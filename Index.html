@@ -1,0 +1,27 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Image Viewer</title>
+    <link rel="stylesheet" href="static/css/styles.css">
+    <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.15.4/css/all.min.css"> <!-- Font Awesome -->
+</head>
+<body>
+    <div id="imageContainer">
+        <img id="displayedImage" src="" alt="Image">
+    </div>
+    <button id="prevButton">◀</button>
+    <button id="nextButton">▶</button>
+    <a href="index_pinterest.html" class="gallery">
+        <img src="static/images/grid_icons_pinterest.png" alt="Pinterest View" class="icon">
+    </a>
+    <button id="menuButton"><i class="fas fa-bars"></i></button>
+    <div id="leftPanel">
+        <div class="resize-handle"></div>
+    </div>
+    <button id="playPauseButton"><i class="fas fa-play"></i><i class="fas fa-pause"></i></button>
+    <div id="hoverArea"></div>
+    <script src="static/js/script.js"></script>
+</body>
+</html>
