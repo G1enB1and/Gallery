@@ -1,55 +1,66 @@
 body {
     margin: 0;
     padding: 0;
-    display: flex;
-    height: 100vh;
     background-color: #222; /* Dark grey background */
     overflow: hidden; /* Prevent scrolling */
-}
-
-#leftPanel {
-    width: 25%;
-    max-width: 24%; /* Limit the maximum width to 24% */
-    background-color: #333;
-    position: relative;
-    display: none;
-    flex-shrink: 0;
-    overflow: auto;
-}
-
-.resize-handle {
-    width: 5px;
-    background-color: #555;
-    cursor: ew-resize;
-    position: absolute;
-    top: 0;
-    right: 0;
-    bottom: 0;
+    display: flex;
+    flex-direction: column;
+    height: 100vh;
 }
 
 #mainContent {
     flex-grow: 1;
-    background-color: #222; /* Dark grey background */
+    height: 100%;
+    position: relative;
     display: flex;
     flex-direction: column;
     align-items: center;
     justify-content: center;
-    height: 100%;
-    position: relative;
-    margin-left: 25%; /* Start main content from the right of the left panel */
-    transition: margin-left 0.3s ease, width 0.3s ease; /* Smooth transition for resizing */
+    z-index: 1;
 }
 
-#menuButton {
-    position: fixed;
-    top: 10px;
-    left: 10px;
-    background-color: transparent;
+#playPauseButton {
+    position: absolute; /* Ensure correct positioning */
+    bottom: 50px;
+    left: 50%;
+    transform: translateX(-50%);
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
     border: none;
+    background-color: rgba(0, 0, 0, 0.5);
     color: white;
-    font-size: 24px;
+    border-radius: 50%;
     cursor: pointer;
-    z-index: 1000;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 9999; /* Ensure play/pause stays on top of other content */
+}
+
+#hoverArea {
+    position: fixed;
+    top: 0;
+    left: 25%;
+    width: 50%;
+    height: 100%;
+    background-color: transparent; /* Invisible, only for detecting hover */
+    z-index: 1; /* Below buttons but above the image */
+}
+
+#hoverArea:hover + #playPauseButton {
+    opacity: 1;
+}
+
+#playPauseButton .fa-play,
+#playPauseButton .fa-pause {
+    font-size: 24px;
+}
+
+#playPauseButton .fa-pause {
+    display: none;
 }
 
 #imageContainer {
@@ -79,12 +90,10 @@ button {
     background-color: transparent;
     color: white;
     cursor: pointer;
-    z-index: 1001; /* Ensure buttons are on top */
 }
 
 #prevButton {
     left: 20px;
-    transition: left 0.3s ease; /* Smooth transition for resizing */
 }
 
 #nextButton {
@@ -100,11 +109,10 @@ button {
     padding: 5px;
     border-radius: 5px;
     text-decoration: none;
-    z-index: 1001; /* Ensure link stays on top of other content */
+    z-index: 9999; /* Ensure link stays on top of other content */
     display: flex;
     align-items: center;
     justify-content: center;
-    transition: right 0.3s ease; /* Smooth transition for resizing */
 }
 
 .gallery:hover {
@@ -115,48 +123,4 @@ button {
     width: 50px;
     height: 50px;
     display: block;
-}
-
-#playPauseButton {
-    position: absolute;
-    bottom: 50px;
-    left: 50%;
-    transform: translateX(-50%);
-    width: 50px;
-    height: 50px;
-    font-size: 30px;
-    border: none;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0; /* Start hidden */
-    transition: opacity 0.3s;
-    z-index: 1001; /* Ensure play/pause stays on top of other content */
-}
-
-#playPauseButton .fa-play,
-#playPauseButton .fa-pause {
-    font-size: 24px;
-}
-
-#playPauseButton .fa-pause {
-    display: none;
-}
-
-#hoverArea {
-    position: fixed;
-    top: 0;
-    left: 25%;
-    width: 50%;
-    height: 100%;
-    background-color: transparent; /* Invisible, only for detecting hover */
-    z-index: 1; /* Below buttons but above the image */
-}
-
-#hoverArea:hover + #playPauseButton {
-    opacity: 1;
 }
