@@ -32,6 +32,7 @@ function displayImage() {
 
 // Function to navigate to the next image
 function nextImage() {
+    savePanelState(); // Save the panel state before navigating
     const currentImageUrl = getCurrentImageUrl();
     if (!currentImageUrl) {
         console.error('Image URL not found.');
@@ -50,6 +51,7 @@ function nextImage() {
 
 // Function to navigate to the previous image
 function prevImage() {
+    savePanelState(); // Save the panel state before navigating
     const currentImageUrl = getCurrentImageUrl();
     if (!currentImageUrl) {
         console.error('Image URL not found.');
@@ -122,6 +124,48 @@ document.getElementById('playPauseButton').addEventListener('mouseleave', functi
     this.style.opacity = 0;
 });
 
+// Save the state of the panel to session storage
+function savePanelState() {
+    const leftPanel = document.getElementById('leftPanel');
+    const isPanelOpen = leftPanel.style.display === 'block';
+    sessionStorage.setItem('isPanelOpen', isPanelOpen);
+}
+
+// Restore the state of the panel from session storage
+function restorePanelState() {
+    const leftPanel = document.getElementById('leftPanel');
+    const isPanelOpen = sessionStorage.getItem('isPanelOpen') === 'true';
+    leftPanel.style.display = isPanelOpen ? 'block' : 'none';
+    adjustMainContent();
+}
+
+// Function to adjust the main content area based on the left panel state
+function adjustMainContent() {
+    const leftPanel = document.getElementById('leftPanel');
+    const leftPanelWidth = leftPanel.style.display === 'none' ? '0px' : leftPanel.offsetWidth + 'px';
+
+    const prevButton = document.getElementById('prevButton');
+    prevButton.style.left = leftPanel.style.display === 'none' ? '20px' : `calc(${leftPanelWidth} + 20px)`;
+
+    const galleryButton = document.querySelector('.gallery');
+    galleryButton.style.right = '50px';
+
+    const mainContent = document.getElementById('mainContent');
+    mainContent.style.width = leftPanel.style.display === 'none' ? '100%' : `calc(100% - ${leftPanelWidth})`;
+
+    const hoverArea = document.getElementById('hoverArea');
+    hoverArea.style.left = '50%';
+    hoverArea.style.transform = 'translateX(-50%)';
+
+    const playPauseButton = document.getElementById('playPauseButton');
+    playPauseButton.style.left = '50%';
+    playPauseButton.style.transform = 'translateX(-50%)';
+
+    const imageContainer = document.getElementById('imageContainer');
+    imageContainer.style.maxWidth = mainContent.style.width;
+    imageContainer.style.transition = 'none';
+}
+
 // Function to initialize the page
 function initializePage() {
     console.log('Initializing page');
@@ -164,6 +208,9 @@ function initializePage() {
                 console.log('Paused state');
             }
 
+            // Restore panel state
+            restorePanelState();
+
             // Add keypress event listener
             document.addEventListener('keydown', handleKeyPress);
             console.log('Keypress event listener added');
@@ -182,6 +229,7 @@ function initializePage() {
             leftPanel.style.display = 'none';
         }
         adjustMainContent();
+        savePanelState(); // Save panel state after toggling
     });
 
     resizeHandle.addEventListener('mousedown', (e) => {
@@ -202,31 +250,6 @@ function initializePage() {
         isResizing = false;
         document.removeEventListener('mousemove', resizePanel);
         document.removeEventListener('mouseup', stopResizing);
-    }
-
-    function adjustMainContent() {
-        const leftPanelWidth = leftPanel.style.display === 'none' ? '0px' : leftPanel.offsetWidth + 'px';
-
-        const prevButton = document.getElementById('prevButton');
-        prevButton.style.left = leftPanel.style.display === 'none' ? '20px' : `calc(${leftPanelWidth} + 20px)`;
-
-        const galleryButton = document.querySelector('.gallery');
-        galleryButton.style.right = '50px';
-
-        const mainContent = document.getElementById('mainContent');
-        mainContent.style.width = leftPanel.style.display === 'none' ? '100%' : `calc(100% - ${leftPanelWidth})`;
-
-        const hoverArea = document.getElementById('hoverArea');
-        hoverArea.style.left = '50%';
-        hoverArea.style.transform = 'translateX(-50%)';
-
-        const playPauseButton = document.getElementById('playPauseButton');
-        playPauseButton.style.left = '50%';
-        playPauseButton.style.transform = 'translateX(-50%)';
-
-        const imageContainer = document.getElementById('imageContainer');
-        imageContainer.style.maxWidth = mainContent.style.width;
-        imageContainer.style.transition = 'none';
     }
 
     adjustMainContent();
