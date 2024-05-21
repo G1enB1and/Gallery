@@ -115,6 +115,12 @@ hoverArea.addEventListener('mouseenter', function() {
 hoverArea.addEventListener('mouseleave', function() {
     document.getElementById('playPauseButton').style.opacity = 0;
 });
+document.getElementById('playPauseButton').addEventListener('mouseenter', function() {
+    this.style.opacity = 1;
+});
+document.getElementById('playPauseButton').addEventListener('mouseleave', function() {
+    this.style.opacity = 0;
+});
 
 // Function to initialize the page
 function initializePage() {
@@ -163,7 +169,71 @@ function initializePage() {
             console.log('Keypress event listener added');
         })
         .catch(error => console.error('Error fetching images:', error));
+
+    const menuButton = document.getElementById('menuButton');
+    const leftPanel = document.getElementById('leftPanel');
+    const resizeHandle = document.querySelector('.resize-handle');
+    let isResizing = false;
+
+    menuButton.addEventListener('click', () => {
+        if (leftPanel.style.display === 'none' || leftPanel.style.display === '') {
+            leftPanel.style.display = 'block';
+        } else {
+            leftPanel.style.display = 'none';
+        }
+        adjustMainContent();
+    });
+
+    resizeHandle.addEventListener('mousedown', (e) => {
+        isResizing = true;
+        document.addEventListener('mousemove', resizePanel);
+        document.addEventListener('mouseup', stopResizing);
+    });
+
+    function resizePanel(e) {
+        if (!isResizing) return;
+        const newWidth = Math.min(e.clientX, window.innerWidth * 0.24); // Limit the maximum width to 24%
+        if (newWidth < window.innerWidth * 0.1 || newWidth > window.innerWidth * 0.24) return;
+        leftPanel.style.width = `${newWidth}px`;
+        adjustMainContent();
+    }
+
+    function stopResizing() {
+        isResizing = false;
+        document.removeEventListener('mousemove', resizePanel);
+        document.removeEventListener('mouseup', stopResizing);
+    }
+
+    function adjustMainContent() {
+        const leftPanelWidth = leftPanel.style.display === 'none' ? '0px' : leftPanel.offsetWidth + 'px';
+
+        const prevButton = document.getElementById('prevButton');
+        prevButton.style.left = leftPanel.style.display === 'none' ? '20px' : `calc(${leftPanelWidth} + 20px)`;
+
+        const galleryButton = document.querySelector('.gallery');
+        galleryButton.style.right = '50px';
+
+        const mainContent = document.getElementById('mainContent');
+        mainContent.style.width = leftPanel.style.display === 'none' ? '100%' : `calc(100% - ${leftPanelWidth})`;
+
+        const hoverArea = document.getElementById('hoverArea');
+        hoverArea.style.left = '50%';
+        hoverArea.style.transform = 'translateX(-50%)';
+
+        const playPauseButton = document.getElementById('playPauseButton');
+        playPauseButton.style.left = '50%';
+        playPauseButton.style.transform = 'translateX(-50%)';
+
+        const imageContainer = document.getElementById('imageContainer');
+        imageContainer.style.maxWidth = mainContent.style.width;
+        imageContainer.style.transition = 'none';
+    }
+
+    adjustMainContent();
 }
 
 // Call the initializePage function when the page loads
-document.addEventListener('DOMContentLoaded', initializePage);
+document.addEventListener('DOMContentLoaded', () => {
+    initializePage();
+    adjustMainContent(); // Ensure content is adjusted initially
+});

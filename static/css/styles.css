@@ -1,29 +1,59 @@
 body {
     margin: 0;
     padding: 0;
+    display: flex;
+    height: 100vh;
     background-color: #222; /* Dark grey background */
     overflow: hidden; /* Prevent scrolling */
-    display: flex;
-    flex-direction: column;
-    height: 100vh;
+}
+
+#leftPanel {
+    width: 25%;
+    max-width: 25%;
+    background-color: #333;
+    position: relative;
+    display: none;
+    flex-shrink: 0;
+    overflow: auto;
+}
+
+.resize-handle {
+    width: 5px;
+    background-color: #555;
+    cursor: ew-resize;
+    position: absolute;
+    top: 0;
+    right: 0;
+    bottom: 0;
 }
 
 #mainContent {
     flex-grow: 1;
     height: 100%;
-    position: relative;
     display: flex;
-    flex-direction: column;
     align-items: center;
     justify-content: center;
     z-index: 1;
+    transition: width 0.3s; /* Smooth transition for resizing */
+}
+
+#menuButton {
+    position: fixed;
+    top: 20px; /* Adjust top padding */
+    left: 20px; /* Match the padding with other buttons */
+    background-color: transparent;
+    border: none;
+    color: white;
+    font-size: 24px;
+    cursor: pointer;
+    z-index: 1000;
 }
 
 #playPauseButton {
     position: absolute; /* Ensure correct positioning */
     bottom: 50px;
     left: 50%;
-    transform: translateX(-50%);
+    transform: translate(-50%, 50%);
     width: 50px;
     height: 50px;
     font-size: 30px;
@@ -41,16 +71,20 @@ body {
 }
 
 #hoverArea {
-    position: fixed;
+    position: absolute;
     top: 0;
-    left: 25%;
+    left: 25%; /* Center the hover area */
     width: 50%;
     height: 100%;
     background-color: transparent; /* Invisible, only for detecting hover */
     z-index: 1; /* Below buttons but above the image */
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
-#hoverArea:hover + #playPauseButton {
+#hoverArea:hover + #playPauseButton,
+#playPauseButton:hover {
     opacity: 1;
 }
 
@@ -64,17 +98,16 @@ body {
 }
 
 #imageContainer {
-    position: relative;
     display: flex;
     justify-content: center;
     align-items: center;
-    width: 100%;
+    max-width: 100%; /* Ensure the image does not exceed the main content width */
     height: 100%;
+    position: relative; /* Ensure absolute positioned elements are relative to this container */
 }
 
 img {
-    position: relative;
-    width: 100%;
+    width: auto;
     height: 100%;
     object-fit: contain;
 }
@@ -94,6 +127,7 @@ button {
 
 #prevButton {
     left: 20px;
+    z-index: 100; /* Ensure it stays above other elements */
 }
 
 #nextButton {
