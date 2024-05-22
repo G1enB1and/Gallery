@@ -24,29 +24,3 @@ body {
     width: 100%;
     border-radius: 8px;
 }
-
-/* CSS for pagination buttons */
-.pagination {
-    text-align: center;
-    margin-top: 20px;
-}
-
-.pagination button {
-    background-color: #f8f9fa;
-    border: none;
-    color: #007bff;
-    padding: 8px 16px;
-    text-align: center;
-    text-decoration: none;
-    display: inline-block;
-    font-size: 14px;
-    margin: 4px;
-    cursor: pointer;
-    border-radius: 4px;
-}
-
-/* CSS for active (current) page button */
-.pagination button.active {
-    font-weight: bold;
-    color: #ff0000;
-}
