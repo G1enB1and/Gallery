@@ -30,21 +30,35 @@ function getPanelState() {
 function displayImage() {
     const imageUrl = getQueryParam('image');
     const image = document.getElementById('displayedImage');
+    image.style.display = 'none'; // Hide the image initially
     if (!imageUrl && data.length > 0) {
         // If no query parameter is provided, set the image URL to the first image in the data array
         const firstImageUrl = data[0];
-        image.src = decodeURIComponent(firstImageUrl); // Decode the URL
+        preloadAndDisplayImage(firstImageUrl, image);
         console.log(`Displaying first image: ${firstImageUrl}`);
         // Update the URL with the first image
         history.replaceState(null, '', `?image=${encodeURIComponent(firstImageUrl)}&panel=${getPanelState() ? 'open' : 'closed'}`);
     } else if (imageUrl) {
         // If a query parameter is provided, display the corresponding image
-        image.src = decodeURIComponent(imageUrl); // Decode the URL
+        preloadAndDisplayImage(decodeURIComponent(imageUrl), image);
         console.log(`Displaying image from URL: ${imageUrl}`);
     } else {
         console.error('Image URL not found in query parameters.');
     }
     preloadAdjacentImages(); // Preload the next and previous images
+}
+
+// Function to preload and display an image
+function preloadAndDisplayImage(src, imgElement) {
+    const preloader = new Image();
+    preloader.onload = () => {
+        imgElement.src = src;
+        imgElement.style.display = 'block'; // Show the image after it has loaded
+    };
+    preloader.onerror = () => {
+        console.error(`Failed to load image: ${src}`);
+    };
+    preloader.src = src;
 }
 
 // Function to preload the next and previous images
