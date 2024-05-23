@@ -31,73 +31,94 @@ document.addEventListener('DOMContentLoaded', function() {
     }
 
     // Function to render pagination controls
-function renderPagination() {
-    const totalPages = Math.ceil(data.length / imagesPerPage);
-    pagination.innerHTML = '';
-    
-    // First page button
-    const firstButton = document.createElement('button');
-    firstButton.textContent = 'First';
-    firstButton.disabled = currentPage === 1;
-    firstButton.addEventListener('click', () => {
-        currentPage = 1;
-        renderImages(data, currentPage);
-        renderPagination();
-    });
-    pagination.appendChild(firstButton);
-    
-    // Previous page button
-    const prevButton = document.createElement('button');
-    prevButton.textContent = 'Previous';
-    prevButton.disabled = currentPage === 1;
-    prevButton.addEventListener('click', () => {
-        currentPage--;
-        renderImages(data, currentPage);
-        renderPagination();
-    });
-    pagination.appendChild(prevButton);
-    
-    // Page number buttons
-    const maxPageButtons = 7;
-    const startPage = Math.max(1, Math.min(currentPage - Math.floor(maxPageButtons / 2), totalPages - maxPageButtons + 1));
-    const endPage = Math.min(startPage + maxPageButtons - 1, totalPages);
-    for (let i = startPage; i <= endPage; i++) {
-        const pageButton = document.createElement('button');
-        pageButton.textContent = i;
-        pageButton.classList.toggle('active', i === currentPage);
-        pageButton.addEventListener('click', () => {
-            currentPage = i;
-            renderImages(data, currentPage);
-            renderPagination();
+    function renderPagination() {
+        const totalPages = Math.ceil(data.length / imagesPerPage);
+        pagination.innerHTML = '';
+        pagination.setAttribute('data-pagination', '');
+
+        // Previous page button
+        const prevButton = document.createElement('a');
+        prevButton.innerHTML = '<i class="fas fa-chevron-left"></i>';
+        prevButton.classList.add('prev');
+        prevButton.href = '#';
+        prevButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage > 1) {
+                currentPage--;
+                renderImages(data, currentPage);
+                renderPagination();
+            }
         });
-        pagination.appendChild(pageButton);
+        pagination.appendChild(prevButton);
+
+        // Page number buttons
+        const ul = document.createElement('ul');
+        pagination.appendChild(ul);
+
+        const createPageButton = (page) => {
+            const li = document.createElement('li');
+            if (page === currentPage) {
+                li.classList.add('current');
+            }
+            const a = document.createElement('a');
+            a.href = `#${page}`;
+            a.textContent = page;
+            a.addEventListener('click', (e) => {
+                e.preventDefault();
+                currentPage = page;
+                renderImages(data, currentPage);
+                renderPagination();
+            });
+            li.appendChild(a);
+            return li;
+        };
+
+        // Logic for displaying pagination buttons
+        if (totalPages <= 7) {
+            for (let i = 1; i <= totalPages; i++) {
+                ul.appendChild(createPageButton(i));
+            }
+        } else {
+            ul.appendChild(createPageButton(1));
+            if (currentPage > 4) {
+                const li = document.createElement('li');
+                li.textContent = '...';
+                ul.appendChild(li);
+            }
+            let startPage = Math.max(2, currentPage - 2);
+            let endPage = Math.min(totalPages - 1, currentPage + 2);
+            if (currentPage < 4) {
+                endPage = 5;
+            }
+            if (currentPage > totalPages - 3) {
+                startPage = totalPages - 4;
+            }
+            for (let i = startPage; i <= endPage; i++) {
+                ul.appendChild(createPageButton(i));
+            }
+            if (currentPage < totalPages - 3) {
+                const li = document.createElement('li');
+                li.textContent = '...';
+                ul.appendChild(li);
+            }
+            ul.appendChild(createPageButton(totalPages));
+        }
+
+        // Next page button
+        const nextButton = document.createElement('a');
+        nextButton.innerHTML = '<i class="fas fa-chevron-right"></i>';
+        nextButton.classList.add('next');
+        nextButton.href = '#';
+        nextButton.addEventListener('click', (e) => {
+            e.preventDefault();
+            if (currentPage < totalPages) {
+                currentPage++;
+                renderImages(data, currentPage);
+                renderPagination();
+            }
+        });
+        pagination.appendChild(nextButton);
     }
-    
-    // Next page button
-    const nextButton = document.createElement('button');
-    nextButton.textContent = 'Next';
-    nextButton.disabled = currentPage === totalPages;
-    nextButton.addEventListener('click', () => {
-        currentPage++;
-        renderImages(data, currentPage);
-        renderPagination();
-    });
-    pagination.appendChild(nextButton);
-    
-    // Last page button
-    const lastButton = document.createElement('button');
-    lastButton.textContent = 'Last';
-    lastButton.disabled = currentPage === totalPages;
-    lastButton.addEventListener('click', () => {
-        currentPage = totalPages;
-        renderImages(data, currentPage);
-        renderPagination();
-    });
-    pagination.appendChild(lastButton);
-    
-    // Center pagination
-    pagination.style.textAlign = 'center';
-}
 
     // Event listener for image clicks
     imageGrid.addEventListener('click', function(event) {
