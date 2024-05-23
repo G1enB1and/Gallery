@@ -10,6 +10,20 @@ function getQueryParam(name) {
     return urlParams.get(name);
 }
 
+// Function to get the current image URL from the query parameters
+function getCurrentImageUrl() {
+    const params = new URLSearchParams(window.location.search);
+    const currentImageUrl = params.get('image');
+    console.log(`Current image URL: ${currentImageUrl}`);
+    return currentImageUrl;
+}
+
+// Function to get the current panel state from the query parameters
+function getPanelState() {
+    const params = new URLSearchParams(window.location.search);
+    return params.get('panel') === 'open';
+}
+
 // Function to display the image
 function displayImage() {
     const imageUrl = getQueryParam('image');
@@ -20,7 +34,7 @@ function displayImage() {
         image.src = decodeURIComponent(firstImageUrl); // Decode the URL
         console.log(`Displaying first image: ${firstImageUrl}`);
         // Update the URL with the first image
-        history.replaceState(null, '', `?image=${encodeURIComponent(firstImageUrl)}`);
+        history.replaceState(null, '', `?image=${encodeURIComponent(firstImageUrl)}&panel=${getPanelState() ? 'open' : 'closed'}`);
     } else if (imageUrl) {
         // If a query parameter is provided, display the corresponding image
         image.src = decodeURIComponent(imageUrl); // Decode the URL
@@ -32,8 +46,8 @@ function displayImage() {
 
 // Function to navigate to the next image
 function nextImage() {
-    savePanelState(); // Save the panel state before navigating
     const currentImageUrl = getCurrentImageUrl();
+    const panelState = document.getElementById('leftPanel').style.display === 'block' ? 'open' : 'closed';
     if (!currentImageUrl) {
         console.error('Image URL not found.');
         return;
@@ -42,7 +56,7 @@ function nextImage() {
     const nextIndex = (currentIndex + 1) % data.length; // Ensure looping back to the first image
     const nextImageUrl = data[nextIndex];
     if (nextImageUrl) {
-        window.location.href = `index.html?image=${encodeURIComponent(nextImageUrl)}`;
+        window.location.href = `index.html?image=${encodeURIComponent(nextImageUrl)}&panel=${panelState}`;
         console.log(`Navigating to next image: ${nextImageUrl}`);
     } else {
         console.error('Next image URL not found.');
@@ -51,8 +65,8 @@ function nextImage() {
 
 // Function to navigate to the previous image
 function prevImage() {
-    savePanelState(); // Save the panel state before navigating
     const currentImageUrl = getCurrentImageUrl();
+    const panelState = document.getElementById('leftPanel').style.display === 'block' ? 'open' : 'closed';
     if (!currentImageUrl) {
         console.error('Image URL not found.');
         return;
@@ -61,19 +75,11 @@ function prevImage() {
     const prevIndex = (currentIndex - 1 + data.length) % data.length; // Ensure looping back to the last image
     const prevImageUrl = data[prevIndex];
     if (prevImageUrl) {
-        window.location.href = `index.html?image=${encodeURIComponent(prevImageUrl)}`;
+        window.location.href = `index.html?image=${encodeURIComponent(prevImageUrl)}&panel=${panelState}`;
         console.log(`Navigating to previous image: ${prevImageUrl}`);
     } else {
         console.error('Previous image URL not found.');
     }
-}
-
-// Function to get the current image URL from the query parameters
-function getCurrentImageUrl() {
-    const params = new URLSearchParams(window.location.search);
-    const currentImageUrl = params.get('image');
-    console.log(`Current image URL: ${currentImageUrl}`);
-    return currentImageUrl;
 }
 
 // Function to toggle play/pause
@@ -134,8 +140,9 @@ function savePanelState() {
 // Restore the state of the panel from session storage
 function restorePanelState() {
     const leftPanel = document.getElementById('leftPanel');
-    const isPanelOpen = sessionStorage.getItem('isPanelOpen') === 'true';
+    const isPanelOpen = getPanelState();
     leftPanel.style.display = isPanelOpen ? 'block' : 'none';
+    leftPanel.style.width = '270px'; // Set default width to 270px
     adjustMainContent();
 }
 
@@ -169,6 +176,11 @@ function adjustMainContent() {
 // Function to initialize the page
 function initializePage() {
     console.log('Initializing page');
+
+    // Restore panel state as soon as possible to avoid flicker
+    restorePanelState();
+    adjustMainContent();
+
     // Fetch images.json to populate the data variable
     fetch('images.json')
         .then(response => response.json())
@@ -207,9 +219,6 @@ function initializePage() {
                 playPauseButton.querySelector('.fa-pause').style.display = 'none';
                 console.log('Paused state');
             }
-
-            // Restore panel state
-            restorePanelState();
 
             // Add keypress event listener
             document.addEventListener('keydown', handleKeyPress);
