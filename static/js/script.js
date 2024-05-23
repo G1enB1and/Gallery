@@ -1,6 +1,8 @@
 // Define data globally
 let data = [];
 let intervalId = null;
+let preloadedNextImage = new Image();
+let preloadedPrevImage = new Image();
 
 console.log('Script loaded');
 
@@ -42,6 +44,26 @@ function displayImage() {
     } else {
         console.error('Image URL not found in query parameters.');
     }
+    preloadAdjacentImages(); // Preload the next and previous images
+}
+
+// Function to preload the next and previous images
+function preloadAdjacentImages() {
+    const currentImageUrl = getCurrentImageUrl();
+    if (!currentImageUrl) {
+        console.error('Image URL not found.');
+        return;
+    }
+    const currentIndex = data.indexOf(decodeURIComponent(currentImageUrl));
+
+    const nextIndex = (currentIndex + 1) % data.length; // Ensure looping back to the first image
+    const prevIndex = (currentIndex - 1 + data.length) % data.length; // Ensure looping back to the last image
+
+    preloadedNextImage.src = data[nextIndex];
+    preloadedPrevImage.src = data[prevIndex];
+
+    console.log(`Preloading next image: ${data[nextIndex]}`);
+    console.log(`Preloading previous image: ${data[prevIndex]}`);
 }
 
 // Function to navigate to the next image
