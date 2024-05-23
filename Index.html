@@ -28,10 +28,15 @@
 <body>
     <div id="leftPanel">
         <div class="resize-handle"></div>
+        <div id="fileTreeContainer">
+            <ul id="fileTree">
+                <!-- File tree will be dynamically populated -->
+            </ul>
+        </div>
     </div>
     <div id="mainContent">
         <div id="imageContainer">
-            <img src="static/images/loading.gif" alt="Loading Image" id="displayedImage">
+            <img src="static/images/loading.gif" alt="Displayed Image" id="displayedImage">
             <div id="hoverArea"></div>
             <button id="playPauseButton" class="play">
                 <i class="fas fa-play"></i>

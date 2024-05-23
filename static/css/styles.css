@@ -27,6 +27,23 @@ body {
     bottom: 0;
 }
 
+#fileTreeContainer {
+    padding: 10px;
+    overflow-y: auto;
+    height: calc(100% - 20px); /* Adjust for padding */
+}
+
+#fileTree {
+    list-style: none;
+    padding: 0;
+}
+
+#fileTree li {
+    margin: 5px 0;
+    cursor: pointer;
+}
+
+
 #mainContent {
     flex-grow: 1;
     height: 100%;

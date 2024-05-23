@@ -304,4 +304,44 @@ function initializePage() {
 document.addEventListener('DOMContentLoaded', () => {
     initializePage();
     adjustMainContent(); // Ensure content is adjusted initially
+    populateFileTree(); // Populate the file tree initially
 });
+
+// Function to populate the file tree
+function populateFileTree() {
+    const fileTreeContainer = document.getElementById('fileTree');
+    fetch('/file-tree')
+        .then(response => response.json())
+        .then(data => {
+            buildFileTree(fileTreeContainer, data);
+        })
+        .catch(error => console.error('Error fetching file tree:', error));
+}
+
+// Function to build the file tree
+function buildFileTree(container, nodes) {
+    container.innerHTML = ''; // Clear the current file tree
+    nodes.forEach(node => {
+        const li = document.createElement('li');
+        li.textContent = node.name;
+        if (node.type === 'directory') {
+            li.addEventListener('click', () => {
+                fetch('/update-images', {
+                    method: 'POST',
+                    headers: {
+                        'Content-Type': 'application/json'
+                    },
+                    body: JSON.stringify({ directory: node.path })
+                })
+                .then(response => response.text())
+                .then(message => {
+                    console.log(message);
+                    // Optionally reload the images or update the UI
+                    initializePage();
+                })
+                .catch(error => console.error('Error updating images:', error));
+            });
+        }
+        container.appendChild(li);
+    });
+}

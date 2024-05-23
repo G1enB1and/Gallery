@@ -2,15 +2,14 @@
 REM Get the directory of the batch file
 SET "BATCH_DIR=%~dp0"
 
-REM Change to the directory of the batch file
-cd /d "%BATCH_DIR%"
+REM Change to the project root directory (Gallery folder)
+cd /d "%BATCH_DIR%..\Gallery"
 
-REM Run the randomize script
-python randomize.py
+REM Run the randomize script with the initial directory
+python backend/randomize.py "Pictures/.."
 
-REM Change to the backend directory
-cd /d "%BATCH_DIR%backend"
-python server.py
+REM Run the server script
+python backend/server.py
 
 REM Keep the terminal open to display any errors
 echo.

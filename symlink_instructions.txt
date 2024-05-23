@@ -1,0 +1,13 @@
+Creating a Symlink in Windows
+Open Command Prompt as Administrator.
+
+Create a symbolic link:
+
+mklink /D C:\Pictures\Gallery\External C:\Pictures
+
+This command creates a directory symlink named External in C:\Pictures\Gallery that points to C:\Pictures.
+
+Access files in C:\Pictures via C:\Pictures\Gallery\External in your server:
+
+
+http://localhost:8000/External/SomeImage.jpg
