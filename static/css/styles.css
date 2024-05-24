@@ -10,7 +10,8 @@ body {
 #leftPanel {
     width: 25%;
     max-width: 25%;
-    background-color: #333;
+    background-color: #303030;
+    color: white;
     position: relative;
     display: none;
     flex-shrink: 0;
@@ -28,7 +29,7 @@ body {
 }
 
 #fileTreeContainer {
-    padding: 10px;
+    padding: 20px 10px 10px;
     overflow-y: auto;
     height: calc(100% - 20px); /* Adjust for padding */
 }

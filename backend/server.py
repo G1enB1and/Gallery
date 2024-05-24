@@ -3,6 +3,7 @@ import json
 import os
 import subprocess
 import urllib.parse
+import webbrowser
 
 # Define the root directory for the file tree
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -75,6 +76,8 @@ def run_server():
     server_address = ('', 8000)
     httpd = HTTPServer(server_address, RequestHandler)
     print('Server running at http://localhost:8000/')
+    webbrowser.open('http://localhost:8000/index_pinterest.html')
+
     httpd.serve_forever()
 
 if __name__ == '__main__':
