@@ -339,7 +339,7 @@ function buildFileTree(container, nodes) {
                     // Optionally reload the images or update the UI
                     // Ensure the panel stays open and updates the images
                     const panelState = getPanelState() ? 'open' : 'closed';
-                    window.location.href = `index.html?panel=${panelState}`;
+                    window.location.href = `index.html?panel=open`; // Maintain panel open state
                 })
                 .catch(error => console.error('Error updating images:', error));
             });
