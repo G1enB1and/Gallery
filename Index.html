@@ -29,9 +29,10 @@
     <div id="leftPanel">
         <div id="leftPanelContent">
             <img src="static/images/logo.png" alt="Logo" id="logoOpened" class="logo">
-            <button id="fileTreeButtonOpened">
+            <div id="fileTreeToggleOpened" class="fileTreeToggle">
                 <img src="static/images/file_tree_white.png" alt="Open Panel" class="icon">
-            </button>
+                <span class="text">Close File Tree</span>
+            </div>
             <div class="resize-handle"></div>
             <div id="fileTreeContainer">
                 <ul id="fileTree">
@@ -57,9 +58,10 @@
     </div>
     <div id="closedPanelContent">
         <img src="static/images/logo.png" alt="Logo" id="logoClosed" class="logo">
-        <button id="fileTreeButtonClosed">
+        <div id="fileTreeToggleClosed" class="fileTreeToggle">
             <img src="static/images/file_tree_white.png" alt="Open Panel" class="icon">
-        </button>
+            <span class="text">Open File Tree</span>
+        </div>
     </div>
     <script src="static/js/script.js"></script>
 </body>

@@ -176,11 +176,11 @@ function savePanelState() {
 // Restore the state of the panel from session storage
 function restorePanelState() {
     const leftPanel = document.getElementById('leftPanel');
-    const fileTreeButtonClosed = document.getElementById('fileTreeButtonClosed');
+    const fileTreeToggleClosed = document.getElementById('fileTreeToggleClosed');
     const logoClosed = document.getElementById('logoClosed');
     const isPanelOpen = getPanelState();
     leftPanel.style.display = isPanelOpen ? 'block' : 'none';
-    fileTreeButtonClosed.style.display = isPanelOpen ? 'none' : 'block';
+    fileTreeToggleClosed.style.display = isPanelOpen ? 'none' : 'block';
     logoClosed.style.display = isPanelOpen ? 'none' : 'block';
     leftPanel.style.width = '270px'; // Set default width to 270px
     adjustMainContent();
@@ -266,8 +266,8 @@ function initializePage() {
         })
         .catch(error => console.error('Error fetching images:', error));
 
-    const fileTreeButtonOpened = document.getElementById('fileTreeButtonOpened');
-    const fileTreeButtonClosed = document.getElementById('fileTreeButtonClosed');
+    const fileTreeToggleOpened = document.getElementById('fileTreeToggleOpened');
+    const fileTreeToggleClosed = document.getElementById('fileTreeToggleClosed');
     const logoClosed = document.getElementById('logoClosed');
     const leftPanel = document.getElementById('leftPanel');
     const resizeHandle = document.querySelector('.resize-handle');
@@ -276,19 +276,19 @@ function initializePage() {
     function toggleLeftPanel() {
         if (leftPanel.style.display === 'none' || leftPanel.style.display === '') {
             leftPanel.style.display = 'block';
-            fileTreeButtonClosed.style.display = 'none';
+            fileTreeToggleClosed.style.display = 'none';
             logoClosed.style.display = 'none';
         } else {
             leftPanel.style.display = 'none';
-            fileTreeButtonClosed.style.display = 'block';
+            fileTreeToggleClosed.style.display = 'block';
             logoClosed.style.display = 'block';
         }
         adjustMainContent();
         savePanelState(); // Save panel state after toggling
     }
 
-    fileTreeButtonOpened.addEventListener('click', toggleLeftPanel);
-    fileTreeButtonClosed.addEventListener('click', toggleLeftPanel);
+    fileTreeToggleOpened.addEventListener('click', toggleLeftPanel);
+    fileTreeToggleClosed.addEventListener('click', toggleLeftPanel);
 
     resizeHandle.addEventListener('mousedown', (e) => {
         isResizing = true;

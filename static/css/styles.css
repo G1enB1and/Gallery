@@ -46,25 +46,28 @@ body {
     align-items: center;
 }
 
-#fileTreeButtonOpened,
-#fileTreeButtonClosed {
-    background-color: transparent;
-    border: none;
-    cursor: pointer;
+.fileTreeToggle {
+    display: flex;
+    align-items: center;
     margin: 5px 0;
+    cursor: pointer;
+    transition: transform 0.3s;
 }
 
-#fileTreeButtonOpened .icon,
-#fileTreeButtonClosed .icon {
-    width: 25px; /* Adjust size as needed */
-    height: 25px; /* Adjust size as needed */
+.fileTreeToggle:hover {
+    transform: scale(1.1); /* Uniform scaling for both icon and text */
+    transform-origin: left; /* Grow to the right */
 }
 
-#fileTreeButtonOpened .icon:hover,
-#fileTreeButtonClosed .icon:hover {
-    width: 50px; /* Adjust size as needed */
-    height: 50px; /* Adjust size as needed */
-    size: 120%; /* Adjust size as needed */
+.fileTreeToggle .icon {
+    width: 25px;
+    height: 25px;
+}
+
+.fileTreeToggle .text {
+    color: white;
+    margin-left: 5px; /* Ensure a consistent 5px margin */
+    font-size: 16px; /* Adjust as needed */
 }
 
 .resize-handle {
