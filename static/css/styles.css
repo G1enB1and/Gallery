@@ -55,17 +55,21 @@ body {
     transition: width 0.3s; /* Smooth transition for resizing */
 }
 
-#menuButton {
+#fileTreeButton {
     position: fixed;
     top: 20px; /* Adjust top padding */
     left: 20px; /* Match the padding with other buttons */
     background-color: transparent;
     border: none;
-    color: white;
-    font-size: 24px;
     cursor: pointer;
     z-index: 1000;
 }
+
+#fileTreeButton .icon {
+    width: 25px; /* Adjust size as needed */
+    height: 25px; /* Adjust size as needed */
+}
+
 
 #playPauseButton {
     position: absolute; /* Ensure correct positioning */

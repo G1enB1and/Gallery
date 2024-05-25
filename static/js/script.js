@@ -262,12 +262,12 @@ function initializePage() {
         })
         .catch(error => console.error('Error fetching images:', error));
 
-    const menuButton = document.getElementById('menuButton');
+    const fileTreeButton = document.getElementById('fileTreeButton');
     const leftPanel = document.getElementById('leftPanel');
     const resizeHandle = document.querySelector('.resize-handle');
     let isResizing = false;
 
-    menuButton.addEventListener('click', () => {
+    fileTreeButton.addEventListener('click', () => {
         if (leftPanel.style.display === 'none' || leftPanel.style.display === '') {
             leftPanel.style.display = 'block';
         } else {
