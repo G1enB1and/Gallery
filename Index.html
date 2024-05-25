@@ -27,18 +27,24 @@
 </head>
 <body>
     <div id="leftPanel">
-        <div class="resize-handle"></div>
-        <div id="fileTreeContainer">
-            <ul id="fileTree">
-                <!-- File tree will be dynamically populated -->
-            </ul>
+        <div id="leftPanelContent">
+            <img src="static/images/logo.png" alt="Logo" id="logoOpened" class="logo">
+            <button id="fileTreeButtonOpened">
+                <img src="static/images/file_tree_white.png" alt="Open Panel" class="icon">
+            </button>
+            <div class="resize-handle"></div>
+            <div id="fileTreeContainer">
+                <ul id="fileTree">
+                    <!-- File tree will be dynamically populated -->
+                </ul>
+            </div>
         </div>
     </div>
     <div id="mainContent">
         <div id="imageContainer">
             <img src="static/images/loading.gif" alt="Displayed Image" id="displayedImage">
             <div id="hoverArea"></div>
-            <button id="playPauseButton" class="play">
+            <button id="playPauseButton" class="mediaControls">
                 <i class="fas fa-play"></i>
                 <i class="fas fa-pause" style="display: none;"></i>
             </button>
@@ -46,12 +52,15 @@
         <a href="index_pinterest.html" class="gallery">
             <img src="static/images/grid_icons_pinterest.png" alt="Pinterest View" class="icon">
         </a>
-        <button id="prevButton">◀</button>
-        <button id="nextButton">▶</button>
+        <button id="prevButton" class="mediaControls">◀</button>
+        <button id="nextButton" class="mediaControls">▶</button>
     </div>
-    <button id="fileTreeButton">
-        <img src="static/images/file_tree_white.png" alt="Open Panel" class="icon">
-    </button>
+    <div id="closedPanelContent">
+        <img src="static/images/logo.png" alt="Logo" id="logoClosed" class="logo">
+        <button id="fileTreeButtonClosed">
+            <img src="static/images/file_tree_white.png" alt="Open Panel" class="icon">
+        </button>
+    </div>
     <script src="static/js/script.js"></script>
 </body>
 </html>

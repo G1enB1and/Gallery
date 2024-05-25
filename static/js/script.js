@@ -176,8 +176,12 @@ function savePanelState() {
 // Restore the state of the panel from session storage
 function restorePanelState() {
     const leftPanel = document.getElementById('leftPanel');
+    const fileTreeButtonClosed = document.getElementById('fileTreeButtonClosed');
+    const logoClosed = document.getElementById('logoClosed');
     const isPanelOpen = getPanelState();
     leftPanel.style.display = isPanelOpen ? 'block' : 'none';
+    fileTreeButtonClosed.style.display = isPanelOpen ? 'none' : 'block';
+    logoClosed.style.display = isPanelOpen ? 'none' : 'block';
     leftPanel.style.width = '270px'; // Set default width to 270px
     adjustMainContent();
 }
@@ -262,20 +266,29 @@ function initializePage() {
         })
         .catch(error => console.error('Error fetching images:', error));
 
-    const fileTreeButton = document.getElementById('fileTreeButton');
+    const fileTreeButtonOpened = document.getElementById('fileTreeButtonOpened');
+    const fileTreeButtonClosed = document.getElementById('fileTreeButtonClosed');
+    const logoClosed = document.getElementById('logoClosed');
     const leftPanel = document.getElementById('leftPanel');
     const resizeHandle = document.querySelector('.resize-handle');
     let isResizing = false;
 
-    fileTreeButton.addEventListener('click', () => {
+    function toggleLeftPanel() {
         if (leftPanel.style.display === 'none' || leftPanel.style.display === '') {
             leftPanel.style.display = 'block';
+            fileTreeButtonClosed.style.display = 'none';
+            logoClosed.style.display = 'none';
         } else {
             leftPanel.style.display = 'none';
+            fileTreeButtonClosed.style.display = 'block';
+            logoClosed.style.display = 'block';
         }
         adjustMainContent();
         savePanelState(); // Save panel state after toggling
-    });
+    }
+
+    fileTreeButtonOpened.addEventListener('click', toggleLeftPanel);
+    fileTreeButtonClosed.addEventListener('click', toggleLeftPanel);
 
     resizeHandle.addEventListener('mousedown', (e) => {
         isResizing = true;
@@ -337,9 +350,7 @@ function buildFileTree(container, nodes) {
                 .then(message => {
                     console.log(message);
                     // Optionally reload the images or update the UI
-                    // Ensure the panel stays open and updates the images
-                    const panelState = getPanelState() ? 'open' : 'closed';
-                    window.location.href = `index.html?panel=open`; // Maintain panel open state
+                    initializePage();
                 })
                 .catch(error => console.error('Error updating images:', error));
             });

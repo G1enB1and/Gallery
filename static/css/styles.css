@@ -15,7 +15,56 @@ body {
     position: relative;
     display: none;
     flex-shrink: 0;
-    overflow: hidden; /* Prevent scrolling when not needed */
+    overflow: auto;
+    margin: 0px;
+    padding: 0px;
+}
+
+#leftPanelContent {
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    margin: 0px;
+    padding: 0px;
+}
+
+#closedPanelContent {
+    position: fixed;
+    top: 0px; /* Adjust top padding */
+    left: 0px; /* Match the padding with other buttons */
+    display: flex;
+    flex-direction: column;
+    align-items: left;
+    z-index: 1000;
+    margin: 0px;
+    padding: 0px;
+}
+
+.logo {
+    max-width: calc(100% - 20px);
+    margin: 10px;
+    align-items: center;
+}
+
+#fileTreeButtonOpened,
+#fileTreeButtonClosed {
+    background-color: transparent;
+    border: none;
+    cursor: pointer;
+    margin: 5px 0;
+}
+
+#fileTreeButtonOpened .icon,
+#fileTreeButtonClosed .icon {
+    width: 25px; /* Adjust size as needed */
+    height: 25px; /* Adjust size as needed */
+}
+
+#fileTreeButtonOpened .icon:hover,
+#fileTreeButtonClosed .icon:hover {
+    width: 50px; /* Adjust size as needed */
+    height: 50px; /* Adjust size as needed */
+    size: 120%; /* Adjust size as needed */
 }
 
 .resize-handle {
@@ -29,15 +78,15 @@ body {
 }
 
 #fileTreeContainer {
-    padding: 20px 10px 10px;
+    padding: 0px 10px 10px; //top, left+right, bottom
+    overflow-y: auto;
     height: calc(100% - 20px); /* Adjust for padding */
-    overflow-y: auto; /* Enable vertical scrolling if needed */
 }
 
 #fileTree {
     list-style: none;
     padding: 0;
-    margin: 0; /* Ensure no margin to prevent unnecessary scrolling */
+    margin: 0;
 }
 
 #fileTree li {
@@ -55,19 +104,17 @@ body {
     transition: width 0.3s; /* Smooth transition for resizing */
 }
 
-#fileTreeButton {
+.mediaControls {
     position: fixed;
-    top: 20px; /* Adjust top padding */
-    left: 20px; /* Match the padding with other buttons */
-    background-color: transparent;
+    top: 50%;
+    transform: translateY(-50%);
+    width: 40px;
+    height: 40px;
+    font-size: 24px;
     border: none;
+    background-color: transparent;
+    color: white;
     cursor: pointer;
-    z-index: 1000;
-}
-
-#fileTreeButton .icon {
-    width: 25px; /* Adjust size as needed */
-    height: 25px; /* Adjust size as needed */
 }
 
 #playPauseButton {
@@ -136,9 +183,6 @@ img {
 }
 
 button {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
     width: 40px;
     height: 40px;
     font-size: 24px;
@@ -180,23 +224,4 @@ button {
     width: 25px;
     height: 25px;
     display: block;
-}
-
-/* Custom scrollbar styling for the left panel */
-#fileTreeContainer::-webkit-scrollbar {
-    width: 8px;
-}
-
-#fileTreeContainer::-webkit-scrollbar-track {
-    background: #2a2a2a;
-    border-radius: 4px;
-}
-
-#fileTreeContainer::-webkit-scrollbar-thumb {
-    background: #555;
-    border-radius: 4px;
-}
-
-#fileTreeContainer::-webkit-scrollbar-thumb:hover {
-    background: #888;
 }
