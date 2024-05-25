@@ -15,7 +15,7 @@ body {
     position: relative;
     display: none;
     flex-shrink: 0;
-    overflow: auto;
+    overflow: hidden; /* Prevent scrolling when not needed */
 }
 
 .resize-handle {
@@ -30,20 +30,20 @@ body {
 
 #fileTreeContainer {
     padding: 20px 10px 10px;
-    overflow-y: auto;
     height: calc(100% - 20px); /* Adjust for padding */
+    overflow-y: auto; /* Enable vertical scrolling if needed */
 }
 
 #fileTree {
     list-style: none;
     padding: 0;
+    margin: 0; /* Ensure no margin to prevent unnecessary scrolling */
 }
 
 #fileTree li {
     margin: 5px 0;
     cursor: pointer;
 }
-
 
 #mainContent {
     flex-grow: 1;
@@ -69,7 +69,6 @@ body {
     width: 25px; /* Adjust size as needed */
     height: 25px; /* Adjust size as needed */
 }
-
 
 #playPauseButton {
     position: absolute; /* Ensure correct positioning */
@@ -181,4 +180,23 @@ button {
     width: 25px;
     height: 25px;
     display: block;
+}
+
+/* Custom scrollbar styling for the left panel */
+#fileTreeContainer::-webkit-scrollbar {
+    width: 8px;
+}
+
+#fileTreeContainer::-webkit-scrollbar-track {
+    background: #2a2a2a;
+    border-radius: 4px;
+}
+
+#fileTreeContainer::-webkit-scrollbar-thumb {
+    background: #555;
+    border-radius: 4px;
+}
+
+#fileTreeContainer::-webkit-scrollbar-thumb:hover {
+    background: #888;
 }
