@@ -2,7 +2,7 @@ document.addEventListener('DOMContentLoaded', function() {
     const imageGrid = document.getElementById('imageGrid');
     const pagination = document.getElementById('pagination');
     const imagesPerPage = 12 * 5; // 12 rows * 5 columns
-    let currentPage = 1;
+    let currentPage = parseInt(sessionStorage.getItem('currentPage')) || 1;
     let data = []; // Array to store the image paths
 
     fetch('images.json')
@@ -11,6 +11,7 @@ document.addEventListener('DOMContentLoaded', function() {
             data = images;
             renderImages(data, currentPage); // Render the first page of images
             renderPagination();
+            restoreScrollPositionAfterImagesLoad(); // Restore scroll position after images load
         })
         .catch(error => console.error('Error fetching images:', error));
 
@@ -47,6 +48,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPage--;
                 renderImages(data, currentPage);
                 renderPagination();
+                saveSessionState();
             }
         });
         pagination.appendChild(prevButton);
@@ -68,6 +70,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPage = page;
                 renderImages(data, currentPage);
                 renderPagination();
+                saveSessionState();
             });
             li.appendChild(a);
             return li;
@@ -115,6 +118,7 @@ document.addEventListener('DOMContentLoaded', function() {
                 currentPage++;
                 renderImages(data, currentPage);
                 renderPagination();
+                saveSessionState();
             }
         });
         pagination.appendChild(nextButton);
@@ -125,16 +129,48 @@ document.addEventListener('DOMContentLoaded', function() {
         if (event.target && event.target.matches('img.imageItem')) {
             const index = parseInt(event.target.getAttribute('data-index'));
             const imageUrl = data[index]; // Get the URL of the clicked image
-            const currentPage = getCurrentPage(); // Get the current page number from the query parameters
 
-            // Navigate to index.html with image URL and page number as query parameters
-            window.location.href = `index.html?image=${encodeURIComponent(imageUrl)}&page=${currentPage}`;
+            // Save scroll position and current page before navigating
+            saveSessionState();
+
+            // Navigate to index.html with image URL as a query parameter
+            window.location.href = `index.html?image=${encodeURIComponent(imageUrl)}`;
         }
     });
 
-    // Function to get the current page number from the query parameters
-    function getCurrentPage() {
-        const params = new URLSearchParams(window.location.search);
-        return parseInt(params.get('page')) || 1; // Default to page 1 if no page parameter is present
+    // Function to save scroll position and current page to session storage
+    function saveSessionState() {
+        sessionStorage.setItem('scrollPosition', window.scrollY);
+        sessionStorage.setItem('currentPage', currentPage);
+    }
+
+    // Function to restore scroll position after images load
+    function restoreScrollPositionAfterImagesLoad() {
+        const allImages = document.querySelectorAll('.imageItem');
+        let loadedImagesCount = 0;
+        const totalImages = allImages.length;
+
+        allImages.forEach((img) => {
+            if (img.complete) {
+                loadedImagesCount++;
+            } else {
+                img.addEventListener('load', () => {
+                    loadedImagesCount++;
+                    if (loadedImagesCount === totalImages) {
+                        window.scrollTo(0, sessionStorage.getItem('scrollPosition') || 0);
+                    }
+                });
+                img.addEventListener('error', () => {
+                    loadedImagesCount++;
+                    if (loadedImagesCount === totalImages) {
+                        window.scrollTo(0, sessionStorage.getItem('scrollPosition') || 0);
+                    }
+                });
+            }
+        });
+
+        if (loadedImagesCount === totalImages) {
+            window.scrollTo(0, sessionStorage.getItem('scrollPosition') || 0);
+        }
     }
 });
