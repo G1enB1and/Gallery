@@ -331,7 +331,6 @@ function populateFileTree() {
         .catch(error => console.error('Error fetching file tree:', error));
 }
 
-// Function to build the file tree
 function buildFileTree(container, nodes) {
     container.innerHTML = ''; // Clear the current file tree
     nodes.forEach(node => {
@@ -349,12 +348,41 @@ function buildFileTree(container, nodes) {
                 .then(response => response.text())
                 .then(message => {
                     console.log(message);
-                    // Optionally reload the images or update the UI
-                    initializePage();
+                    // Introduce a longer delay to ensure images.json is updated
+                    setTimeout(() => {
+                        fetch('images.json')
+                            .then(response => response.json())
+                            .then(images => {
+                                data = images;
+                                console.log(`Data loaded: ${JSON.stringify(data)}`);
+                                if (data.length > 0) {
+                                    // Display the first image after data is loaded and update the URL
+                                    const firstImageUrl = data[0];
+                                    displayImageWithUrlUpdate(firstImageUrl);
+                                }
+                            })
+                            .catch(error => console.error('Error fetching images:', error));
+                    }, 300); // Delay of 3 seconds to ensure images.json is updated
                 })
                 .catch(error => console.error('Error updating images:', error));
             });
         }
         container.appendChild(li);
     });
+}
+
+function displayImageWithUrlUpdate(imageUrl) {
+    const image = document.getElementById('displayedImage');
+    image.style.display = 'none'; // Hide the image initially
+    const preloader = new Image();
+    preloader.onload = () => {
+        image.src = imageUrl;
+        image.style.display = 'block'; // Show the image after it has loaded
+        // Update the URL with the new image
+        history.replaceState(null, '', `?image=${encodeURIComponent(imageUrl)}`);
+    };
+    preloader.onerror = () => {
+        console.error(`Failed to load image: ${imageUrl}`);
+    };
+    preloader.src = imageUrl;
 }
