@@ -100,15 +100,20 @@ body {
     height: calc(100% - 20px); /* Adjust for padding */
 }
 
+/* Hide bullets in the file tree */
 #fileTree {
-    list-style: none;
-    padding: 0;
-    margin: 0;
+    list-style-type: none; /* Remove bullets */
+    padding-left: 0; /* Remove padding */
 }
 
 #fileTree li {
     margin: 5px 0;
     cursor: pointer;
+}
+
+#fileTree li ul {
+    list-style-type: none; /* Remove bullets from sub-lists */
+    padding-left: 20px; /* Add indentation for sub-lists */
 }
 
 #mainContent {
@@ -242,4 +247,3 @@ button {
     height: 25px;
     display: block;
 }
-
