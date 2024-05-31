@@ -109,12 +109,23 @@ body {
 #fileTree li {
     margin: 5px 0;
     cursor: pointer;
+    position: relative;
+    padding-left: 20px; /* Add space for the toggle icon */
+}
+
+#fileTree li .toggle-icon {
+    position: absolute;
+    left: 0;
+    top: 0;
+    cursor: pointer;
+    user-select: none;
 }
 
 #fileTree li ul {
     list-style-type: none; /* Remove bullets from sub-lists */
     padding-left: 20px; /* Add indentation for sub-lists */
 }
+
 
 #mainContent {
     flex-grow: 1;

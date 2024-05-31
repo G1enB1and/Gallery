@@ -339,7 +339,31 @@ function buildFileTree(container, nodes) {
         icon.className = 'fas fa-folder'; // Font Awesome folder icon
         li.appendChild(icon);
         li.appendChild(document.createTextNode(` ${node.name}`));
+
         if (node.type === 'directory') {
+            if (node.children && node.children.length > 0) {
+                const toggleIcon = document.createElement('span');
+                toggleIcon.className = 'toggle-icon';
+                toggleIcon.innerHTML = '&#9654;'; // Right pointing triangle
+                li.insertBefore(toggleIcon, li.firstChild);
+
+                const subList = document.createElement('ul');
+                subList.style.display = 'none'; // Initially hide subfolders
+                buildFileTree(subList, node.children);
+                li.appendChild(subList);
+
+                toggleIcon.addEventListener('click', (e) => {
+                    e.stopPropagation();
+                    if (subList.style.display === 'none') {
+                        subList.style.display = 'block';
+                        toggleIcon.innerHTML = '&#9660;'; // Down pointing triangle
+                    } else {
+                        subList.style.display = 'none';
+                        toggleIcon.innerHTML = '&#9654;'; // Right pointing triangle
+                    }
+                });
+            }
+
             li.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent event from bubbling up to parent elements
                 fetch('/update-images', {
@@ -372,11 +396,6 @@ function buildFileTree(container, nodes) {
                 })
                 .catch(error => console.error('Error updating images:', error));
             });
-            if (node.children && node.children.length > 0) {
-                const subList = document.createElement('ul');
-                buildFileTree(subList, node.children); // Recursive call to build subfolders
-                li.appendChild(subList);
-            }
         }
         container.appendChild(li);
     });
