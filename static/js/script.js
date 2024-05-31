@@ -180,7 +180,7 @@ function restorePanelState() {
     const logoClosed = document.getElementById('logoClosed');
     const isPanelOpen = getPanelState();
     leftPanel.style.display = isPanelOpen ? 'block' : 'none';
-    fileTreeToggleClosed.style.display = isPanelOpen ? 'none' : 'block';
+    fileTreeToggleClosed.style.display = isPanelOpen ? 'none' : 'flex';
     logoClosed.style.display = isPanelOpen ? 'none' : 'block';
     leftPanel.style.width = '270px'; // Set default width to 270px
     adjustMainContent();
@@ -280,7 +280,7 @@ function initializePage() {
             logoClosed.style.display = 'none';
         } else {
             leftPanel.style.display = 'none';
-            fileTreeToggleClosed.style.display = 'block';
+            fileTreeToggleClosed.style.display = 'flex';
             logoClosed.style.display = 'block';
         }
         adjustMainContent();
