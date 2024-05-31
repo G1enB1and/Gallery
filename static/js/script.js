@@ -335,7 +335,10 @@ function buildFileTree(container, nodes) {
     container.innerHTML = ''; // Clear the current file tree
     nodes.forEach(node => {
         const li = document.createElement('li');
-        li.textContent = node.name;
+        const icon = document.createElement('i');
+        icon.className = 'fas fa-folder'; // Font Awesome folder icon
+        li.appendChild(icon);
+        li.appendChild(document.createTextNode(` ${node.name}`));
         if (node.type === 'directory') {
             li.addEventListener('click', () => {
                 fetch('/update-images', {
@@ -366,6 +369,11 @@ function buildFileTree(container, nodes) {
                 })
                 .catch(error => console.error('Error updating images:', error));
             });
+            if (node.children && node.children.length > 0) {
+                const subList = document.createElement('ul');
+                buildFileTree(subList, node.children); // Recursive call to build subfolders
+                li.appendChild(subList);
+            }
         }
         container.appendChild(li);
     });
