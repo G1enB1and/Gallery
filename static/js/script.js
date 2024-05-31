@@ -340,7 +340,8 @@ function buildFileTree(container, nodes) {
         li.appendChild(icon);
         li.appendChild(document.createTextNode(` ${node.name}`));
         if (node.type === 'directory') {
-            li.addEventListener('click', () => {
+            li.addEventListener('click', (e) => {
+                e.stopPropagation(); // Prevent event from bubbling up to parent elements
                 fetch('/update-images', {
                     method: 'POST',
                     headers: {
@@ -362,6 +363,8 @@ function buildFileTree(container, nodes) {
                                     // Display the first image after data is loaded and update the URL
                                     const firstImageUrl = data[0];
                                     displayImageWithUrlUpdate(firstImageUrl);
+                                } else {
+                                    console.error('No images found in the selected directory.');
                                 }
                             })
                             .catch(error => console.error('Error fetching images:', error));
