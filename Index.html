@@ -7,8 +7,6 @@
     <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon.png">
     <link rel="stylesheet" href="static/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
-    
-
     <script>
         function getQueryParam(name) {
             const urlParams = new URLSearchParams(window.location.search);
@@ -28,20 +26,29 @@
     </script>
 </head>
 <body>
-    <div id="leftPanel">
+    <div id="leftPanel" class="scroller">
         <div id="leftPanelContent">
-            <img src="static/images/logo.png" alt="Logo" id="logoOpened" class="logo">
-            <div id="fileTreeToggleOpened" class="fileTreeToggle">
-                <img src="static/images/file_tree_white.png" alt="Open Panel" class="icon">
-                <span class="text">Close File Tree</span>
+            <img src="static/images/logo.png" alt="PicTagger Logo" id="logoOpened" class="logo">
+            <div id="fileTreeBanner" class="fileTreeBanner">
+                <div id="fileTreeToggleOpened" class="fileTreeToggle">
+                    <i class="fa-solid fa-folder-tree" alt="Close Panel"></i>
+                    <span class="text">Close File Tree</span>
+                </div>
+                <div id="controls">
+                    <div id="expandCollapseControls">
+                        <i class="fas fa-chevron-circle-down" id="expandAll" title="Expand All"></i>
+                        <i class="fas fa-chevron-circle-up" id="collapseAll" title="Collapse All"></i>
+                    </div>
+                </div>
             </div>
-            <div class="resize-handle"></div>
+            
             <div id="fileTreeContainer">
                 <ul id="fileTree">
                     <!-- File tree will be dynamically populated -->
                 </ul>
             </div>
         </div>
+        <div class="resize-handle"></div>
     </div>
     <div id="mainContent">
         <div id="imageContainer">
@@ -59,10 +66,12 @@
         <button id="nextButton" class="mediaControls">▶</button>
     </div>
     <div id="closedPanelContent">
-        <img src="static/images/logo.png" alt="Logo" id="logoClosed" class="logo">
-        <div id="fileTreeToggleClosed" class="fileTreeToggle">
-            <img src="static/images/file_tree_white.png" alt="Open Panel" class="icon">
-            <span class="text">Open File Tree</span>
+        <img src="static/images/logo.png" alt="PicTagger Logo" id="logoClosed" class="logo">
+        <div id="fileTreeBanner" class="fileTreeBanner">
+            <div id="fileTreeToggleClosed" class="fileTreeToggle">
+                <i class="fa-solid fa-folder-tree" alt="Open Panel"></i>
+                <span class="text">Open File Tree</span>
+            </div>
         </div>
     </div>
     <script src="static/js/script.js"></script>

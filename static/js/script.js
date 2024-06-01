@@ -148,6 +148,10 @@ function handleKeyPress(event) {
         nextImage();
     } else if (event.code === 'ArrowLeft') {
         prevImage();
+    } else if (event.altKey && event.code === 'Home') {
+        collapseAll();
+    } else if (event.altKey && event.code === 'End') {
+        expandAll();
     }
 }
 
@@ -318,7 +322,40 @@ document.addEventListener('DOMContentLoaded', () => {
     initializePage();
     adjustMainContent(); // Ensure content is adjusted initially
     populateFileTree(); // Populate the file tree initially
+    document.getElementById('expandAll').addEventListener('click', expandAll);
+    document.getElementById('collapseAll').addEventListener('click', collapseAll);
+
+    document.addEventListener('keydown', (e) => {
+        if (e.altKey && e.code === 'Home') {
+            collapseAll();
+        }
+        if (e.altKey && e.code === 'End') {
+            expandAll();
+        }
+    });
 });
+
+function expandAll() {
+    const toggleIcons = document.querySelectorAll('#fileTree .toggle-icon');
+    toggleIcons.forEach(icon => {
+        const subList = icon.parentElement.querySelector('ul');
+        if (subList) {
+            subList.style.display = 'block';
+            icon.innerHTML = '&#9660;'; // Down pointing triangle
+        }
+    });
+}
+
+function collapseAll() {
+    const toggleIcons = document.querySelectorAll('#fileTree .toggle-icon');
+    toggleIcons.forEach(icon => {
+        const subList = icon.parentElement.querySelector('ul');
+        if (subList) {
+            subList.style.display = 'none';
+            icon.innerHTML = '&#9654;'; // Right pointing triangle
+        }
+    });
+}
 
 // Function to populate the file tree
 function populateFileTree() {
