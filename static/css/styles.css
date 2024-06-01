@@ -288,6 +288,14 @@ body {
     position: relative; /* Ensure absolute positioned elements are relative to this container */
 }
 
+#displayedImage {
+    display: none; /* Initially hide the image element */
+}
+
+#displayedVideo {
+    display: none; /* Initially hide the video element */
+}
+
 img, video {
     max-width: 100%;
     max-height: 100%;

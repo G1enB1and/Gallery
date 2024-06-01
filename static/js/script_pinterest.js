@@ -21,13 +21,16 @@ document.addEventListener('DOMContentLoaded', function() {
         const startIndex = (page - 1) * imagesPerPage;
         const endIndex = startIndex + imagesPerPage;
         const pageImages = images.slice(startIndex, endIndex);
-        pageImages.forEach((imagePath, index) => {
-            const img = document.createElement('img');
-            img.src = imagePath;
-            img.classList.add('imageItem');
-            img.classList.add('masonry-item');
-            img.setAttribute('data-index', startIndex + index); // Set the data-index attribute
-            imageGrid.appendChild(img);
+        pageImages.forEach((mediaPath, index) => {
+            const mediaElement = document.createElement(mediaPath.endsWith('.mp4') ? 'video' : 'img');
+            mediaElement.src = mediaPath;
+            mediaElement.classList.add('imageItem');
+            mediaElement.classList.add('masonry-item');
+            mediaElement.setAttribute('data-index', startIndex + index); // Set the data-index attribute
+            if (mediaPath.endsWith('.mp4')) {
+                mediaElement.controls = true;
+            }
+            imageGrid.appendChild(mediaElement);
         });
     }
 
@@ -124,17 +127,17 @@ document.addEventListener('DOMContentLoaded', function() {
         pagination.appendChild(nextButton);
     }
 
-    // Event listener for image clicks
+    // Event listener for image and video clicks
     imageGrid.addEventListener('click', function(event) {
-        if (event.target && event.target.matches('img.imageItem')) {
+        if (event.target && (event.target.matches('img.imageItem') || event.target.matches('video.imageItem'))) {
             const index = parseInt(event.target.getAttribute('data-index'));
-            const imageUrl = data[index]; // Get the URL of the clicked image
+            const mediaUrl = data[index]; // Get the URL of the clicked media
 
             // Save scroll position and current page before navigating
             saveSessionState();
 
-            // Navigate to index.html with image URL as a query parameter
-            window.location.href = `index.html?image=${encodeURIComponent(imageUrl)}`;
+            // Navigate to index.html with media URL as a query parameter
+            window.location.href = `index.html?image=${encodeURIComponent(mediaUrl)}`;
         }
     });
 
@@ -146,30 +149,30 @@ document.addEventListener('DOMContentLoaded', function() {
 
     // Function to restore scroll position after images load
     function restoreScrollPositionAfterImagesLoad() {
-        const allImages = document.querySelectorAll('.imageItem');
-        let loadedImagesCount = 0;
-        const totalImages = allImages.length;
+        const allMedia = document.querySelectorAll('.imageItem');
+        let loadedMediaCount = 0;
+        const totalMedia = allMedia.length;
 
-        allImages.forEach((img) => {
-            if (img.complete) {
-                loadedImagesCount++;
+        allMedia.forEach((media) => {
+            if (media.complete || (media.tagName === 'VIDEO' && media.readyState === 4)) {
+                loadedMediaCount++;
             } else {
-                img.addEventListener('load', () => {
-                    loadedImagesCount++;
-                    if (loadedImagesCount === totalImages) {
+                media.addEventListener('load', () => {
+                    loadedMediaCount++;
+                    if (loadedMediaCount === totalMedia) {
                         window.scrollTo(0, sessionStorage.getItem('scrollPosition') || 0);
                     }
                 });
-                img.addEventListener('error', () => {
-                    loadedImagesCount++;
-                    if (loadedImagesCount === totalImages) {
+                media.addEventListener('error', () => {
+                    loadedMediaCount++;
+                    if (loadedMediaCount === totalMedia) {
                         window.scrollTo(0, sessionStorage.getItem('scrollPosition') || 0);
                     }
                 });
             }
         });
 
-        if (loadedImagesCount === totalImages) {
+        if (loadedMediaCount === totalMedia) {
             window.scrollTo(0, sessionStorage.getItem('scrollPosition') || 0);
         }
     }

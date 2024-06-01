@@ -35,6 +35,7 @@ function displayMedia() {
 
     imageElement.style.display = 'none';
     videoElement.style.display = 'none';
+    videoElement.src = ''; // Clear the video source
 
     if (!mediaUrl && data.length > 0) {
         // If no query parameter is provided, set the media URL to the first item in the data array
@@ -59,8 +60,11 @@ function preloadAndDisplayMedia(src, imgElement, vidElement) {
     if (isVideo) {
         vidElement.src = src;
         vidElement.style.display = 'block'; // Show the video after it has loaded
+        vidElement.autoplay = true; // Ensure the video auto-plays
         vidElement.load(); // Load the video
+        imgElement.style.display = 'none'; // Hide the image element
     } else {
+        vidElement.style.display = 'none'; // Hide the video element
         const preloader = new Image();
         preloader.onload = () => {
             imgElement.src = src;
