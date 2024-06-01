@@ -26,95 +26,107 @@ function getPanelState() {
     return params.get('panel') === 'open';
 }
 
-// Function to display the image
-function displayImage() {
-    const imageUrl = getQueryParam('image');
-    const image = document.getElementById('displayedImage');
-    image.style.display = 'none'; // Hide the image initially
-    if (!imageUrl && data.length > 0) {
-        // If no query parameter is provided, set the image URL to the first image in the data array
-        const firstImageUrl = data[0];
-        preloadAndDisplayImage(firstImageUrl, image);
-        console.log(`Displaying first image: ${firstImageUrl}`);
-        // Update the URL with the first image
-        history.replaceState(null, '', `?image=${encodeURIComponent(firstImageUrl)}&panel=${getPanelState() ? 'open' : 'closed'}`);
-    } else if (imageUrl) {
-        // If a query parameter is provided, display the corresponding image
-        preloadAndDisplayImage(decodeURIComponent(imageUrl), image);
-        console.log(`Displaying image from URL: ${imageUrl}`);
+// Function to display the media (image or video)
+function displayMedia() {
+    const mediaUrl = getQueryParam('image');
+    const imageContainer = document.getElementById('imageContainer');
+    const imageElement = document.getElementById('displayedImage');
+    const videoElement = document.getElementById('displayedVideo');
+
+    imageElement.style.display = 'none';
+    videoElement.style.display = 'none';
+
+    if (!mediaUrl && data.length > 0) {
+        // If no query parameter is provided, set the media URL to the first item in the data array
+        const firstMediaUrl = data[0];
+        preloadAndDisplayMedia(firstMediaUrl, imageElement, videoElement);
+        console.log(`Displaying first media: ${firstMediaUrl}`);
+        // Update the URL with the first media
+        history.replaceState(null, '', `?image=${encodeURIComponent(firstMediaUrl)}&panel=${getPanelState() ? 'open' : 'closed'}`);
+    } else if (mediaUrl) {
+        // If a query parameter is provided, display the corresponding media
+        preloadAndDisplayMedia(decodeURIComponent(mediaUrl), imageElement, videoElement);
+        console.log(`Displaying media from URL: ${mediaUrl}`);
     } else {
-        console.error('Image URL not found in query parameters.');
+        console.error('Media URL not found in query parameters.');
     }
-    preloadAdjacentImages(); // Preload the next and previous images
+    preloadAdjacentMedia(); // Preload the next and previous media
 }
 
-// Function to preload and display an image
-function preloadAndDisplayImage(src, imgElement) {
-    const preloader = new Image();
-    preloader.onload = () => {
-        imgElement.src = src;
-        imgElement.style.display = 'block'; // Show the image after it has loaded
-    };
-    preloader.onerror = () => {
-        console.error(`Failed to load image: ${src}`);
-    };
-    preloader.src = src;
+// Function to preload and display media (image or video)
+function preloadAndDisplayMedia(src, imgElement, vidElement) {
+    const isVideo = src.endsWith('.mp4');
+    if (isVideo) {
+        vidElement.src = src;
+        vidElement.style.display = 'block'; // Show the video after it has loaded
+        vidElement.load(); // Load the video
+    } else {
+        const preloader = new Image();
+        preloader.onload = () => {
+            imgElement.src = src;
+            imgElement.style.display = 'block'; // Show the image after it has loaded
+        };
+        preloader.onerror = () => {
+            console.error(`Failed to load image: ${src}`);
+        };
+        preloader.src = src;
+    }
 }
 
-// Function to preload the next and previous images
-function preloadAdjacentImages() {
-    const currentImageUrl = getCurrentImageUrl();
-    if (!currentImageUrl) {
-        console.error('Image URL not found.');
+// Function to preload the next and previous media
+function preloadAdjacentMedia() {
+    const currentMediaUrl = getCurrentImageUrl();
+    if (!currentMediaUrl) {
+        console.error('Media URL not found.');
         return;
     }
-    const currentIndex = data.indexOf(decodeURIComponent(currentImageUrl));
+    const currentIndex = data.indexOf(decodeURIComponent(currentMediaUrl));
 
-    const nextIndex = (currentIndex + 1) % data.length; // Ensure looping back to the first image
-    const prevIndex = (currentIndex - 1 + data.length) % data.length; // Ensure looping back to the last image
+    const nextIndex = (currentIndex + 1) % data.length; // Ensure looping back to the first media
+    const prevIndex = (currentIndex - 1 + data.length) % data.length; // Ensure looping back to the last media
 
     preloadedNextImage.src = data[nextIndex];
     preloadedPrevImage.src = data[prevIndex];
 
-    console.log(`Preloading next image: ${data[nextIndex]}`);
-    console.log(`Preloading previous image: ${data[prevIndex]}`);
+    console.log(`Preloading next media: ${data[nextIndex]}`);
+    console.log(`Preloading previous media: ${data[prevIndex]}`);
 }
 
-// Function to navigate to the next image
+// Function to navigate to the next media
 function nextImage() {
-    const currentImageUrl = getCurrentImageUrl();
+    const currentMediaUrl = getCurrentImageUrl();
     const panelState = document.getElementById('leftPanel').style.display === 'block' ? 'open' : 'closed';
-    if (!currentImageUrl) {
-        console.error('Image URL not found.');
+    if (!currentMediaUrl) {
+        console.error('Media URL not found.');
         return;
     }
-    const currentIndex = data.indexOf(decodeURIComponent(currentImageUrl));
-    const nextIndex = (currentIndex + 1) % data.length; // Ensure looping back to the first image
-    const nextImageUrl = data[nextIndex];
-    if (nextImageUrl) {
-        window.location.href = `index.html?image=${encodeURIComponent(nextImageUrl)}&panel=${panelState}`;
-        console.log(`Navigating to next image: ${nextImageUrl}`);
+    const currentIndex = data.indexOf(decodeURIComponent(currentMediaUrl));
+    const nextIndex = (currentIndex + 1) % data.length; // Ensure looping back to the first media
+    const nextMediaUrl = data[nextIndex];
+    if (nextMediaUrl) {
+        window.location.href = `index.html?image=${encodeURIComponent(nextMediaUrl)}&panel=${panelState}`;
+        console.log(`Navigating to next media: ${nextMediaUrl}`);
     } else {
-        console.error('Next image URL not found.');
+        console.error('Next media URL not found.');
     }
 }
 
-// Function to navigate to the previous image
+// Function to navigate to the previous media
 function prevImage() {
-    const currentImageUrl = getCurrentImageUrl();
+    const currentMediaUrl = getCurrentImageUrl();
     const panelState = document.getElementById('leftPanel').style.display === 'block' ? 'open' : 'closed';
-    if (!currentImageUrl) {
-        console.error('Image URL not found.');
+    if (!currentMediaUrl) {
+        console.error('Media URL not found.');
         return;
     }
-    const currentIndex = data.indexOf(decodeURIComponent(currentImageUrl));
-    const prevIndex = (currentIndex - 1 + data.length) % data.length; // Ensure looping back to the last image
-    const prevImageUrl = data[prevIndex];
-    if (prevImageUrl) {
-        window.location.href = `index.html?image=${encodeURIComponent(prevImageUrl)}&panel=${panelState}`;
-        console.log(`Navigating to previous image: ${prevImageUrl}`);
+    const currentIndex = data.indexOf(decodeURIComponent(currentMediaUrl));
+    const prevIndex = (currentIndex - 1 + data.length) % data.length; // Ensure looping back to the last media
+    const prevMediaUrl = data[prevIndex];
+    if (prevMediaUrl) {
+        window.location.href = `index.html?image=${encodeURIComponent(prevMediaUrl)}&panel=${panelState}`;
+        console.log(`Navigating to previous media: ${prevMediaUrl}`);
     } else {
-        console.error('Previous image URL not found.');
+        console.error('Previous media URL not found.');
     }
 }
 
@@ -131,7 +143,7 @@ function togglePlayPause() {
         sessionStorage.setItem('isPlaying', 'false'); // Store state
         console.log('Paused');
     } else {
-        intervalId = setInterval(nextImage, 5000); // Change image every 5 seconds
+        intervalId = setInterval(nextImage, 5000); // Change media every 5 seconds
         playIcon.style.display = 'none';
         pauseIcon.style.display = 'block';
         sessionStorage.setItem('isPlaying', 'true'); // Store state
@@ -231,7 +243,7 @@ function initializePage() {
         .then(images => {
             data = images;
             console.log(`Data loaded: ${JSON.stringify(data)}`);
-            displayImage(); // Display the image after data is loaded
+            displayMedia(); // Display the media after data is loaded
 
             // Event listener for the "Next" button
             const nextButton = document.getElementById('nextButton');
@@ -421,11 +433,11 @@ function buildFileTree(container, nodes) {
                                 data = images;
                                 console.log(`Data loaded: ${JSON.stringify(data)}`);
                                 if (data.length > 0) {
-                                    // Display the first image after data is loaded and update the URL
-                                    const firstImageUrl = data[0];
-                                    displayImageWithUrlUpdate(firstImageUrl);
+                                    // Display the first media after data is loaded and update the URL
+                                    const firstMediaUrl = data[0];
+                                    displayImageWithUrlUpdate(firstMediaUrl);
                                 } else {
-                                    console.error('No images found in the selected directory.');
+                                    console.error('No media found in the selected directory.');
                                 }
                             })
                             .catch(error => console.error('Error fetching images:', error));
@@ -438,18 +450,28 @@ function buildFileTree(container, nodes) {
     });
 }
 
-function displayImageWithUrlUpdate(imageUrl) {
-    const image = document.getElementById('displayedImage');
-    image.style.display = 'none'; // Hide the image initially
-    const preloader = new Image();
-    preloader.onload = () => {
-        image.src = imageUrl;
-        image.style.display = 'block'; // Show the image after it has loaded
-        // Update the URL with the new image
-        history.replaceState(null, '', `?image=${encodeURIComponent(imageUrl)}`);
-    };
-    preloader.onerror = () => {
-        console.error(`Failed to load image: ${imageUrl}`);
-    };
-    preloader.src = imageUrl;
+function displayImageWithUrlUpdate(mediaUrl) {
+    const imageElement = document.getElementById('displayedImage');
+    const videoElement = document.getElementById('displayedVideo');
+    imageElement.style.display = 'none';
+    videoElement.style.display = 'none';
+
+    const isVideo = mediaUrl.endsWith('.mp4');
+    if (isVideo) {
+        videoElement.src = mediaUrl;
+        videoElement.style.display = 'block';
+        videoElement.load();
+    } else {
+        const preloader = new Image();
+        preloader.onload = () => {
+            imageElement.src = mediaUrl;
+            imageElement.style.display = 'block';
+            // Update the URL with the new media
+            history.replaceState(null, '', `?image=${encodeURIComponent(mediaUrl)}`);
+        };
+        preloader.onerror = () => {
+            console.error(`Failed to load image: ${mediaUrl}`);
+        };
+        preloader.src = mediaUrl;
+    }
 }

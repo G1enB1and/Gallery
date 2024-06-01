@@ -8,7 +8,7 @@ def randomize_images(directory):
     base_directory = os.path.relpath(directory, os.path.join(os.path.dirname(__file__), '..'))
     for root, dirs, files in os.walk(directory):
         for file in files:
-            if file.endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp')):
+            if file.endswith(('.jpg', '.jpeg', '.png', '.gif', '.webp', '.mp4')):
                 relative_path = os.path.relpath(os.path.join(root, file), start=os.path.join(os.path.dirname(__file__), '..'))
                 images.append(relative_path)  # Ensure the path is relative to the root directory
 
