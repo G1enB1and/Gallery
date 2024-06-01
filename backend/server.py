@@ -49,7 +49,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             directory = json.loads(post_data).get('directory')
             if directory:
                 full_path = os.path.join(PROJECT_ROOT, directory)
-                subprocess.run(['python', 'backend/randomize.py', full_path])
+                subprocess.run(['python', 'backend/fetch_images.py', full_path])
                 self.send_response(200)
                 self.end_headers()
                 self.wfile.write(b'Images updated successfully.')

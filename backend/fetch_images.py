@@ -3,7 +3,7 @@ import os
 import random
 import sys
 
-def randomize_images(directory):
+def fetch_and_randomize_images(directory):
     images = []
     base_directory = os.path.relpath(directory, os.path.join(os.path.dirname(__file__), '..'))
     for root, dirs, files in os.walk(directory):
@@ -21,6 +21,6 @@ def randomize_images(directory):
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:
-        randomize_images(sys.argv[1])
+        fetch_and_randomize_images(sys.argv[1])
     else:
-        print("Usage: python randomize.py <directory>")
+        print("Usage: python fetch_images.py <directory>")

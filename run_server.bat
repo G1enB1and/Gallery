@@ -6,7 +6,7 @@ REM Change to the project root directory (Gallery folder)
 cd /d "%BATCH_DIR%..\Gallery"
 
 REM Run the randomize script with the initial directory
-python backend/randomize.py "Pictures/.."
+python backend/fetch_images.py "Pictures/.."
 
 REM Run the server script
 python backend/server.py
