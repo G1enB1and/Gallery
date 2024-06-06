@@ -1,12 +1,3 @@
-body {
-    margin: 0;
-    padding: 0;
-    display: flex;
-    height: 100vh;
-    background-color: #222; /* Dark grey background */
-    overflow: hidden; /* Prevent scrolling */
-}
-
 #leftPanel {
     width: 25%;
     max-width: 25%;
@@ -32,9 +23,9 @@ body {
       scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
       scrollbar-width: var(--scrollbar-width);
     }
-  }
+}
   
-  @supports selector(::-webkit-scrollbar) {
+@supports selector(::-webkit-scrollbar) {
     .scroller {
       text-align: justify;
     }
@@ -48,7 +39,7 @@ body {
       max-width: var(--scrollbar-width-legacy);
       max-height: var(--scrollbar-width-legacy);
     }
-  }
+}
 
 #leftPanelContent {
     display: flex;
@@ -129,16 +120,16 @@ body {
     -webkit-animation: glow 1s ease-in-out infinite alternate;
     -moz-animation: glow 1s ease-in-out infinite alternate;
     animation: glow 1s ease-in-out infinite alternate;
-  }
+}
   
-  @-webkit-keyframes glow {
+@-webkit-keyframes glow {
     from {
       text-shadow: 0 0 2px #fff, 0 0 05px #007bff, 0 0 10px #0000ff;
     }
     to {
       text-shadow: 0 0 5px #fff, 0 0 10px #007bff, 0 0 15px #0000ff;
     }
-  }
+}
 
 .resize-handle {
     width: 5px;
@@ -206,152 +197,4 @@ body {
 
 #expandCollapseControls i:hover {
     color: #007bff;
-}
-
-#mainContent {
-    flex-grow: 1;
-    height: 100%;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    z-index: 1;
-    transition: width 0.3s; /* Smooth transition for resizing */
-}
-
-.mediaControls {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
-    border: none;
-    background-color: transparent;
-    color: white;
-    cursor: pointer;
-}
-
-#playPauseButton {
-    position: absolute; /* Ensure correct positioning */
-    bottom: 50px;
-    left: 50%;
-    transform: translate(-50%, 50%);
-    width: 50px;
-    height: 50px;
-    font-size: 30px;
-    border: none;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: white;
-    border-radius: 50%;
-    cursor: pointer;
-    display: flex;
-    align-items: center;
-    justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 9999; /* Ensure play/pause stays on top of other content */
-}
-
-#hoverArea {
-    position: absolute;
-    top: 0;
-    left: 25%; /* Center the hover area */
-    width: 50%;
-    height: 100%;
-    background-color: transparent; /* Invisible, only for detecting hover */
-    z-index: 1; /* Below buttons but above the image */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-#hoverArea:hover + #playPauseButton,
-#playPauseButton:hover {
-    opacity: 1;
-}
-
-#playPauseButton .fa-play,
-#playPauseButton .fa-pause {
-    font-size: 24px;
-}
-
-#playPauseButton .fa-pause {
-    display: none;
-}
-
-#imageContainer {
-    display: flex;
-    justify-content: center;
-    align-items: center;
-    max-width: 100%; /* Ensure the image does not exceed the main content width */
-    height: 100%;
-    position: relative; /* Ensure absolute positioned elements are relative to this container */
-}
-
-#displayedImage {
-    display: none; /* Initially hide the image element */
-}
-
-#displayedVideo {
-    display: none; /* Initially hide the video element */
-}
-
-img, video {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-}
-
-img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
-}
-
-button {
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
-    border: none;
-    background-color: transparent;
-    color: white;
-    cursor: pointer;
-}
-
-#prevButton {
-    left: 20px;
-    z-index: 100; /* Ensure it stays above other elements */
-}
-
-#nextButton {
-    right: 20px;
-}
-
-.gallery {
-    position: fixed;
-    top: 10px;
-    right: 10px;
-    background-color: #007bff;
-    color: white;
-    padding: 5px;
-    border-radius: 5px;
-    text-decoration: none;
-    z-index: 9999; /* Ensure link stays on top of other content */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.gallery:hover {
-    background-color: #0056b3;
-}
-
-.gallery .icon {
-    width: 25px;
-    height: 25px;
-    display: block;
 }

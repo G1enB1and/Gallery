@@ -1,19 +1,15 @@
 // fileTree.js
-import { setData, displayImageWithUrlUpdate } from './media.js';
-import { expandAll, collapseAll } from './events.js';
-
-// Function to populate the file tree
 export function populateFileTree() {
     const fileTreeContainer = document.getElementById('fileTree');
     fetch('/file-tree')
         .then(response => response.json())
         .then(data => {
             buildFileTree(fileTreeContainer, data);
+            restoreFileTreeState();
         })
         .catch(error => console.error('Error fetching file tree:', error));
 }
 
-// Function to build the file tree
 export function buildFileTree(container, nodes) {
     container.innerHTML = ''; // Clear the current file tree
     nodes.forEach(node => {
@@ -37,18 +33,15 @@ export function buildFileTree(container, nodes) {
 
                 toggleIcon.addEventListener('click', (e) => {
                     e.stopPropagation();
-                    if (subList.style.display === 'none') {
-                        subList.style.display = 'block';
-                        toggleIcon.innerHTML = '&#9660;'; // Down pointing triangle
-                    } else {
-                        subList.style.display = 'none';
-                        toggleIcon.innerHTML = '&#9654;'; // Right pointing triangle
-                    }
+                    const isExpanded = subList.style.display === 'block';
+                    subList.style.display = isExpanded ? 'none' : 'block';
+                    toggleIcon.innerHTML = isExpanded ? '&#9654;' : '&#9660;';
+                    saveFileTreeState();
                 });
             }
 
             li.addEventListener('click', (e) => {
-                e.stopPropagation(); // Prevent event from bubbling up to parent elements
+                e.stopPropagation();
                 fetch('/update-images', {
                     method: 'POST',
                     headers: {
@@ -59,27 +52,69 @@ export function buildFileTree(container, nodes) {
                 .then(response => response.text())
                 .then(message => {
                     console.log(message);
-                    // Introduce a longer delay to ensure images.json is updated
                     setTimeout(() => {
                         fetch('images.json')
                             .then(response => response.json())
                             .then(images => {
                                 setData(images);
-                                console.log(`Data loaded: ${JSON.stringify(images)}`);
-                                if (images.length > 0) {
-                                    // Display the first media after data is loaded and update the URL
-                                    const firstMediaUrl = images[0];
-                                    displayImageWithUrlUpdate(firstMediaUrl);
-                                } else {
-                                    console.error('No media found in the selected directory.');
-                                }
+                                renderImages(images, getCurrentPage());
+                                renderPagination(images.length, 12 * 5, getCurrentPage());
                             })
                             .catch(error => console.error('Error fetching images:', error));
-                    }, 300); // Delay of 3 seconds to ensure images.json is updated
+                    }, 300);
                 })
                 .catch(error => console.error('Error updating images:', error));
             });
         }
         container.appendChild(li);
     });
+
+    document.getElementById('expandAll').addEventListener('click', expandAll);
+    document.getElementById('collapseAll').addEventListener('click', collapseAll);
+}
+
+function saveFileTreeState() {
+    const state = {};
+    document.querySelectorAll('#fileTree .toggle-icon').forEach((icon, index) => {
+        const subList = icon.parentElement.querySelector('ul');
+        if (subList) {
+            state[index] = subList.style.display === 'block';
+        }
+    });
+    sessionStorage.setItem('fileTreeState', JSON.stringify(state));
+}
+
+function restoreFileTreeState() {
+    const state = JSON.parse(sessionStorage.getItem('fileTreeState'));
+    if (state) {
+        document.querySelectorAll('#fileTree .toggle-icon').forEach((icon, index) => {
+            const subList = icon.parentElement.querySelector('ul');
+            if (subList && state[index] !== undefined) {
+                subList.style.display = state[index] ? 'block' : 'none';
+                icon.innerHTML = state[index] ? '&#9660;' : '&#9654;';
+            }
+        });
+    }
+}
+
+function expandAll() {
+    document.querySelectorAll('#fileTree .toggle-icon').forEach(icon => {
+        const subList = icon.parentElement.querySelector('ul');
+        if (subList) {
+            subList.style.display = 'block';
+            icon.innerHTML = '&#9660;';
+        }
+    });
+    saveFileTreeState();
+}
+
+function collapseAll() {
+    document.querySelectorAll('#fileTree .toggle-icon').forEach(icon => {
+        const subList = icon.parentElement.querySelector('ul');
+        if (subList) {
+            subList.style.display = 'none';
+            icon.innerHTML = '&#9654;';
+        }
+    });
+    saveFileTreeState();
 }
