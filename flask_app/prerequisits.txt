@@ -1,2 +1,2 @@
-pip install flask pywebview pygetwindow
+pip install flask pywebview pygetwindow PyQt5 PyQtWebEngine
 

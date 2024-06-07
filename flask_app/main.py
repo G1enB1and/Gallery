@@ -14,7 +14,7 @@ def set_window_icon():
     time.sleep(1)
 
     # Get the path to the icon file
-    icon_path = os.path.abspath("static/images/logoIcon.ico")
+    icon_path = os.path.abspath("static/images/LogoIcon.ico")
 
     # Find the window by title
     windows = gw.getWindowsWithTitle('PicTagger')
