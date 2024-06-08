@@ -37,10 +37,11 @@ function createPlaceholder({ width, height }) {
 }
 
 // Function to create image element
-function createImageElement(url) {
+function createImageElement(url, index) {
     const img = document.createElement('img');
     img.className = 'lazy';
     img.dataset.src = url;
+    img.dataset.index = index;
 
     // Add event listener for when the image is loaded
     img.addEventListener('load', () => {
@@ -67,9 +68,9 @@ export async function renderImages(images, page, loadCount = imagesPerPage) {
     const imagePromises = pageImages.map(fetchImageDimensions);
     const imagesWithDimensions = await Promise.all(imagePromises);
 
-    imagesWithDimensions.forEach(({ url, width, height }) => {
+    imagesWithDimensions.forEach(({ url, width, height }, index) => {
         const placeholder = createPlaceholder({ width, height });
-        const img = createImageElement(url);
+        const img = createImageElement(url, startIndex + index);
 
         placeholder.appendChild(img);
         gallery.appendChild(placeholder);
