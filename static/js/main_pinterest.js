@@ -12,8 +12,14 @@ document.addEventListener('DOMContentLoaded', () => {
         .then(images => {
             data = images;
             setData(images);
-            renderImages(images, currentPage); // Render the first page of images
+            renderImages(images, currentPage, 10); // Render the first 10 images
             renderPagination();
+
+            // Load the rest of the images after the initial set
+            setTimeout(() => {
+                renderImages(images, currentPage); // Render the remaining images
+            }, 100); // Adjust the timeout as necessary
+
             restoreScrollPositionAfterImagesLoad(); // Restore scroll position after images load
             setupMediaClickListener(data); // Setup click listener for media
         })

@@ -4,6 +4,7 @@ import { saveSessionState } from './utils_pinterest.js';
 let data = [];
 let currentPage = parseInt(sessionStorage.getItem('currentPage')) || 1;
 const imagesPerPage = 60;
+const initialLoadCount = 10; // Number of images to load initially
 
 export function setData(images) {
     data = images;
@@ -48,6 +49,7 @@ function createImageElement(url) {
             img.style.display = 'block'; // Show the image
             placeholder.style.paddingBottom = '0'; // Remove padding from placeholder
             placeholder.classList.remove('placeholder'); // Remove the placeholder class
+            console.log(`Image loaded: ${img.src}`);
         }
     });
 
@@ -55,11 +57,11 @@ function createImageElement(url) {
 }
 
 // Function to render images for a specific page
-export async function renderImages(images, page) {
+export async function renderImages(images, page, loadCount = imagesPerPage) {
     const gallery = document.getElementById('gallery');
     gallery.innerHTML = ''; // Clear previous images
     const startIndex = (page - 1) * imagesPerPage;
-    const endIndex = startIndex + imagesPerPage;
+    const endIndex = startIndex + loadCount;
     const pageImages = images.slice(startIndex, endIndex);
 
     const imagePromises = pageImages.map(fetchImageDimensions);
@@ -71,16 +73,21 @@ export async function renderImages(images, page) {
 
         placeholder.appendChild(img);
         gallery.appendChild(placeholder);
+        console.log(`Placeholder created for image: ${url}`);
     });
 
     // Initialize lazy loading
     new LazyLoad({
         elements_selector: ".lazy",
+        callback_load: (img) => {
+            console.log(`LazyLoad callback: ${img.dataset.src}`);
+        }
     });
 
     // Recalculate layout after images are loaded
     imagesLoaded(gallery, function () {
         gallery.style.opacity = 1;
+        console.log('Images loaded and layout recalculated.');
     });
 }
 
