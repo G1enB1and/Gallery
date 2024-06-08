@@ -8,7 +8,7 @@ export function saveSessionState(scrollPosition, currentPage) {
 
 // Function to restore scroll position after images load
 export function restoreScrollPositionAfterImagesLoad() {
-    const allMedia = document.querySelectorAll('.imageItem');
+    const allMedia = document.querySelectorAll('.masonry-item img');
     let loadedMediaCount = 0;
     const totalMedia = allMedia.length;
 

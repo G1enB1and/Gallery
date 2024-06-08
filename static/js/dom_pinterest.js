@@ -3,7 +3,7 @@ import { saveSessionState } from './utils_pinterest.js';
 
 let data = [];
 let currentPage = parseInt(sessionStorage.getItem('currentPage')) || 1;
-const imagesPerPage = 12 * 5; // 12 rows * 5 columns
+const imagesPerPage = 60;
 
 export function setData(images) {
     data = images;
@@ -17,23 +17,70 @@ export function setCurrentPage(page) {
     currentPage = page;
 }
 
+// Function to fetch image dimensions
+async function fetchImageDimensions(url) {
+    return new Promise((resolve, reject) => {
+        const img = new Image();
+        img.onload = () => resolve({ url, width: img.width, height: img.height });
+        img.onerror = reject;
+        img.src = url;
+    });
+}
+
+// Function to create placeholders
+function createPlaceholder({ width, height }) {
+    const placeholder = document.createElement('div');
+    placeholder.className = 'masonry-item placeholder';
+    placeholder.style.paddingBottom = `${(height / width) * 100}%`;
+    return placeholder;
+}
+
+// Function to create image element
+function createImageElement(url) {
+    const img = document.createElement('img');
+    img.className = 'lazy';
+    img.dataset.src = url;
+
+    // Add event listener for when the image is loaded
+    img.addEventListener('load', () => {
+        const placeholder = img.closest('.placeholder');
+        if (placeholder) {
+            img.style.display = 'block'; // Show the image
+            placeholder.style.paddingBottom = '0'; // Remove padding from placeholder
+            placeholder.classList.remove('placeholder'); // Remove the placeholder class
+        }
+    });
+
+    return img;
+}
+
 // Function to render images for a specific page
-export function renderImages(images, page) {
-    const imageGrid = document.getElementById('imageGrid');
-    imageGrid.innerHTML = ''; // Clear previous images
+export async function renderImages(images, page) {
+    const gallery = document.getElementById('gallery');
+    gallery.innerHTML = ''; // Clear previous images
     const startIndex = (page - 1) * imagesPerPage;
     const endIndex = startIndex + imagesPerPage;
     const pageImages = images.slice(startIndex, endIndex);
-    pageImages.forEach((mediaPath, index) => {
-        const mediaElement = document.createElement(mediaPath.endsWith('.mp4') ? 'video' : 'img');
-        mediaElement.src = mediaPath;
-        mediaElement.classList.add('imageItem');
-        mediaElement.classList.add('masonry-item');
-        mediaElement.setAttribute('data-index', startIndex + index); // Set the data-index attribute
-        if (mediaPath.endsWith('.mp4')) {
-            mediaElement.controls = true;
-        }
-        imageGrid.appendChild(mediaElement);
+
+    const imagePromises = pageImages.map(fetchImageDimensions);
+    const imagesWithDimensions = await Promise.all(imagePromises);
+
+    imagesWithDimensions.forEach(({ url, width, height }) => {
+        const placeholder = createPlaceholder({ width, height });
+        const img = createImageElement(url);
+
+        placeholder.appendChild(img);
+        gallery.appendChild(placeholder);
+    });
+
+    // Initialize lazy loading
+    new LazyLoad({
+        elements_selector: ".lazy",
+    });
+
+    // Recalculate layout after images are loaded
+    imagesLoaded(gallery, function () {
+        gallery.style.opacity = 1;
     });
 }
 
