@@ -4,6 +4,14 @@ body {
     margin: 0px;
 }
 
+.loading {
+    position: fixed;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+    z-index: 1000;
+}
+
 /* old method of displaying gallery */
 
 .imageItem {
@@ -29,7 +37,7 @@ body {
 .masonry-item {
     break-inside: avoid;
     margin-bottom: 10px;
-    background-color: #f3f3f3;
+    background-color: #000;
     position: relative;
     border-radius: 15px;
 }
@@ -42,7 +50,7 @@ body {
 
 .placeholder {
     width: 100%;
-    background-color: #e0e0e0;
+    background-color: #000;
     position: relative;
 }
 

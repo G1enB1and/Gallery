@@ -1,10 +1,10 @@
 // dom_pinterest.js
 import { saveSessionState } from './utils_pinterest.js';
+import { loadPage } from './loader.js';
 
 let data = [];
 let currentPage = parseInt(sessionStorage.getItem('currentPage')) || 1;
 const imagesPerPage = 60;
-const initialLoadCount = 10; // Number of images to load initially
 
 export function setData(images) {
     data = images;
@@ -107,9 +107,8 @@ export function renderPagination() {
         e.preventDefault();
         if (currentPage > 1) {
             currentPage--;
-            renderImages(data, currentPage);
-            renderPagination();
             saveSessionState(window.scrollY, currentPage);
+            loadPage(data, currentPage); // Call loadPage to trigger loading animation
         }
     });
     pagination.appendChild(prevButton);
@@ -129,9 +128,8 @@ export function renderPagination() {
         a.addEventListener('click', (e) => {
             e.preventDefault();
             currentPage = page;
-            renderImages(data, currentPage);
-            renderPagination();
             saveSessionState(window.scrollY, currentPage);
+            loadPage(data, currentPage); // Call loadPage to trigger loading animation
         });
         li.appendChild(a);
         return li;
@@ -177,9 +175,8 @@ export function renderPagination() {
         e.preventDefault();
         if (currentPage < totalPages) {
             currentPage++;
-            renderImages(data, currentPage);
-            renderPagination();
             saveSessionState(window.scrollY, currentPage);
+            loadPage(data, currentPage); // Call loadPage to trigger loading animation
         }
     });
     pagination.appendChild(nextButton);

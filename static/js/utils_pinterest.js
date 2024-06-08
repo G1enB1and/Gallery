@@ -1,37 +1,16 @@
 // utils_pinterest.js
 
-// Function to save scroll position and current page to session storage
+let scrollPositionRestored = false;
+
 export function saveSessionState(scrollPosition, currentPage) {
     sessionStorage.setItem('scrollPosition', scrollPosition);
     sessionStorage.setItem('currentPage', currentPage);
 }
 
-// Function to restore scroll position after images load
 export function restoreScrollPositionAfterImagesLoad() {
-    const allMedia = document.querySelectorAll('.masonry-item img');
-    let loadedMediaCount = 0;
-    const totalMedia = allMedia.length;
+    if (scrollPositionRestored) return;
 
-    allMedia.forEach((media) => {
-        if (media.complete || (media.tagName === 'VIDEO' && media.readyState === 4)) {
-            loadedMediaCount++;
-        } else {
-            media.addEventListener('load', () => {
-                loadedMediaCount++;
-                if (loadedMediaCount === totalMedia) {
-                    window.scrollTo(0, sessionStorage.getItem('scrollPosition') || 0);
-                }
-            });
-            media.addEventListener('error', () => {
-                loadedMediaCount++;
-                if (loadedMediaCount === totalMedia) {
-                    window.scrollTo(0, sessionStorage.getItem('scrollPosition') || 0);
-                }
-            });
-        }
-    });
-
-    if (loadedMediaCount === totalMedia) {
-        window.scrollTo(0, sessionStorage.getItem('scrollPosition') || 0);
-    }
+    const scrollPosition = sessionStorage.getItem('scrollPosition') || 0;
+    window.scrollTo(0, scrollPosition);
+    scrollPositionRestored = true;
 }

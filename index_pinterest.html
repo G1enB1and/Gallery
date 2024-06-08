@@ -17,13 +17,13 @@
     <script src="static/js/main_pinterest.js" type="module"></script>
 </head>
 <body>
-    <!-- old method of displaying images in gallery
-    <div class="masonry-container" id="imageGrid"></div> -->
-    <!-- new method of displaying images in gallery -->
-    <div id="gallery" class="masonry">
+    <div id="loading" class="loading">
+        <img src="static/images/loading.gif" alt="Loading...">
+    </div>
+    <div id="gallery" class="masonry" style="display: none;">
         <!-- Image placeholders will be dynamically inserted here -->
     </div>
-
     <div id="pagination" class="pagination"></div>
 </body>
 </html>
+
