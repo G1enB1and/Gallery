@@ -48,7 +48,7 @@ export function adjustMainContent() {
     const imageContainer = document.getElementById('imageContainer');
     imageContainer.style.maxWidth = mainContent.style.width;
     imageContainer.style.transition = 'none';
-}
+} 
 
 // Function to initialize the page
 export function initializePage() {

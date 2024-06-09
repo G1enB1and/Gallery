@@ -1,13 +1,7 @@
 <!-- mainContent.html -->
-<!-- convert this to python -->
-<!-- <?php
-$view = $_GET['view'] ?? 'gallery'; // Default to gallery if no view parameter is provided
 
-if ($view === 'slideshow') {
-    include 'slideshow.php';
-} else {
-    include 'gallery.php';
-}
-?> -->
-
-{% include 'gallery.html' %}
+{% if request.args.get('view') == 'slideshow' %}
+    {% include 'slideshow.html' %}
+{% else %}
+    {% include 'gallery.html' %}
+{% endif %}
