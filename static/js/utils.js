@@ -13,9 +13,3 @@ export function getCurrentImageUrl() {
     console.log(`Current image URL: ${currentImageUrl}`);
     return currentImageUrl;
 }
-
-// Function to get the current panel state from the query parameters
-export function getPanelState() {
-    const params = new URLSearchParams(window.location.search);
-    return params.get('panel') === 'open';
-}

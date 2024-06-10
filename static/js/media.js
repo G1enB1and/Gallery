@@ -1,5 +1,5 @@
 // media.js
-import { getQueryParam, getCurrentImageUrl, getPanelState } from './utils.js';
+import { getQueryParam, getCurrentImageUrl } from './utils.js';
 
 let data = [];
 let intervalId = null;

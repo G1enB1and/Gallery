@@ -1,61 +1,53 @@
 // dom.js
-import { getPanelState } from './utils.js';
 import { setData, displayMedia, nextImage, prevImage, togglePlayPause, getIntervalId, setIntervalId } from './media.js';
 import { handleKeyPress } from './events.js';
 
-// Function to save the state of the panel to session storage
-export function savePanelState() {
-    const leftPanel = document.getElementById('leftPanel');
-    const isPanelOpen = leftPanel.style.display === 'block';
-    sessionStorage.setItem('isPanelOpen', isPanelOpen);
-}
-
-// Function to restore the state of the panel from session storage
-export function restorePanelState() {
-    const leftPanel = document.getElementById('leftPanel');
-    const fileTreeToggleClosed = document.getElementById('fileTreeToggleClosed');
-    const logoClosed = document.getElementById('logoClosed');
-    const isPanelOpen = getPanelState();
-    leftPanel.style.display = isPanelOpen ? 'block' : 'none';
-    fileTreeToggleClosed.style.display = isPanelOpen ? 'none' : 'flex';
-    logoClosed.style.display = isPanelOpen ? 'none' : 'block';
-    leftPanel.style.width = '270px';
-    adjustMainContent();
-}
-
 // Function to adjust the main content area based on the left panel state
+// it has to first check if the element is loaded before adjusting it because mainContent can have different pages
+// and if the element is not loaded it will throw an error.
 export function adjustMainContent() {
     const leftPanel = document.getElementById('leftPanel');
-    const leftPanelWidth = leftPanel.style.display === 'none' ? '0px' : leftPanel.offsetWidth + 'px';
+    const leftPanelWidth = leftPanel && leftPanel.style.display === 'none' ? '0px' : (leftPanel ? leftPanel.offsetWidth + 'px' : '0px');
 
     const prevButton = document.getElementById('prevButton');
-    prevButton.style.left = leftPanel.style.display === 'none' ? '20px' : `calc(${leftPanelWidth} + 20px)`;
+    if (prevButton) {
+        prevButton.style.left = leftPanel && leftPanel.style.display === 'none' ? '20px' : `calc(${leftPanelWidth} + 20px)`;
+    }
 
     const galleryButton = document.querySelector('.gallery');
-    galleryButton.style.right = '50px';
+    if (galleryButton) {
+        galleryButton.style.right = '50px';
+    }
 
     const mainContent = document.getElementById('mainContent');
-    mainContent.style.width = leftPanel.style.display === 'none' ? '100%' : `calc(100% - ${leftPanelWidth})`;
+    if (mainContent) {
+        mainContent.style.width = leftPanel && leftPanel.style.display === 'none' ? '100%' : `calc(100% - ${leftPanelWidth})`;
+    }
 
     const hoverArea = document.getElementById('hoverArea');
-    hoverArea.style.left = '50%';
-    hoverArea.style.transform = 'translateX(-50%)';
+    if (hoverArea) {
+        hoverArea.style.left = '50%';
+        hoverArea.style.transform = 'translateX(-50%)';
+    }
 
     const playPauseButton = document.getElementById('playPauseButton');
-    playPauseButton.style.left = '50%';
-    playPauseButton.style.transform = 'translateX(-50%)';
+    if (playPauseButton) {
+        playPauseButton.style.left = '50%';
+        playPauseButton.style.transform = 'translateX(-50%)';
+    }
 
     const imageContainer = document.getElementById('imageContainer');
-    imageContainer.style.maxWidth = mainContent.style.width;
-    imageContainer.style.transition = 'none';
-} 
+    if (imageContainer && mainContent) {
+        imageContainer.style.maxWidth = mainContent.style.width;
+        imageContainer.style.transition = 'none';
+    }
+}
 
 // Function to initialize the page
 export function initializePage() {
     console.log('Initializing page');
 
-    // Restore panel state as soon as possible to avoid flicker
-    restorePanelState();
+    // adjust for leftPanel as soon as possible to avoid flicker
     adjustMainContent();
 
     // Fetch images.json to populate the data variable
@@ -103,29 +95,9 @@ export function initializePage() {
         })
         .catch(error => console.error('Error fetching images:', error));
 
-    const fileTreeToggleOpened = document.getElementById('fileTreeToggleOpened');
-    const fileTreeToggleClosed = document.getElementById('fileTreeToggleClosed');
-    const logoClosed = document.getElementById('logoClosed');
     const leftPanel = document.getElementById('leftPanel');
     const resizeHandle = document.querySelector('.resize-handle');
     let isResizing = false;
-
-    function toggleLeftPanel() {
-        if (leftPanel.style.display === 'none' || leftPanel.style.display === '') {
-            leftPanel.style.display = 'block';
-            fileTreeToggleClosed.style.display = 'none';
-            logoClosed.style.display = 'none';
-        } else {
-            leftPanel.style.display = 'none';
-            fileTreeToggleClosed.style.display = 'flex';
-            logoClosed.style.display = 'block';
-        }
-        adjustMainContent();
-        savePanelState();
-    }
-
-    fileTreeToggleOpened.addEventListener('click', toggleLeftPanel);
-    fileTreeToggleClosed.addEventListener('click', toggleLeftPanel);
 
     resizeHandle.addEventListener('mousedown', (e) => {
         isResizing = true;

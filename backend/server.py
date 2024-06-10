@@ -1,4 +1,5 @@
 from http.server import SimpleHTTPRequestHandler, HTTPServer
+from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 import json
 import os
 import subprocess
@@ -8,6 +9,11 @@ import webbrowser
 # Define the root directory for the file tree
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
 PICTURES_ROOT = os.path.join(PROJECT_ROOT, 'Pictures')
+TEMPLATES_ROOT = os.path.join(PROJECT_ROOT, 'templates')
+STATIC_ROOT = os.path.join(PROJECT_ROOT, 'static')
+
+# Initialize Jinja2 environment
+env = Environment(loader=FileSystemLoader(TEMPLATES_ROOT))
 
 class RequestHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
@@ -30,7 +36,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps(get_file_tree(PICTURES_ROOT)).encode())
-        else:
+        elif parsed_path.path.startswith('/static/'):
             file_path = self.translate_path(parsed_path.path)
             if os.path.exists(file_path) and os.path.isfile(file_path):
                 self.send_response(200)
@@ -41,6 +47,32 @@ class RequestHandler(SimpleHTTPRequestHandler):
             else:
                 self.send_response(404)
                 self.end_headers()
+                self.wfile.write(b'Static file not found')
+        else:
+            template_name = parsed_path.path.lstrip('/')
+            if not template_name or template_name == 'index.html':
+                template_name = 'index.html'
+            try:
+                self.render_template(template_name)
+            except TemplateNotFound:
+                self.send_response(404)
+                self.end_headers()
+                self.wfile.write(b'Template not found')
+
+    def render_template(self, template_name, context={}):
+        try:
+            template = env.get_template(template_name)
+            self.send_response(200)
+            self.send_header('Content-type', 'text/html')
+            self.end_headers()
+            rendered = template.render(context)
+            self.wfile.write(rendered.encode('utf-8'))
+        except TemplateNotFound:
+            raise
+        except Exception as e:
+            self.send_response(500)
+            self.end_headers()
+            self.wfile.write(f'Error rendering template: {str(e)}'.encode())
 
     def do_POST(self):
         if self.path == '/update-images':
@@ -86,7 +118,7 @@ def run_server():
     server_address = ('', 8000)
     httpd = HTTPServer(server_address, RequestHandler)
     print('Server running at http://localhost:8000/')
-    webbrowser.open('http://localhost:8000/index_pinterest.html')
+    webbrowser.open('http://localhost:8000/')
 
     httpd.serve_forever()
 
