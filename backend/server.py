@@ -20,6 +20,10 @@ class RequestHandler(SimpleHTTPRequestHandler):
         """Translate a /-separated PATH to the local filename syntax."""
         path = urllib.parse.unquote(path)
         path = path.lstrip('/')
+        if path.startswith('static/'):
+            return os.path.join(STATIC_ROOT, path[len('static/'):])
+        elif path.startswith('Pictures/'):
+            return os.path.join(PICTURES_ROOT, path[len('Pictures/'):])
         return os.path.join(PROJECT_ROOT, path)
 
     def do_GET(self):
@@ -36,7 +40,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps(get_file_tree(PICTURES_ROOT)).encode())
-        elif parsed_path.path.startswith('/static/'):
+        elif parsed_path.path.startswith('/static/') or parsed_path.path.startswith('/Pictures/'):
             file_path = self.translate_path(parsed_path.path)
             if os.path.exists(file_path) and os.path.isfile(file_path):
                 self.send_response(200)
