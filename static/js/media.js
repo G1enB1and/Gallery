@@ -18,8 +18,8 @@ export function setIntervalId(id) {
 export function displayMedia() {
     const mediaUrl = getQueryParam('image');
     const imageContainer = document.getElementById('imageContainer');
-    const imageElement = document.getElementById('displayedImage');
-    const videoElement = document.getElementById('displayedVideo');
+    const imageElement = document.getElementById('slideshowDisplayedImage');
+    const videoElement = document.getElementById('slideshowDisplayedVideo');
 
     imageElement.style.display = 'none';
     videoElement.style.display = 'none';
@@ -140,8 +140,8 @@ export function setData(images) {
 }
 
 export function displayImageWithUrlUpdate(mediaUrl) {
-    const imageElement = document.getElementById('displayedImage');
-    const videoElement = document.getElementById('displayedVideo');
+    const imageElement = document.getElementById('slideshowDisplayedImage');
+    const videoElement = document.getElementById('slideshowDisplayedVideo');
     imageElement.style.display = 'none';
     videoElement.style.display = 'none';
 

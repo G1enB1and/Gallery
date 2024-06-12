@@ -20,13 +20,10 @@ def fetch_and_randomize_images(directory):
                 while relative_path.startswith("../"):
                     relative_path = relative_path[3:]
 
-                # Prepend 'static/' to make paths relative to static folder
-                relative_path = 'static/' + relative_path
-
                 images.append(relative_path)
 
     random.shuffle(images)
-    images_json_path = os.path.join(os.path.dirname(__file__), '..', 'static', 'images.json')
+    images_json_path = os.path.join(os.path.dirname(__file__), '..', 'images.json')
     with open(images_json_path, 'w') as f:
         json.dump(images, f)
 

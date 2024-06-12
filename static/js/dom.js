@@ -96,7 +96,7 @@ export function initializePage() {
         .catch(error => console.error('Error fetching images:', error));
 
     const leftPanel = document.getElementById('leftPanel');
-    const resizeHandle = document.querySelector('.resize-handle');
+    const resizeHandle = document.querySelector('.resizer-filetree');
     let isResizing = false;
 
     resizeHandle.addEventListener('mousedown', (e) => {
