@@ -3,8 +3,6 @@ import { setData, displayMedia, nextImage, prevImage, togglePlayPause, getInterv
 import { handleKeyPress } from './events.js';
 
 // Function to adjust the main content area based on the left panel state
-// it has to first check if the element is loaded before adjusting it because mainContent can have different pages
-// and if the element is not loaded it will throw an error.
 export function adjustMainContent() {
     const leftPanel = document.getElementById('leftPanel');
     const leftPanelWidth = leftPanel && leftPanel.style.display === 'none' ? '0px' : (leftPanel ? leftPanel.offsetWidth + 'px' : '0px');
@@ -60,21 +58,27 @@ export function initializePage() {
 
             // Event listener for the "Next" button
             const nextButton = document.getElementById('nextButton');
-            nextButton.removeEventListener('click', nextImage);
-            nextButton.addEventListener('click', nextImage);
-            console.log('Next button initialized');
+            if (nextButton) {
+                nextButton.removeEventListener('click', nextImage);
+                nextButton.addEventListener('click', nextImage);
+                console.log('Next button initialized');
+            }
 
             // Event listener for the "Previous" button
             const prevButton = document.getElementById('prevButton');
-            prevButton.removeEventListener('click', prevImage);
-            prevButton.addEventListener('click', prevImage);
-            console.log('Previous button initialized');
+            if (prevButton) {
+                prevButton.removeEventListener('click', prevImage);
+                prevButton.addEventListener('click', prevImage);
+                console.log('Previous button initialized');
+            }
 
             // Event listener for the "Play/Pause" button
             const playPauseButton = document.getElementById('playPauseButton');
-            playPauseButton.removeEventListener('click', togglePlayPause);
-            playPauseButton.addEventListener('click', togglePlayPause);
-            console.log('Play/Pause button initialized');
+            if (playPauseButton) {
+                playPauseButton.removeEventListener('click', togglePlayPause);
+                playPauseButton.addEventListener('click', togglePlayPause);
+                console.log('Play/Pause button initialized');
+            }
 
             // Restore play/pause state
             const isPlaying = sessionStorage.getItem('isPlaying');
@@ -97,26 +101,28 @@ export function initializePage() {
 
     const leftPanel = document.getElementById('leftPanel');
     const resizeHandle = document.querySelector('.resizer-filetree');
-    let isResizing = false;
+    if (resizeHandle) {
+        let isResizing = false;
 
-    resizeHandle.addEventListener('mousedown', (e) => {
-        isResizing = true;
-        document.addEventListener('mousemove', resizePanel);
-        document.addEventListener('mouseup', stopResizing);
-    });
+        resizeHandle.addEventListener('mousedown', (e) => {
+            isResizing = true;
+            document.addEventListener('mousemove', resizePanel);
+            document.addEventListener('mouseup', stopResizing);
+        });
 
-    function resizePanel(e) {
-        if (!isResizing) return;
-        const newWidth = Math.min(e.clientX, window.innerWidth * 0.24);
-        if (newWidth < window.innerWidth * 0.1 || newWidth > window.innerWidth * 0.24) return;
-        leftPanel.style.width = `${newWidth}px`;
-        adjustMainContent();
-    }
+        function resizePanel(e) {
+            if (!isResizing) return;
+            const newWidth = Math.min(e.clientX, window.innerWidth * 0.24);
+            if (newWidth < window.innerWidth * 0.1 || newWidth > window.innerWidth * 0.24) return;
+            leftPanel.style.width = `${newWidth}px`;
+            adjustMainContent();
+        }
 
-    function stopResizing() {
-        isResizing = false;
-        document.removeEventListener('mousemove', resizePanel);
-        document.removeEventListener('mouseup', stopResizing);
+        function stopResizing() {
+            isResizing = false;
+            document.removeEventListener('mousemove', resizePanel);
+            document.removeEventListener('mouseup', stopResizing);
+        }
     }
 
     adjustMainContent();

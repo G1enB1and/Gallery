@@ -1,5 +1,9 @@
 {% if view == 'slideshow' %}
-    {% include 'slideshow.html' %}
+    <div class="slideshow">
+        {% include 'slideshow.html' %}
+    </div>
 {% else %}
-    {% include 'gallery.html' %}
+    <div class="gallery">
+        {% include 'gallery.html' %}
+    </div>
 {% endif %}
