@@ -1,3 +1,4 @@
+/* General styles */
 body, html {
     --white: #ffffff;
     --offwhite1: #f9f9f9;
@@ -26,6 +27,7 @@ a:link, a:visited, a:hover, a:active {
     text-decoration: none; /* Optional: to remove underlines */
 }
 
+/* Header styles */
 .header {
     height: 65px;
     width: 100%;
@@ -131,60 +133,19 @@ a:link, a:visited, a:hover, a:active {
 }
 
 /* Gallery styles */
-.gallery .masonry-container {
-    column-gap: 10px;
+.gallery {
+    display: flex;
+    flex-wrap: wrap;
+    justify-content: center;
+    gap: 10px;
     padding: 10px;
-    column-fill: balance;
 }
 
-.gallery .imageItem {
-    display: inline-block;
-    width: 100%;
-    margin-bottom: 10px;
-    border-radius: 15px;
-}
-
-.gallery .imageItem img {
-    display: block;
-    width: 100%;
+.gallery .gallery-image {
+    max-width: 300px;
+    height: auto;
     border-radius: 15px;
     cursor: pointer;
-}
-
-/* Adjust column count and width based on screen size for gallery */
-@media (min-width: 1500px) {
-    .gallery .masonry-container {
-        column-count: 5;
-        column-width: 300px;
-    }
-}
-
-@media (max-width: 1499px) and (min-width: 1200px) {
-    .gallery .masonry-container {
-        column-count: 4;
-        column-width: 300px;
-    }
-}
-
-@media (max-width: 1199px) and (min-width: 900px) {
-    .gallery .masonry-container {
-        column-count: 3;
-        column-width: 300px;
-    }
-}
-
-@media (max-width: 899px) and (min-width: 600px) {
-    .gallery .masonry-container {
-        column-count: 2;
-        column-width: 300px;
-    }
-}
-
-@media (max-width: 599px) {
-    .gallery .masonry-container {
-        column-count: 1;
-        column-width: 100%;
-    }
 }
 
 /* Slideshow styles */
@@ -310,8 +271,7 @@ a:link, a:visited, a:hover, a:active {
     right: 20px;
 }
 
-/* drawer */
-
+/* Drawer styles */
 #drawer { 
     display: flex;
     flex-direction: column;
@@ -349,8 +309,7 @@ a:link, a:visited, a:hover, a:active {
     margin-left: -5px;
 }
 
-/* fileTree */
-
+/* File tree styles */
 .file-tree {
     width: 20%;
     max-width: 40%;

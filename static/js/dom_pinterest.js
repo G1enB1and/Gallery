@@ -86,7 +86,7 @@ export async function renderImages(images, page, loadCount = imagesPerPage) {
     });
 
     // Recalculate layout after images are loaded
-    imagesLoaded(gallery, function () {
+    $(gallery).imagesLoaded(() => {
         gallery.style.opacity = 1;
         console.log('Images loaded and layout recalculated.');
     });

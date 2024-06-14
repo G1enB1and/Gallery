@@ -1,3 +1,4 @@
+// loader.js
 import { renderImages, renderPagination, getCurrentPage, setCurrentPage } from './dom_pinterest.js';
 import { setupMediaClickListener } from './events_pinterest.js';
 import { restoreScrollPositionAfterImagesLoad } from './utils_pinterest.js';
@@ -12,7 +13,7 @@ export async function loadPage(data, page) {
 
     await renderImages(data, page, 10); // Render the first 10 images
 
-    imagesLoaded(gallery, { background: true }, async function () {
+    $(gallery).imagesLoaded({ background: true }, async function () {
         window.scrollTo(0, initialScrollPosition); // Restore scroll position after first images load
 
         loading.style.display = 'none'; // Hide loading animation
