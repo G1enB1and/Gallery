@@ -2,32 +2,48 @@
 import { setData, displayMedia, nextImage, prevImage, togglePlayPause } from './media.js';
 
 export function initializePage() {
-    fetch('images.json')
-        .then(response => response.json())
-        .then(images => {
-            setData(images);
-            setupGallery(images);
-            setupEventListeners();
-            displayMedia();
-        })
-        .catch(error => console.error('Error fetching images:', error));
+    const view = new URLSearchParams(window.location.search).get('view');
+    const image = new URLSearchParams(window.location.search).get('image');
+
+    if (view === 'slideshow' && image) {
+        displayMedia(image);
+    } else {
+        fetch('images.json')
+            .then(response => response.json())
+            .then(images => {
+                setData(images);
+                setupGallery(images);
+                setupEventListeners();
+            })
+            .catch(error => console.error('Error fetching images:', error));
+    }
 }
 
 function setupGallery(images) {
     const gallery = document.getElementById('gallery');
     gallery.innerHTML = ''; // Clear previous images
 
-    images.forEach((src, index) => {
+    images.slice(0, 120).forEach((src, index) => { // Limit to 120 images
+        const div = document.createElement('div');
+        div.className = 'gallery-item';
         const img = document.createElement('img');
         img.src = src;
         img.className = 'gallery-image';
-        img.style.maxWidth = '300px';
-        img.style.height = 'auto';
-        img.dataset.index = index;
         img.addEventListener('click', () => {
-            window.location.href = `index.html?image=${encodeURIComponent(src)}`;
+            window.location.href = `index.html?view=slideshow&image=${encodeURIComponent(src)}`;
         });
-        gallery.appendChild(img);
+        div.appendChild(img);
+        gallery.appendChild(div);
+    });
+
+    const msnry = new Masonry(gallery, {
+        itemSelector: '.gallery-item',
+        columnWidth: '.gallery-item',
+        percentPosition: true
+    });
+
+    imagesLoaded(gallery, () => {
+        msnry.layout();
     });
 }
 

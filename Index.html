@@ -3,43 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0">
-    <title>PicTagger</title>
-    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon.png">
-    <link rel="stylesheet" href="static/css/styles.css">
+    <link rel="stylesheet" href="/static/css/styles.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/6.0.0-beta3/css/all.min.css">
+    <link rel="icon" type="image/png" sizes="32x32" href="/static/images/favicon.png">
+    <title>PicTagger</title>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery/3.6.0/jquery.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/jquery.imagesloaded/5.0.0/imagesloaded.pkgd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/masonry/4.2.2/masonry.pkgd.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/vanilla-lazyload/17.5.0/lazyload.min.js"></script>
 </head>
 <body>
-    <div id="leftPanel" class="scroller">
-        <div id="leftPanelContent">        
-            <div id="fileTreeContainer">
-                <ul id="fileTree">
-                    <!-- File tree will be dynamically populated -->
-                </ul>
-            </div>
+    {% include 'header.html' %}
+    <div class="container">
+        {% include 'drawer.html' %}
+        <div id="leftPanel" class="file-tree">
+            {% include 'fileTree.html' %}
+            <div class="resizer" id="resizer-filetree"></div>
         </div>
-        <div class="resize-handle"></div>
-    </div>
-    <div id="mainContent">
-        <div id="imageContainer">
-            <img src="static/images/loading.gif" alt="Displayed Image" id="displayedImage">
-            <video id="displayedVideo" controls></video>
-            <div id="hoverArea"></div>
-            <button id="playPauseButton" class="mediaControls">
-                <i class="fas fa-play"></i>
-                <i class="fas fa-pause" style="display: none;"></i>
-            </button>
+        {% include 'mainContent.html' %}
+        <div id="dataPanel" class="data-panel">
+            {% include 'dataPanel.html' %}
+            <div class="resizer" id="resizer-datapanel"></div>
         </div>
-        <a href="index_pinterest.html" class="gallery">
-            <img src="static/images/grid_icons_pinterest.png" alt="Pinterest View" class="icon">
-        </a>
-        <button id="prevButton" class="mediaControls">◀</button>
-        <button id="nextButton" class="mediaControls">▶</button>
     </div>
-    <script src="static/js/utils.js" type="module"></script>
-    <script src="static/js/media.js" type="module"></script>
-    <script src="static/js/events.js" type="module"></script>
-    <script src="static/js/dom.js" type="module"></script>
-    <script src="static/js/fileTree.js" type="module"></script>
-    <script src="static/js/main.js" type="module"></script>
+    <script src="/static/js/main.js" type="module"></script>
 </body>
 </html>

@@ -1,7 +1,9 @@
-{% if view == 'slideshow' %}
+<div id="mainContent" class="main-content">
+    {% if view == 'slideshow' %}
     <div class="slideshow">
         {% include 'slideshow.html' %}
     </div>
-{% else %}
-        <div id="gallery"></div>
-{% endif %}
+    {% else %}
+        {% include 'gallery.html' %}
+    {% endif %}
+</div>

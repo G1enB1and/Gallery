@@ -14,4 +14,4 @@ document.addEventListener('DOMContentLoaded', () => {
             loadPage(data, currentPage);
         })
         .catch(error => console.error('Error fetching images:', error));
-});
+}); 

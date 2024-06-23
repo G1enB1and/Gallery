@@ -181,4 +181,4 @@ export function renderPagination() {
         }
     });
     pagination.appendChild(nextButton);
-}
+} 

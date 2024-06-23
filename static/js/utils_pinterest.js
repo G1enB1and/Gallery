@@ -13,4 +13,4 @@ export function restoreScrollPositionAfterImagesLoad() {
     const scrollPosition = sessionStorage.getItem('scrollPosition') || 0;
     window.scrollTo(0, scrollPosition);
     scrollPositionRestored = true;
-}
+} 
