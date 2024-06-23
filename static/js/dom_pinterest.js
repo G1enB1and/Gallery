@@ -31,7 +31,7 @@ async function fetchImageDimensions(url) {
 // Function to create placeholders
 function createPlaceholder({ width, height }) {
     const placeholder = document.createElement('div');
-    placeholder.className = 'masonry-item placeholder';
+    placeholder.className = 'gallery-item placeholder';
     placeholder.style.paddingBottom = `${(height / width) * 100}%`;
     return placeholder;
 }
@@ -39,7 +39,7 @@ function createPlaceholder({ width, height }) {
 // Function to create image element
 function createImageElement(url, index) {
     const img = document.createElement('img');
-    img.className = 'lazy';
+    img.className = 'lazy gallery-image';
     img.dataset.src = url;
     img.dataset.index = index;
 
@@ -58,8 +58,12 @@ function createImageElement(url, index) {
 }
 
 // Function to render images for a specific page
-export async function renderImages(images, page, loadCount = imagesPerPage) {
+async function renderImages(images, page, loadCount = imagesPerPage) {
     const gallery = document.getElementById('gallery');
+    if (!gallery) {
+        console.error('Gallery element not found');
+        return;
+    }
     gallery.innerHTML = ''; // Clear previous images
     const startIndex = (page - 1) * imagesPerPage;
     const endIndex = startIndex + loadCount;
@@ -93,8 +97,12 @@ export async function renderImages(images, page, loadCount = imagesPerPage) {
 }
 
 // Function to render pagination controls
-export function renderPagination() {
+function renderPagination() {
     const pagination = document.getElementById('pagination');
+    if (!pagination) {
+        console.error('Pagination element not found');
+        return;
+    }
     const totalPages = Math.ceil(data.length / imagesPerPage);
     pagination.innerHTML = '';
     pagination.setAttribute('data-pagination', '');
@@ -181,4 +189,11 @@ export function renderPagination() {
         }
     });
     pagination.appendChild(nextButton);
-} 
+}
+
+// New function to initialize the gallery
+export async function initializeGallery(images, page) {
+    setData(images);
+    await renderImages(images, page);
+    renderPagination();
+}

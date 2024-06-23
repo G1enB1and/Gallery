@@ -1,4 +1,4 @@
-// media.js
+// media.js (for slideshow)
 let data = [];
 let intervalId = null;
 let preloadedNextImage = new Image();
@@ -129,4 +129,4 @@ export function displayImageWithUrlUpdate(mediaUrl) {
         };
         preloader.src = mediaUrl;
     }
-}
+} 
