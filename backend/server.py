@@ -84,7 +84,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             directory = json.loads(post_data).get('directory')
             if directory:
-                full_path = os.path.join(PROJECT_ROOT, directory)
+                full_path = os.path.abspath(os.path.join(PROJECT_ROOT, directory))
                 subprocess.run(['python', 'backend/fetch_images.py', full_path])
                 self.send_response(200)
                 self.end_headers()
@@ -93,6 +93,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(b'Missing directory parameter.')
+
 
 def get_file_tree(path):
     def build_tree(directory):
