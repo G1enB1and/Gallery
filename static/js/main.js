@@ -2,6 +2,7 @@
 import { initializePage, adjustMainContent } from './dom.js';
 import { handleKeyPress, expandAll, collapseAll } from './events.js';
 import { populateFileTree } from './fileTree.js';
+import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initializePage();
@@ -46,6 +47,16 @@ function changeView(view) {
             const newContent = doc.querySelector('#mainContent').innerHTML;
             mainContent.innerHTML = newContent;
             window.history.pushState({}, '', `index.html?view=${view}`);
+            
+            if (view === 'gallery') {
+                const currentPage = getCurrentPage();
+                fetch('images.json')
+                    .then(response => response.json())
+                    .then(images => {
+                        initializeGallery(images, currentPage);
+                    })
+                    .catch(error => console.error('Error fetching images:', error));
+            }
         })
         .catch(error => console.error('Error changing view:', error));
 }
