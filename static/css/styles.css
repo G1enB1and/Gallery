@@ -400,16 +400,21 @@ a:link, a:visited, a:hover, a:active {
     }
   }
 
-#leftPanelContent {
+  #leftPanelContent {
     display: flex;
     flex-direction: column;
-    align-items: left;
-    margin: 0px;
-    padding: 0px;
+    align-items: flex-start; /* Use flex-start instead of left */
+    margin: 0;
+    padding: 0;
+}
+
+#rootDirectoryLinkContainer {
+    padding: 10px 10px 1px;
+    margin: 0;
 }
 
 #fileTreeContainer {
-    padding: 0px 10px 10px; /*top, left+right, bottom*/
+    padding: 0px 10px 10px; /* Top, left+right, bottom */
     overflow-x: hidden;
     overflow-y: auto;
     height: calc(100% - 20px); /* Adjust for padding */
@@ -419,6 +424,8 @@ a:link, a:visited, a:hover, a:active {
 #fileTree {
     list-style-type: none; /* Remove bullets */
     padding-left: 0; /* Remove padding */
+    margin-top: 0;
+    align-items: flex-start; /* Use flex-start instead of left */
 }
 
 #fileTree li {
@@ -426,6 +433,9 @@ a:link, a:visited, a:hover, a:active {
     cursor: pointer;
     position: relative;
     padding-left: 20px; /* Add space for the toggle icon */
+    align-items: flex-start; /* Use flex-start instead of left */
+    white-space: nowrap; /* Prevent text from justifying */
+    text-align: left; /* Ensure text is left-aligned */
 }
 
 #fileTree li .toggle-icon {
@@ -437,8 +447,9 @@ a:link, a:visited, a:hover, a:active {
 }
 
 #fileTree li ul {
+    margin-top: 0;
     list-style-type: none; /* Remove bullets from sub-lists */
-    padding-left: 0px; /* Add indentation for sub-lists */
+    padding-left: 0; /* Remove padding */
 }
 
 #expandCollapseControlsContainer {

@@ -83,3 +83,42 @@ export function buildFileTree(container, nodes) {
         container.appendChild(li);
     });
 }
+
+// Add event listener for the root directory link
+document.addEventListener('DOMContentLoaded', () => {
+    const rootDirectoryLink = document.getElementById('rootDirectoryLink');
+    if (rootDirectoryLink) {
+        rootDirectoryLink.addEventListener('click', (e) => {
+            e.preventDefault();
+            fetch('/update-images', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ directory: 'Pictures' }) // Adjust the directory as needed
+            })
+            .then(response => response.text())
+            .then(message => {
+                console.log(message);
+                // Introduce a longer delay to ensure images.json is updated
+                setTimeout(() => {
+                    fetch('images.json')
+                        .then(response => response.json())
+                        .then(images => {
+                            setData(images);
+                            console.log(`Data loaded: ${JSON.stringify(images)}`);
+                            if (images.length > 0) {
+                                // Display the first media after data is loaded and update the URL
+                                const firstMediaUrl = images[0];
+                                displayImageWithUrlUpdate(firstMediaUrl);
+                            } else {
+                                console.error('No media found in the selected directory.');
+                            }
+                        })
+                        .catch(error => console.error('Error fetching images:', error));
+                }, 300); // Delay of 3 seconds to ensure images.json is updated
+            })
+            .catch(error => console.error('Error updating images:', error));
+        });
+    }
+});
