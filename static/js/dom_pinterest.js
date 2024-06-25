@@ -66,6 +66,11 @@ function createImageElement(url, index) {
         }
     });
 
+    // Add click event listener to switch to slideshow view
+    img.addEventListener('click', () => {
+        changeView('slideshow', url);
+    });
+
     return img;
 }
 
@@ -86,6 +91,11 @@ function createVideoElement(url, index) {
             placeholder.classList.remove('placeholder'); // Remove the placeholder class
             console.log(`Video loaded: ${video.src}`);
         }
+    });
+
+    // Add click event listener to switch to slideshow view
+    video.addEventListener('click', () => {
+        changeView('slideshow', url);
     });
 
     return video;
@@ -249,4 +259,48 @@ export async function initializeGallery(images, page) {
     } catch (error) {
         console.error('Error initializing gallery:', error);
     }
+}
+
+// Function to change view and update the URL
+function changeView(view, image = null) {
+    let url = `index.html?view=${view}`;
+    if (image) {
+        url += `&image=${encodeURIComponent(image)}`;
+    }
+    fetch(url)
+        .then(response => response.text())
+        .then(html => {
+            const parser = new DOMParser();
+            const doc = parser.parseFromString(html, 'text/html');
+            const mainContent = document.getElementById('mainContent');
+            const newContent = doc.querySelector('#mainContent').innerHTML;
+            mainContent.innerHTML = newContent;
+            window.history.pushState({}, '', url);
+            
+            if (view === 'gallery') {
+                const currentPage = getCurrentPage();
+                fetch('images.json')
+                    .then(response => response.json())
+                    .then(images => {
+                        initializeGallery(images, currentPage);
+                    })
+                    .catch(error => console.error('Error fetching images:', error));
+            } else if (view === 'slideshow' && image) {
+                const slideshowImage = document.getElementById('slideshowDisplayedImage');
+                const slideshowVideo = document.getElementById('slideshowDisplayedVideo');
+                if (slideshowImage && slideshowVideo) {
+                    if (image.endsWith('.mp4')) {
+                        slideshowImage.style.display = 'none';
+                        slideshowVideo.style.display = 'block';
+                        slideshowVideo.src = image;
+                        slideshowVideo.load();
+                    } else {
+                        slideshowVideo.style.display = 'none';
+                        slideshowImage.style.display = 'block';
+                        slideshowImage.src = image;
+                    }
+                }
+            }
+        })
+        .catch(error => console.error('Error changing view:', error));
 }
