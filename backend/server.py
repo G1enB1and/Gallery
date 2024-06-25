@@ -1,3 +1,4 @@
+# server.py
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 import json
@@ -28,6 +29,11 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
     def do_GET(self):
         parsed_path = urllib.parse.urlparse(self.path)
+        query_params = urllib.parse.parse_qs(parsed_path.query)
+        view = query_params.get('view', ['gallery'])[0]  # Default to 'gallery' view
+
+        print(f"View parameter: {view}")  # Add logging to verify the view parameter
+
         if parsed_path.path == '/images.json':
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
@@ -57,7 +63,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             if not template_name or template_name == 'index.html':
                 template_name = 'index.html'
             try:
-                self.render_template(template_name)
+                self.render_template(template_name, {'view': view})
             except TemplateNotFound:
                 self.send_response(404)
                 self.end_headers()
@@ -65,6 +71,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
     def render_template(self, template_name, context={}):
         try:
+            print(f"Rendering template: {template_name} with context: {context}")  # Add logging for template rendering
             template = env.get_template(template_name)
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
@@ -84,7 +91,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             post_data = self.rfile.read(content_length)
             directory = json.loads(post_data).get('directory')
             if directory:
-                full_path = os.path.abspath(os.path.join(PROJECT_ROOT, directory))
+                full_path = os.path.join(PROJECT_ROOT, directory)
                 subprocess.run(['python', 'backend/fetch_images.py', full_path])
                 self.send_response(200)
                 self.end_headers()
@@ -93,7 +100,6 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(b'Missing directory parameter.')
-
 
 def get_file_tree(path):
     def build_tree(directory):

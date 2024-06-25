@@ -105,7 +105,7 @@ export function displayImageWithUrlUpdate(mediaUrl) {
     const imageElement = document.getElementById('slideshowDisplayedImage');
     const videoElement = document.getElementById('slideshowDisplayedVideo');
     if (!imageElement || !videoElement) {
-        console.error('Image or Video element not found.');
+        console.error('Slideshow Image or Video element not found.');
         return;
     }
 
