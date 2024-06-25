@@ -23,8 +23,20 @@ async function fetchImageDimensions(url) {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => resolve({ url, width: img.width, height: img.height });
-        img.onerror = reject;
+        img.onerror = (error) => reject(new Error(`Failed to load image dimensions for ${url}: ${error.message}`));
         img.src = url;
+    });
+}
+
+// Function to fetch video dimensions
+async function fetchVideoDimensions(url) {
+    return new Promise((resolve, reject) => {
+        const video = document.createElement('video');
+        video.onloadedmetadata = () => {
+            resolve({ url, width: video.videoWidth, height: video.videoHeight });
+        };
+        video.onerror = (error) => reject(new Error(`Failed to load video dimensions for ${url}: ${error.message}`));
+        video.src = url;
     });
 }
 
@@ -57,6 +69,28 @@ function createImageElement(url, index) {
     return img;
 }
 
+// Function to create video element
+function createVideoElement(url, index) {
+    const video = document.createElement('video');
+    video.className = 'lazy gallery-video';
+    video.dataset.src = url;
+    video.dataset.index = index;
+    video.controls = true;
+
+    // Add event listener for when the video is loaded
+    video.addEventListener('loadeddata', () => {
+        const placeholder = video.closest('.placeholder');
+        if (placeholder) {
+            video.style.display = 'block'; // Show the video
+            placeholder.style.paddingBottom = '0'; // Remove padding from placeholder
+            placeholder.classList.remove('placeholder'); // Remove the placeholder class
+            console.log(`Video loaded: ${video.src}`);
+        }
+    });
+
+    return video;
+}
+
 // Function to render images for a specific page
 async function renderImages(images, page, loadCount = imagesPerPage) {
     const gallery = document.getElementById('gallery');
@@ -69,31 +103,46 @@ async function renderImages(images, page, loadCount = imagesPerPage) {
     const endIndex = startIndex + loadCount;
     const pageImages = images.slice(startIndex, endIndex);
 
-    const imagePromises = pageImages.map(fetchImageDimensions);
-    const imagesWithDimensions = await Promise.all(imagePromises);
+    try {
+        const imagePromises = pageImages.map(async (url) => {
+            if (url.endsWith('.mp4')) {
+                return await fetchVideoDimensions(url);
+            } else {
+                return await fetchImageDimensions(url);
+            }
+        });
+        const imagesWithDimensions = await Promise.all(imagePromises);
 
-    imagesWithDimensions.forEach(({ url, width, height }, index) => {
-        const placeholder = createPlaceholder({ width, height });
-        const img = createImageElement(url, startIndex + index);
+        imagesWithDimensions.forEach(({ url, width, height }, index) => {
+            const placeholder = createPlaceholder({ width, height });
+            let mediaElement;
+            if (url.endsWith('.mp4')) {
+                mediaElement = createVideoElement(url, startIndex + index);
+            } else {
+                mediaElement = createImageElement(url, startIndex + index);
+            }
 
-        placeholder.appendChild(img);
-        gallery.appendChild(placeholder);
-        console.log(`Placeholder created for image: ${url}`);
-    });
+            placeholder.appendChild(mediaElement);
+            gallery.appendChild(placeholder);
+            console.log(`Placeholder created for media: ${url}`);
+        });
 
-    // Initialize lazy loading
-    new LazyLoad({
-        elements_selector: ".lazy",
-        callback_load: (img) => {
-            console.log(`LazyLoad callback: ${img.dataset.src}`);
-        }
-    });
+        // Initialize lazy loading
+        new LazyLoad({
+            elements_selector: ".lazy",
+            callback_load: (media) => {
+                console.log(`LazyLoad callback: ${media.dataset.src}`);
+            }
+        });
 
-    // Recalculate layout after images are loaded
-    $(gallery).imagesLoaded(() => {
-        gallery.style.opacity = 1;
-        console.log('Images loaded and layout recalculated.');
-    });
+        // Recalculate layout after images are loaded
+        $(gallery).imagesLoaded(() => {
+            gallery.style.opacity = 1;
+            console.log('Images loaded and layout recalculated.');
+        });
+    } catch (error) {
+        console.error('Error rendering images:', error);
+    }
 }
 
 // Function to render pagination controls
@@ -194,6 +243,10 @@ function renderPagination() {
 // New function to initialize the gallery
 export async function initializeGallery(images, page) {
     setData(images);
-    await renderImages(images, page);
-    renderPagination();
+    try {
+        await renderImages(images, page);
+        renderPagination();
+    } catch (error) {
+        console.error('Error initializing gallery:', error);
+    }
 }
