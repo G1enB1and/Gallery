@@ -8,6 +8,9 @@
     {% elif view == 'settings' %}
         {% include 'settings.html' %}
     {% else %}
-        {% include 'gallery.html' %}
+        <div class="gallery-container">
+            {% include 'gallery.html' %}
+            <div id="pagination"></div>
+        </div>
     {% endif %}
 </div>

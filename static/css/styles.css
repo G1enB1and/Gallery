@@ -98,6 +98,7 @@ a:link, a:visited, a:hover, a:active {
     display: flex;
     flex: 1;
     overflow: hidden;
+    /*margin-top: 65px; /* Offset for the header */
 }
 
 .main-content, .data-panel {
@@ -111,6 +112,10 @@ a:link, a:visited, a:hover, a:active {
     width: 60%;
     background-color: var(--white);
     flex-grow: 1; /* Allow main content to grow */
+    display: flex;
+    flex-direction: column; /* Ensure column layout */
+    align-items: center;
+    justify-content: flex-start; /* Align content to the start */
 }
 
 .data-panel {
@@ -291,13 +296,6 @@ a:link, a:visited, a:hover, a:active {
 
 #playPauseButton .fa-pause {
     display: none;
-}
-
-/* Center the slideshow container vertically in mainContent */
-.main-content {
-    display: flex;
-    justify-content: center;
-    align-items: center;
 }
 
 /* Drawer styles */

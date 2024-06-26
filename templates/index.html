@@ -30,7 +30,19 @@
             {% include 'fileTree.html' %}
             <div class="resizer" id="resizer-filetree"></div>
         </div>
-        {% include 'mainContent.html' %}
+        <div id="mainContent" class="main-content">
+            {% if view == 'slideshow' %}
+                <div class="slideshow-container">
+                    <div class="slideshow">
+                        {% include 'slideshow.html' %}
+                    </div>
+                </div>
+            {% elif view == 'settings' %}
+                {% include 'settings.html' %}
+            {% else %}
+                {% include 'gallery.html' %}
+            {% endif %}
+        </div>
         <div id="dataPanel" class="data-panel">
             {% include 'dataPanel.html' %}
             <div class="resizer" id="resizer-datapanel"></div>
