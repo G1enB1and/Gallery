@@ -33,6 +33,7 @@ async function fetchVideoDimensions(url) {
     return new Promise((resolve, reject) => {
         const video = document.createElement('video');
         video.onloadedmetadata = () => {
+            console.log(`Video dimensions for ${url}: ${video.videoWidth}x${video.videoHeight}`);
             resolve({ url, width: video.videoWidth, height: video.videoHeight });
         };
         video.onerror = (error) => reject(new Error(`Failed to load video dimensions for ${url}: ${error.message}`));
@@ -45,6 +46,7 @@ function createPlaceholder({ width, height }) {
     const placeholder = document.createElement('div');
     placeholder.className = 'gallery-item placeholder';
     placeholder.style.paddingBottom = `${(height / width) * 100}%`;
+    console.log(`Placeholder created with dimensions: ${width}x${height}`);
     return placeholder;
 }
 
@@ -81,6 +83,11 @@ function createVideoElement(url, index) {
     video.dataset.src = url;
     video.dataset.index = index;
     video.controls = true;
+    video.style.maxWidth = '100%';
+    video.style.maxHeight = '100%';
+    video.style.width = 'auto';
+    video.style.height = 'auto';
+    video.style.objectFit = 'contain'; // Ensure the video fits within the container
 
     // Add event listener for when the video is loaded
     video.addEventListener('loadeddata', () => {
@@ -276,7 +283,7 @@ function changeView(view, image = null) {
             const newContent = doc.querySelector('#mainContent').innerHTML;
             mainContent.innerHTML = newContent;
             window.history.pushState({}, '', url);
-            
+
             if (view === 'gallery') {
                 const currentPage = getCurrentPage();
                 fetch('images.json')

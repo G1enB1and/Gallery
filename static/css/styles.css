@@ -43,7 +43,7 @@ a:link, a:visited, a:hover, a:active {
     margin-right: 5px;
 }
 
-.pic-tagger {
+.title {
     font-size: 26px;
     font-weight: bold;
     font-family: system-ui, -apple-system, BlinkMacSystemFont, 'Segoe UI', Roboto, Oxygen, Ubuntu, Cantarell, 'Open Sans', 'Helvetica Neue', sans-serif;
@@ -73,21 +73,25 @@ a:link, a:visited, a:hover, a:active {
     padding: 5px 10px;
     margin-left: 10px;
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .gallery-button {
     height: 25px;
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .settings-icon {
     font-size: 24px;
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .hamburger-icon {
     font-size: 24px;
     margin-right: 10px;
+    cursor: pointer;
 }
 
 .container {
@@ -144,13 +148,16 @@ a:link, a:visited, a:hover, a:active {
     background-color: var(--medgrey);
     position: relative;
     border-radius: 15px;
+    cursor: pointer;
 }
 
-.gallery-item img {
+.gallery-item img,
+.gallery-item video {
     width: 100%;
     height: auto;
     display: block;
     border-radius: 15px;
+    cursor: pointer;
 }
 
 .placeholder {
@@ -201,6 +208,7 @@ a:link, a:visited, a:hover, a:active {
     position: relative;
     transition: width 0.3s; /* Smooth transition for resizing */
     z-index: 1;
+    padding: 20px; /* Add padding to prevent overflow */
 }
 
 .slideshow .mediaControls {
@@ -274,20 +282,12 @@ a:link, a:visited, a:hover, a:active {
     object-fit: contain; /* Ensure the image/video fits within the container */
 }
 
-.slideshow #slideshowDisplayedImage img {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
+.slideshow #slideshowDisplayedImage {
+    max-height: calc(100vh - 100px); /* Ensure the image does not exceed the viewport height */
 }
 
-.slideshow #slideshowDisplayedVideo video {
-    max-width: 100%;
-    max-height: 100%;
-    width: auto;
-    height: auto;
-    object-fit: contain;
+.slideshow #slideshowDisplayedVideo {
+    max-height: calc(100vh - 100px); /* Ensure the video does not exceed the viewport height */
 }
 
 .slideshow #prevButton,
@@ -303,6 +303,7 @@ a:link, a:visited, a:hover, a:active {
     color: var(--offwhite1);
     cursor: pointer;
     z-index: 10;
+    border-radius: 50%;
 }
 
 .slideshow #prevButton {
@@ -379,12 +380,12 @@ a:link, a:visited, a:hover, a:active {
 
 @supports (scrollbar-width: auto) {
     .scroller {
-      scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
+      scrollbar-color: var(--scrollbar-color-thumb) var (--scrollbar-color-track);
       scrollbar-width: var(--scrollbar-width);
     }
-  }
-  
-  @supports selector(::-webkit-scrollbar) {
+}
+
+@supports selector(::-webkit-scrollbar) {
     .scroller {
       text-align: justify;
     }
@@ -398,9 +399,9 @@ a:link, a:visited, a:hover, a:active {
       max-width: var(--scrollbar-width-legacy);
       max-height: var(--scrollbar-width-legacy);
     }
-  }
+}
 
-  #leftPanelContent {
+#leftPanelContent {
     display: flex;
     flex-direction: column;
     align-items: flex-start; /* Use flex-start instead of left */
