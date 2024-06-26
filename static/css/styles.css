@@ -198,103 +198,54 @@ a:link, a:visited, a:hover, a:active {
 }
 
 /* Slideshow styles */
-.slideshow #mediaContainer {
-    flex-grow: 1;
-    height: 100%;
+.slideshow {
     display: flex;
     align-items: center;
     justify-content: center;
+    height: calc(100% - 85px);
     overflow: hidden; /* Prevent scrolling */
     position: relative;
-    transition: width 0.3s; /* Smooth transition for resizing */
-    z-index: 1;
-    padding: 20px; /* Add padding to prevent overflow */
+    padding: 10px; /* Add padding to prevent overflow */
 }
 
-.slideshow .mediaControls {
-    position: fixed;
-    top: 50%;
-    transform: translateY(-50%);
-    width: 40px;
-    height: 40px;
-    font-size: 24px;
-    border: none;
-    background-color: transparent;
-    color: var(--offblack2);
-    cursor: pointer;
-}
-
-.slideshow #playPauseButton {
-    position: absolute; /* Ensure correct positioning */
-    bottom: 50px;
-    left: 50%;
-    transform: translate(-50%, 50%);
-    width: 50px;
-    height: 50px;
-    font-size: 30px;
-    border: none;
-    background-color: rgba(255, 255, 255, 0.5);
-    color: var(--offblack2);
-    border-radius: 50%;
-    cursor: pointer;
+.slideshow-container {
     display: flex;
     align-items: center;
     justify-content: center;
-    opacity: 0;
-    transition: opacity 0.3s;
-    z-index: 9999; /* Ensure play/pause stays on top of other content */
-}
-
-.slideshow #playPauseHoverArea {
-    position: absolute;
-    top: 0;
-    left: 25%; /* Center the hover area */
-    width: 50%;
     height: 100%;
-    background-color: transparent; /* Invisible, only for detecting hover */
-    z-index: 1; /* Below buttons but above the image */
-    display: flex;
-    align-items: center;
-    justify-content: center;
-}
-
-.slideshow #playPauseHoverArea:hover + #playPauseButton,
-.slideshow #playPauseButton:hover {
-    opacity: 1;
+    width: 100%;
 }
 
 .slideshow #slideshowImageContainer {
     display: flex;
     justify-content: center;
     align-items: center;
-    max-width: 100%; /* Ensure the image does not exceed the main content width */
-    height: 100%;
+    max-width: 100%;
+    max-height: 100%;
     position: relative; /* Ensure absolute positioned elements are relative to this container */
+    overflow: hidden; /* Prevent overflow */
 }
 
 .slideshow #slideshowDisplayedImage,
 .slideshow #slideshowDisplayedVideo {
-    display: none; /* Initially hide the image element */
     max-width: 100%;
-    max-height: 100%;
+    max-height: calc(100% - 85px); /* Adjust height to be 85px smaller */
     width: auto;
     height: auto;
     object-fit: contain; /* Ensure the image/video fits within the container */
 }
 
-.slideshow #slideshowDisplayedImage {
-    max-height: calc(100vh - 100px); /* Ensure the image does not exceed the viewport height */
-}
-
-.slideshow #slideshowDisplayedVideo {
-    max-height: calc(100vh - 100px); /* Ensure the video does not exceed the viewport height */
-}
-
-.slideshow #prevButton,
-.slideshow #nextButton {
+.slideshow #controlsContainer {
     position: absolute;
     top: 50%;
+    width: 100%;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
     transform: translateY(-50%);
+}
+
+.slideshow .mediaControls {
     width: 40px;
     height: 40px;
     font-size: 24px;
@@ -302,17 +253,35 @@ a:link, a:visited, a:hover, a:active {
     background-color: rgba(0, 0, 0, 0.5);
     color: var(--offwhite1);
     cursor: pointer;
-    z-index: 10;
     border-radius: 50%;
+    display: flex;
+    align-items: center;
+    justify-content: center;
 }
 
 .slideshow #prevButton {
-    left: 20px;
+    margin-left: 20px; /* 20px from the left */
 }
 
 .slideshow #nextButton {
-    right: 20px;
+    margin-right: 20px; /* 20px from the right */
 }
+
+.slideshow #playPauseButton {
+    width: 50px;
+    height: 50px;
+    font-size: 30px;
+    background-color: rgba(255, 255, 255, 0.5);
+    color: var(--offblack2);
+}
+
+/* Center the slideshow container vertically in mainContent */
+.main-content {
+    display: flex;
+    justify-content: center;
+    align-items: center;
+}
+
 
 /* Drawer styles */
 #drawer { 

@@ -1,13 +1,14 @@
-<div id="mediaContainer">
+<div id="mediaContainer" class="slideshow">
     <div id="slideshowImageContainer">
         <img src="" alt="Displayed Image" id="slideshowDisplayedImage">
         <video id="slideshowDisplayedVideo" controls></video>
-        <div id="playPauseHoverArea"></div>
+    </div>
+    <div id="controlsContainer">
+        <button id="prevButton" class="mediaControls">◀</button>
         <button id="playPauseButton" class="mediaControls">
             <i class="fas fa-play"></i>
             <i class="fas fa-pause" style="display: none;"></i>
         </button>
+        <button id="nextButton" class="mediaControls">▶</button>
     </div>
-    <button id="prevButton" class="mediaControls">◀</button>
-    <button id="nextButton" class="mediaControls">▶</button>
 </div>
