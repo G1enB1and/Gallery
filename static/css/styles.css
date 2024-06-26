@@ -243,6 +243,14 @@ a:link, a:visited, a:hover, a:active {
     justify-content: space-between;
     align-items: center;
     transform: translateY(-50%);
+    opacity: 0;
+    transition: opacity 0.3s;
+    z-index: 2; /* Ensure controls stay on top of other content */
+}
+
+.slideshow #slideshowImageContainer:hover #controlsContainer,
+.slideshow #controlsContainer:hover {
+    opacity: 1;
 }
 
 .slideshow .mediaControls {
@@ -273,6 +281,16 @@ a:link, a:visited, a:hover, a:active {
     font-size: 30px;
     background-color: rgba(255, 255, 255, 0.5);
     color: var(--offblack2);
+    margin-left: 50px;
+}
+
+#playPauseButton .fa-play,
+#playPauseButton .fa-pause {
+    font-size: 24px;
+}
+
+#playPauseButton .fa-pause {
+    display: none;
 }
 
 /* Center the slideshow container vertically in mainContent */
@@ -281,7 +299,6 @@ a:link, a:visited, a:hover, a:active {
     justify-content: center;
     align-items: center;
 }
-
 
 /* Drawer styles */
 #drawer { 
