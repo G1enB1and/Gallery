@@ -2,7 +2,6 @@
 import { initializePage, adjustMainContent } from './dom.js';
 import { handleKeyPress, expandAll, collapseAll } from './events.js';
 import { populateFileTree } from './fileTree.js';
-import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
 
 document.addEventListener('DOMContentLoaded', () => {
     initializePage();
@@ -12,12 +11,7 @@ document.addEventListener('DOMContentLoaded', () => {
     document.getElementById('collapseAll').addEventListener('click', collapseAll);
 
     document.addEventListener('keydown', (e) => {
-        if (e.altKey && e.code === 'Home') {
-            collapseAll();
-        }
-        if (e.altKey && e.code === 'End') {
-            expandAll();
-        }
+        handleKeyPress(e);
     });
 
     // Event listener for settings icon
@@ -56,6 +50,8 @@ function changeView(view) {
                         initializeGallery(images, currentPage);
                     })
                     .catch(error => console.error('Error fetching images:', error));
+            } else if (view === 'slideshow') {
+                setupEventListeners(); // Ensure event listeners are set up for the slideshow
             }
         })
         .catch(error => console.error('Error changing view:', error));

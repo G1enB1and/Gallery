@@ -3,6 +3,7 @@ let data = [];
 let intervalId = null;
 let preloadedNextImage = new Image();
 let preloadedPrevImage = new Image();
+const intervalDuration = 3000; // Default interval duration in milliseconds
 
 export function getIntervalId() {
     return intervalId;
@@ -55,6 +56,11 @@ export function displayMedia(src) {
 export function preloadAdjacentMedia(currentSrc) {
     const currentIndex = data.indexOf(decodeURIComponent(currentSrc));
 
+    if (currentIndex === -1) {
+        console.error(`Current media source not found in data: ${currentSrc}`);
+        return;
+    }
+
     const nextIndex = (currentIndex + 1) % data.length;
     const prevIndex = (currentIndex - 1 + data.length) % data.length;
 
@@ -68,17 +74,27 @@ export function preloadAdjacentMedia(currentSrc) {
 export function nextImage() {
     const currentSrc = decodeURIComponent(new URLSearchParams(window.location.search).get('image'));
     const currentIndex = data.indexOf(currentSrc);
+    if (currentIndex === -1) {
+        console.error(`Current media source not found in data: ${currentSrc}`);
+        return;
+    }
     const nextIndex = (currentIndex + 1) % data.length;
     const nextSrc = data[nextIndex];
-    window.location.href = `index.html?view=slideshow&image=${encodeURIComponent(nextSrc)}`;
+    displayMedia(nextSrc);
+    history.replaceState(null, '', `index.html?view=slideshow&image=${encodeURIComponent(nextSrc)}`);
 }
 
 export function prevImage() {
     const currentSrc = decodeURIComponent(new URLSearchParams(window.location.search).get('image'));
     const currentIndex = data.indexOf(currentSrc);
+    if (currentIndex === -1) {
+        console.error(`Current media source not found in data: ${currentSrc}`);
+        return;
+    }
     const prevIndex = (currentIndex - 1 + data.length) % data.length;
     const prevSrc = data[prevIndex];
-    window.location.href = `index.html?view=slideshow&image=${encodeURIComponent(prevSrc)}`;
+    displayMedia(prevSrc);
+    history.replaceState(null, '', `index.html?view=slideshow&image=${encodeURIComponent(prevSrc)}`);
 }
 
 export function togglePlayPause() {
@@ -93,7 +109,14 @@ export function togglePlayPause() {
         sessionStorage.setItem('isPlaying', 'false');
         console.log('Paused');
     } else {
-        setIntervalId(setInterval(nextImage, 5000));
+        setIntervalId(setInterval(() => {
+            const currentSrc = decodeURIComponent(new URLSearchParams(window.location.search).get('image'));
+            const currentIndex = data.indexOf(currentSrc);
+            const nextIndex = (currentIndex + 1) % data.length;
+            const nextSrc = data[nextIndex];
+            displayMedia(nextSrc);
+            history.replaceState(null, '', `index.html?view=slideshow&image=${encodeURIComponent(nextSrc)}`);
+        }, intervalDuration)); // Set the interval to 3 seconds
         playIcon.style.display = 'none';
         pauseIcon.style.display = 'block';
         sessionStorage.setItem('isPlaying', 'true');

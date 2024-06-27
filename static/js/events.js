@@ -5,6 +5,7 @@ import { nextImage, prevImage, togglePlayPause } from './media.js';
 export function handleKeyPress(event) {
     console.log(`Key pressed: ${event.code}`);
     if (event.code === 'Space') {
+        event.preventDefault(); // Prevent the default action of the space key
         togglePlayPause();
     } else if (event.code === 'ArrowRight') {
         nextImage();
@@ -40,3 +41,30 @@ export function collapseAll() {
         }
     });
 }
+
+// Add event listeners for slideshow controls
+document.addEventListener('DOMContentLoaded', () => {
+    const nextButton = document.getElementById('nextButton');
+    if (nextButton) {
+        nextButton.addEventListener('click', () => {
+            console.log('Next button clicked');
+            nextImage();
+        });
+    }
+
+    const prevButton = document.getElementById('prevButton');
+    if (prevButton) {
+        prevButton.addEventListener('click', () => {
+            console.log('Previous button clicked');
+            prevImage();
+        });
+    }
+
+    const playPauseButton = document.getElementById('playPauseButton');
+    if (playPauseButton) {
+        playPauseButton.addEventListener('click', () => {
+            console.log('Play/Pause button clicked');
+            togglePlayPause();
+        });
+    }
+});
