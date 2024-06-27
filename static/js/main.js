@@ -3,6 +3,11 @@ import { initializePage, adjustMainContent } from './dom.js';
 import { handleKeyPress, expandAll, collapseAll } from './events.js';
 import { populateFileTree } from './fileTree.js';
 
+// adding this line breaks the slideshow next button and causes double key presses,
+// but removing it breaks switching from gslideshow back to gallery.
+// without it: Error changing view: ReferenceError: getCurrentPage is not defined
+import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
+
 document.addEventListener('DOMContentLoaded', () => {
     initializePage();
     adjustMainContent(); // Ensure content is adjusted initially
