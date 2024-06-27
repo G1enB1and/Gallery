@@ -229,6 +229,8 @@ a:link, a:visited, a:hover, a:active {
     max-height: 100%;
     position: relative; /* Ensure absolute positioned elements are relative to this container */
     overflow: hidden; /* Prevent overflow */
+    margin: 0;
+    padding: 0;
 }
 
 .slideshow #slideshowDisplayedImage,
