@@ -1,4 +1,3 @@
-// dom_pinterest.js
 import { saveSessionState } from './utils_pinterest.js';
 import { loadPage } from './loader.js';
 
@@ -311,3 +310,35 @@ function changeView(view, image = null) {
         })
         .catch(error => console.error('Error changing view:', error));
 }
+
+// Ensure functions are only called when the appropriate view is active
+document.addEventListener('DOMContentLoaded', () => {
+    const view = new URLSearchParams(window.location.search).get('view');
+    if (view === 'gallery') {
+        const currentPage = getCurrentPage();
+        fetch('images.json')
+            .then(response => response.json())
+            .then(images => {
+                initializeGallery(images, currentPage);
+            })
+            .catch(error => console.error('Error fetching images:', error));
+    } else if (view === 'slideshow') {
+        const image = new URLSearchParams(window.location.search).get('image');
+        if (image) {
+            const slideshowImage = document.getElementById('slideshowDisplayedImage');
+            const slideshowVideo = document.getElementById('slideshowDisplayedVideo');
+            if (slideshowImage && slideshowVideo) {
+                if (image.endsWith('.mp4')) {
+                    slideshowImage.style.display = 'none';
+                    slideshowVideo.style.display = 'block';
+                    slideshowVideo.src = image;
+                    slideshowVideo.load();
+                } else {
+                    slideshowVideo.style.display = 'none';
+                    slideshowImage.style.display = 'block';
+                    slideshowImage.src = image;
+                }
+            }
+        }
+    }
+});
