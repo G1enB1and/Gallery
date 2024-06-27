@@ -102,6 +102,12 @@ export function togglePlayPause() {
 }
 
 export function displayImageWithUrlUpdate(mediaUrl) {
+    const view = new URLSearchParams(window.location.search).get('view');
+    if (view !== 'slideshow') {
+        console.log('Not in slideshow view, skipping displayImageWithUrlUpdate');
+        return;
+    }
+
     const imageElement = document.getElementById('slideshowDisplayedImage');
     const videoElement = document.getElementById('slideshowDisplayedVideo');
     if (!imageElement || !videoElement) {
@@ -129,4 +135,4 @@ export function displayImageWithUrlUpdate(mediaUrl) {
         };
         preloader.src = mediaUrl;
     }
-} 
+}
