@@ -71,9 +71,12 @@ export function buildFileTree(container, nodes) {
                                     // Display the first media after data is loaded and update the URL
                                     const firstMediaUrl = images[0];
                                     displayImageWithUrlUpdate(firstMediaUrl);
-                                    // Refresh the gallery with the new images
-                                    const currentPage = getCurrentPage();
-                                    initializeGallery(images, currentPage);
+                                    // Refresh the gallery with the new images if the view is gallery
+                                    const view = new URLSearchParams(window.location.search).get('view');
+                                    if (view === 'gallery' || !view) {
+                                        const currentPage = getCurrentPage();
+                                        initializeGallery(images, currentPage);
+                                    }
                                 } else {
                                     console.error('No media found in the selected directory.');
                                 }
@@ -115,9 +118,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // Display the first media after data is loaded and update the URL
                                 const firstMediaUrl = images[0];
                                 displayImageWithUrlUpdate(firstMediaUrl);
-                                // Refresh the gallery with the new images
-                                const currentPage = getCurrentPage();
-                                initializeGallery(images, currentPage);
+                                // Refresh the gallery with the new images if the view is gallery
+                                const view = new URLSearchParams(window.location.search).get('view');
+                                if (view === 'gallery' || !view) {
+                                    const currentPage = getCurrentPage();
+                                    initializeGallery(images, currentPage);
+                                }
                             } else {
                                 console.error('No media found in the selected directory.');
                             }
