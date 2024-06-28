@@ -251,6 +251,10 @@ a:link, a:visited, a:hover, a:active {
     object-fit: contain; /* Ensure the image/video fits within the container */
 }
 
+.slideshow #slideshowDisplayedVideo {
+    display: none;
+}
+
 .slideshow #controlsContainer {
     position: absolute;
     top: 50%;

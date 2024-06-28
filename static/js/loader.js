@@ -1,4 +1,3 @@
-// loader.js
 import { initializeGallery } from './dom_pinterest.js';
 import { setupMediaClickListener } from './events_pinterest.js';
 import { restoreScrollPositionAfterImagesLoad } from './utils_pinterest.js';

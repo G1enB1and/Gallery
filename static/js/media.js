@@ -26,6 +26,7 @@ export function displayMedia(src) {
         return;
     }
 
+    console.log('Hiding image and video elements initially.');
     imageElement.style.display = 'none';
     videoElement.style.display = 'none';
     videoElement.src = ''; // Clear the video source
@@ -42,6 +43,7 @@ export function displayMedia(src) {
             imageElement.src = src;
             imageElement.style.display = 'block';
             videoElement.style.display = 'none'; // Ensure video element is hidden
+            videoElement.src = ''; // Clear the video source explicitly
             console.log(`Displaying image: ${src}`);
         };
         preloader.onerror = () => {
@@ -65,11 +67,22 @@ export function preloadAdjacentMedia(currentSrc) {
     const nextIndex = (currentIndex + 1) % data.length;
     const prevIndex = (currentIndex - 1 + data.length) % data.length;
 
-    preloadedNextImage.src = data[nextIndex];
-    preloadedPrevImage.src = data[prevIndex];
+    const nextSrc = data[nextIndex];
+    const prevSrc = data[prevIndex];
 
-    console.log(`Preloading next media: ${data[nextIndex]}`);
-    console.log(`Preloading previous media: ${data[prevIndex]}`);
+    if (nextSrc.endsWith('.mp4')) {
+        console.log(`Preloading next video: ${nextSrc}`);
+    } else {
+        preloadedNextImage.src = nextSrc;
+        console.log(`Preloading next image: ${nextSrc}`);
+    }
+
+    if (prevSrc.endsWith('.mp4')) {
+        console.log(`Preloading previous video: ${prevSrc}`);
+    } else {
+        preloadedPrevImage.src = prevSrc;
+        console.log(`Preloading previous image: ${prevSrc}`);
+    }
 }
 
 export function nextImage() {
@@ -162,20 +175,25 @@ export function displayImageWithUrlUpdate(mediaUrl) {
         return;
     }
 
+    console.log('Hiding image and video elements initially for URL update.');
     imageElement.style.display = 'none';
     videoElement.style.display = 'none';
+    videoElement.src = ''; // Clear the video source
 
     const isVideo = mediaUrl.endsWith('.mp4');
     if (isVideo) {
         videoElement.src = mediaUrl;
         videoElement.style.display = 'block';
         videoElement.load();
+        console.log(`Displaying video with URL update: ${mediaUrl}`);
     } else {
         const preloader = new Image();
         preloader.onload = () => {
             imageElement.src = mediaUrl;
             imageElement.style.display = 'block';
             videoElement.style.display = 'none'; // Ensure video element is hidden
+            videoElement.src = ''; // Clear the video source explicitly
+            console.log(`Displaying image with URL update: ${mediaUrl}`);
             history.replaceState(null, '', `?image=${encodeURIComponent(mediaUrl)}`);
         };
         preloader.onerror = () => {
@@ -184,3 +202,10 @@ export function displayImageWithUrlUpdate(mediaUrl) {
         preloader.src = mediaUrl;
     }
 }
+
+// Clear video source and hide video element on initial page load
+document.addEventListener('DOMContentLoaded', () => {
+    const videoElement = document.getElementById('slideshowDisplayedVideo');
+    videoElement.src = '';
+    videoElement.style.display = 'none';
+});
