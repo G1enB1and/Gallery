@@ -2,6 +2,7 @@ let data = [];
 let intervalId = null;
 let preloadedNextImage = new Image();
 let preloadedPrevImage = new Image();
+let isTogglePlayPauseRunning = false;
 
 export function getIntervalId() {
     return intervalId;
@@ -98,6 +99,11 @@ export function prevImage() {
 }
 
 export function togglePlayPause() {
+    if (isTogglePlayPauseRunning) {
+        return;
+    }
+    isTogglePlayPauseRunning = true;
+
     const playPauseButton = document.getElementById('playPauseButton');
     const playIcon = playPauseButton.querySelector('.fa-play');
     const pauseIcon = playPauseButton.querySelector('.fa-pause');
@@ -117,6 +123,11 @@ export function togglePlayPause() {
         sessionStorage.setItem('isPlaying', 'true');
         console.log('Playing');
     }
+
+    // Reset the flag after a short delay to allow for the next toggle
+    setTimeout(() => {
+        isTogglePlayPauseRunning = false;
+    }, 300); // Adjust the timeout as needed
 }
 
 function restorePlayPauseState() {
