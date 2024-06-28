@@ -1,15 +1,15 @@
-// events.js
 import { nextImage, prevImage, togglePlayPause } from './media.js';
 
-// Function to handle keypress
 export function handleKeyPress(event) {
     console.log(`Key pressed: ${event.code}`);
     if (event.code === 'Space') {
-        event.preventDefault(); // Prevent the default action of the space key
+        event.preventDefault();
         togglePlayPause();
     } else if (event.code === 'ArrowRight') {
+        event.preventDefault();
         nextImage();
     } else if (event.code === 'ArrowLeft') {
+        event.preventDefault();
         prevImage();
     } else if (event.altKey && event.code === 'Home') {
         collapseAll();

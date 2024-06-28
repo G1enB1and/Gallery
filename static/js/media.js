@@ -1,9 +1,7 @@
-// media.js (for slideshow)
 let data = [];
 let intervalId = null;
 let preloadedNextImage = new Image();
 let preloadedPrevImage = new Image();
-const intervalDuration = 3000; // Default interval duration in milliseconds
 
 export function getIntervalId() {
     return intervalId;
@@ -42,6 +40,7 @@ export function displayMedia(src) {
         preloader.onload = () => {
             imageElement.src = src;
             imageElement.style.display = 'block';
+            videoElement.style.display = 'none'; // Ensure video element is hidden
             console.log(`Displaying image: ${src}`);
         };
         preloader.onerror = () => {
@@ -51,6 +50,7 @@ export function displayMedia(src) {
     }
 
     preloadAdjacentMedia(src);
+    restorePlayPauseState();
 }
 
 export function preloadAdjacentMedia(currentSrc) {
@@ -80,8 +80,8 @@ export function nextImage() {
     }
     const nextIndex = (currentIndex + 1) % data.length;
     const nextSrc = data[nextIndex];
-    displayMedia(nextSrc);
-    history.replaceState(null, '', `index.html?view=slideshow&image=${encodeURIComponent(nextSrc)}`);
+    console.log(`Navigating to next image: ${nextSrc}`);
+    window.location.href = `index.html?view=slideshow&image=${encodeURIComponent(nextSrc)}`;
 }
 
 export function prevImage() {
@@ -93,14 +93,16 @@ export function prevImage() {
     }
     const prevIndex = (currentIndex - 1 + data.length) % data.length;
     const prevSrc = data[prevIndex];
-    displayMedia(prevSrc);
-    history.replaceState(null, '', `index.html?view=slideshow&image=${encodeURIComponent(prevSrc)}`);
+    console.log(`Navigating to previous image: ${prevSrc}`);
+    window.location.href = `index.html?view=slideshow&image=${encodeURIComponent(prevSrc)}`;
 }
 
 export function togglePlayPause() {
     const playPauseButton = document.getElementById('playPauseButton');
     const playIcon = playPauseButton.querySelector('.fa-play');
     const pauseIcon = playPauseButton.querySelector('.fa-pause');
+    const isPlaying = sessionStorage.getItem('isPlaying') === 'true';
+
     if (intervalId) {
         clearInterval(intervalId);
         setIntervalId(null);
@@ -109,18 +111,29 @@ export function togglePlayPause() {
         sessionStorage.setItem('isPlaying', 'false');
         console.log('Paused');
     } else {
-        setIntervalId(setInterval(() => {
-            const currentSrc = decodeURIComponent(new URLSearchParams(window.location.search).get('image'));
-            const currentIndex = data.indexOf(currentSrc);
-            const nextIndex = (currentIndex + 1) % data.length;
-            const nextSrc = data[nextIndex];
-            displayMedia(nextSrc);
-            history.replaceState(null, '', `index.html?view=slideshow&image=${encodeURIComponent(nextSrc)}`);
-        }, intervalDuration)); // Set the interval to 3 seconds
+        setIntervalId(setInterval(nextImage, 3000)); // 3-second interval
         playIcon.style.display = 'none';
         pauseIcon.style.display = 'block';
         sessionStorage.setItem('isPlaying', 'true');
         console.log('Playing');
+    }
+}
+
+function restorePlayPauseState() {
+    const playPauseButton = document.getElementById('playPauseButton');
+    const playIcon = playPauseButton.querySelector('.fa-play');
+    const pauseIcon = playPauseButton.querySelector('.fa-pause');
+    const isPlaying = sessionStorage.getItem('isPlaying') === 'true';
+
+    if (isPlaying) {
+        setIntervalId(setInterval(nextImage, 3000)); // 3-second interval
+        playIcon.style.display = 'none';
+        pauseIcon.style.display = 'block';
+        console.log('Restored to Playing state');
+    } else {
+        playIcon.style.display = 'block';
+        pauseIcon.style.display = 'none';
+        console.log('Restored to Paused state');
     }
 }
 
@@ -151,6 +164,7 @@ export function displayImageWithUrlUpdate(mediaUrl) {
         preloader.onload = () => {
             imageElement.src = mediaUrl;
             imageElement.style.display = 'block';
+            videoElement.style.display = 'none'; // Ensure video element is hidden
             history.replaceState(null, '', `?image=${encodeURIComponent(mediaUrl)}`);
         };
         preloader.onerror = () => {

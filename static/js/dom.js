@@ -1,43 +1,55 @@
-// dom.js
 import { initializeGallery } from './dom_pinterest.js';
 import { displayMedia, nextImage, prevImage, togglePlayPause, setData } from './media.js';
-import { handleKeyPress } from './events.js';
 
 export function initializePage() {
     const view = new URLSearchParams(window.location.search).get('view');
     const image = new URLSearchParams(window.location.search).get('image');
 
-    fetch('images.json')
-        .then(response => response.json())
-        .then(images => {
-            setData(images); // Ensure data is set correctly
-            if (view === 'slideshow' && image) {
+    if (view === 'slideshow' && image) {
+        fetch('images.json')
+            .then(response => response.json())
+            .then(images => {
+                setData(images); // Ensure data is set
                 displayMedia(image);
-            } else {
+                setupEventListeners();
+            })
+            .catch(error => console.error('Error fetching images:', error));
+    } else {
+        fetch('images.json')
+            .then(response => response.json())
+            .then(images => {
+                setData(images); // Ensure data is set
                 initializeGallery(images); // Call the new initializeGallery function
                 setupEventListeners();
-            }
-        })
-        .catch(error => console.error('Error fetching images:', error));
+            })
+            .catch(error => console.error('Error fetching images:', error));
+    }
 }
 
 function setupEventListeners() {
     const nextButton = document.getElementById('nextButton');
     if (nextButton) {
-        nextButton.addEventListener('click', nextImage);
+        nextButton.addEventListener('click', () => {
+            console.log('Next button clicked');
+            nextImage();
+        });
     }
 
     const prevButton = document.getElementById('prevButton');
     if (prevButton) {
-        prevButton.addEventListener('click', prevImage);
+        prevButton.addEventListener('click', () => {
+            console.log('Previous button clicked');
+            prevImage();
+        });
     }
 
     const playPauseButton = document.getElementById('playPauseButton');
     if (playPauseButton) {
-        playPauseButton.addEventListener('click', togglePlayPause);
+        playPauseButton.addEventListener('click', () => {
+            console.log('Play/Pause button clicked');
+            togglePlayPause();
+        });
     }
-
-    document.addEventListener('keydown', handleKeyPress);
 }
 
 export function adjustMainContent() {
