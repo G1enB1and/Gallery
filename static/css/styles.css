@@ -211,9 +211,10 @@ a:link, a:visited, a:hover, a:active {
     display: flex;
     align-items: center;
     justify-content: center;
-    height: 100%;
+    height: calc(100% - 20px);
     overflow: hidden; /* Prevent scrolling */
     position: relative;
+    margin: 10px;
 }
 
 .slideshow-container {
