@@ -42,14 +42,17 @@ export function collapseAll() {
     });
 }
 
-// Add event listeners for slideshow controls
-document.addEventListener('DOMContentLoaded', () => {
+// Attach slideshow event listeners
+export function attachSlideshowEventListeners() {
+    console.log('Attaching slideshow event listeners.');
     const nextButton = document.getElementById('nextButton');
     if (nextButton) {
         nextButton.addEventListener('click', () => {
             console.log('Next button clicked');
             nextImage();
         });
+    } else {
+        console.error('Next button not found.');
     }
 
     const prevButton = document.getElementById('prevButton');
@@ -58,6 +61,8 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Previous button clicked');
             prevImage();
         });
+    } else {
+        console.error('Previous button not found.');
     }
 
     const playPauseButton = document.getElementById('playPauseButton');
@@ -66,5 +71,21 @@ document.addEventListener('DOMContentLoaded', () => {
             console.log('Play/Pause button clicked');
             togglePlayPause();
         });
+    } else {
+        console.error('Play/Pause button not found.');
     }
+}
+
+// Add event listeners for slideshow controls on initial load and URL change
+document.addEventListener('DOMContentLoaded', () => {
+    console.log('Document loaded, attaching slideshow event listeners.');
+    attachSlideshowEventListeners();
+    window.addEventListener('popstate', () => {
+        const urlParams = new URLSearchParams(window.location.search);
+        const view = urlParams.get('view');
+        if (view === 'slideshow') {
+            console.log('URL changed to slideshow view, attaching event listeners.');
+            attachSlideshowEventListeners();
+        }
+    });
 });

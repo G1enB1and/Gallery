@@ -1,14 +1,23 @@
 import { initializePage, adjustMainContent } from './dom.js';
-import { handleKeyPress, expandAll, collapseAll } from './events.js';
+import { handleKeyPress, expandAll, collapseAll, attachSlideshowEventListeners } from './events.js'; // Ensure attachSlideshowEventListeners is imported
 import { populateFileTree } from './fileTree.js';
 import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
 
 document.addEventListener('DOMContentLoaded', () => {
+    console.log('Document loaded, initializing page.');
     initializePage();
     adjustMainContent(); // Ensure content is adjusted initially
     populateFileTree(); // Populate the file tree initially
-    document.getElementById('expandAll').addEventListener('click', expandAll);
-    document.getElementById('collapseAll').addEventListener('click', collapseAll);
+
+    const expandAllButton = document.getElementById('expandAll');
+    if (expandAllButton) {
+        expandAllButton.addEventListener('click', expandAll);
+    }
+
+    const collapseAllButton = document.getElementById('collapseAll');
+    if (collapseAllButton) {
+        collapseAllButton.addEventListener('click', collapseAll);
+    }
 
     document.addEventListener('keydown', (e) => {
         handleKeyPress(e);
@@ -29,9 +38,36 @@ document.addEventListener('DOMContentLoaded', () => {
             changeView('gallery');
         });
     }
+
+    const view = new URLSearchParams(window.location.search).get('view');
+    console.log(`Initial view: ${view}`);
+    if (view === 'slideshow') {
+        console.log('Initial load of slideshow view, attaching event listeners.');
+        attachSlideshowEventListeners(); // Attach slideshow event listeners on initial load if view is slideshow
+    }
+
+    // Use MutationObserver to detect changes in the DOM
+    const observer = new MutationObserver((mutations) => {
+        mutations.forEach((mutation) => {
+            if (mutation.addedNodes.length) {
+                mutation.addedNodes.forEach((node) => {
+                    if (node.nodeType === Node.ELEMENT_NODE && node.querySelector('#nextButton')) {
+                        console.log('Slideshow content loaded, attaching event listeners.');
+                        attachSlideshowEventListeners();
+                    }
+                });
+            }
+        });
+    });
+
+    observer.observe(document.getElementById('mainContent'), {
+        childList: true,
+        subtree: true
+    });
 });
 
 function changeView(view) {
+    console.log(`Changing view to: ${view}`);
     fetch(`index.html?view=${view}`)
         .then(response => response.text())
         .then(html => {
@@ -40,9 +76,11 @@ function changeView(view) {
             const mainContent = document.getElementById('mainContent');
             const newContent = doc.querySelector('#mainContent').innerHTML;
             mainContent.innerHTML = newContent;
+            console.log(`View changed to: ${view}, content updated.`);
             window.history.pushState({}, '', `index.html?view=${view}`);
             
             if (view === 'gallery') {
+                console.log('Initializing gallery view.');
                 const currentPage = getCurrentPage();
                 fetch('images.json')
                     .then(response => response.json())
@@ -50,8 +88,6 @@ function changeView(view) {
                         initializeGallery(images, currentPage);
                     })
                     .catch(error => console.error('Error fetching images:', error));
-            } else if (view === 'slideshow') {
-                setupEventListeners(); // Ensure event listeners are set up for the slideshow
             }
         })
         .catch(error => console.error('Error changing view:', error));
