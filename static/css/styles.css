@@ -1,5 +1,15 @@
 /* General styles */
 body, html {
+    margin: 0;
+    padding: 0;
+    height: 100%;
+    width: 100%;
+    display: flex;
+    flex-direction: column;
+    color: var(--aText);
+    overflow-x: hidden; /* Prevent horizontal scroll */
+
+    /* general colors */
     --white: #ffffff;
     --offwhite1: #f9f9f9;
     --offwhite2: #f1f1f1;
@@ -12,14 +22,76 @@ body, html {
     --black: #000000;
     --accent1: #007bff;
     --accent2: #0000ff;
-    margin: 0;
-    padding: 0;
-    height: 100%;
-    width: 100%;
-    display: flex;
-    flex-direction: column;
-    color: var(--offblack1);
-    overflow-x: hidden; /* Prevent horizontal scroll */
+
+    /* light mode colors */
+    --lmText: var(--offblack2);
+    --lmHeaderBG: var(--offwhite2);
+    --lmMainContentBG: var(--white);
+    --lmDataPanelBG: var(--offwhite1);
+    --lmResizer: var(--lightgrey);
+    --lmGalleryPlaceholder: var(--medgrey);
+    --lmPreviousNextBG: rgba(0, 0, 0, 0.5);
+    --lmPreviousNextFG: var(--offwhite1);
+    --lmPlayPauseBG: rgba(255, 255, 255, 0.5);
+    --lmPlayPauseFG: var(--offblack2);
+    --lmDrawerBG: var(--offwhite2);
+    --lmFileTreeBG: var(--offwhite1);
+    --lmScrollbarColorThumb: var(--offwhite2);
+    --lmScrollbarColorTrack: var(--medlightgrey);
+    --lmExplorerHeaderBG: var(--offwhite2);
+
+    /* dark mode colors */
+    --dmText: var(--offwhite1);
+    --dmHeaderBG: var(--offblack1);
+    --dmMainContentBG: var(--black);
+    --dmDataPanelBG: var(--offblack2);
+    --dmResizer: var(--darkgrey);
+    --dmGallerPlaceholder: var(--medlightgrey);
+    --dmPreviousNextBG: rgba(255, 255, 255, 0.5);
+    --dmPreviousNextFG: var(--offblack2);
+    --dmPlayPauseBG: rgba(0, 0, 0, 0.5);
+    --dmPlayPauseFG: var(--offwhite1);
+    --dmDrawerBG: var(--offblack1);
+    --dmFileTreeBG: var(--offblack2);
+    --dmScrollbarColorThumb: var(--offblack1);
+    --dmScrollbarColorTrack: var(--medgrey);
+    --dmExplorerHeaderBG: var(--offblack1);
+
+    /* active colors */
+    --aText: var(--lmText);
+    --aHeaderBG: var(--lmHeaderBG);
+    --aMainContentBG: var(--lmMainContentBG);
+    --aDataPanelBG: var(--lmDataPanelBG);
+    --aResizer: var(--lmResizer);
+    --aGalleryPlaceholder: var(--lmGalleryPlaceholder);
+    --aPreviousNextBG: var(--lmPreviousNextBG);
+    --aPreviousNextFG: var(--lmPreviousNextFG);
+    --aPlayPauseBG: var(--lmPlayPauseBG);
+    --aPlayPauseFG: var(--lmPlayPauseFG);
+    --aDrawerBG: var(--lmDrawerBG);
+    --aFileTreeBG: var(--lmFileTreeBG);
+    --aScrollbarColorThumb: var(--lmScrollbarColorThumb);
+    --aScrollbarColorTrack: var(--lmScrollbarColorTrack);
+    --aExplorerHeaderBG: var(--lmExplorerHeaderBG);
+}
+
+/* Dark mode active colors */
+body.dark-mode {
+    --aText: var(--dmText);
+    --aHeaderBG: var(--dmHeaderBG);
+    --aMainContentBG: var(--dmMainContentBG);
+    --aDataPanelBG: var(--dmDataPanelBG);
+    --aResizer: var(--dmResizer);
+    --aGalleryPlaceholder: var(--dmGalleryPlaceholder);
+    --aPreviousNextBG: var(--dmPreviousNextBG);
+    --aPreviousNextFG: var(--dmPreviousNextFG);
+    --aPlayPauseBG: var(--dmPlayPauseBG);
+    --aPlayPauseFG: var(--dmPlayPauseFG);
+    --aDrawerBG: var(--dmDrawerBG);
+    --aFileTreeBG: var(--dmFileTreeBG);
+    --aScrollbarColorThumb: var(--dmScrollbarColorThumb);
+    --aScrollbarColorTrack: var(--dmScrollbarColorTrack);
+    --aExplorerHeaderBG: var(--dmExplorerHeaderBG);
 }
 
 a:link, a:visited, a:hover, a:active {
@@ -33,7 +105,7 @@ a:link, a:visited, a:hover, a:active {
     width: 100%;
     display: flex;
     align-items: center;
-    background-color: var(--offwhite2);
+    background-color: var(--aHeaderBG);
     padding: 0 10px;
     box-sizing: border-box; /* Ensure padding is included in width calculation */
 }
@@ -110,7 +182,7 @@ a:link, a:visited, a:hover, a:active {
 
 .main-content {
     width: 60%;
-    background-color: var(--white);
+    background-color: var(--aMainContentBG);
     flex-grow: 1; /* Allow main content to grow */
     display: flex;
     flex-direction: column; /* Ensure column layout */
@@ -120,12 +192,12 @@ a:link, a:visited, a:hover, a:active {
 
 .data-panel {
     width: 20%;
-    background-color: var(--offwhite1);
+    background-color: var(--aDataPanelBG);
 }
 
 .resizer {
     width: 5px;
-    background: var(--lightgrey);
+    background: var(--aResizer);
     cursor: ew-resize;
     position: absolute;
     top: 0;
@@ -150,7 +222,7 @@ a:link, a:visited, a:hover, a:active {
 .gallery-item {
     break-inside: avoid;
     margin-bottom: 10px;
-    background-color: var(--medgrey);
+    background-color: var(--aGalleryPlaceholder);
     position: relative;
     border-radius: 15px;
     cursor: pointer;
@@ -167,7 +239,7 @@ a:link, a:visited, a:hover, a:active {
 
 .placeholder {
     width: 100%;
-    background-color: var(--medgrey);
+    background-color: var(--aGalleryPlaceholder);
     position: relative;
 }
 
@@ -279,8 +351,8 @@ a:link, a:visited, a:hover, a:active {
     height: 40px;
     font-size: 24px;
     border: none;
-    background-color: rgba(0, 0, 0, 0.5);
-    color: var(--offwhite1);
+    background-color: var(--aPreviousNextBG);
+    color: var(--aPreviousNextFG);
     cursor: pointer;
     border-radius: 50%;
     display: flex;
@@ -300,8 +372,8 @@ a:link, a:visited, a:hover, a:active {
     width: 50px;
     height: 50px;
     font-size: 30px;
-    background-color: rgba(255, 255, 255, 0.5);
-    color: var(--offblack2);
+    background-color: var(--aPlayPauseBG);
+    color: var(--aPlayPauseFG);
     margin-left: 30px;
 }
 
@@ -323,7 +395,7 @@ a:link, a:visited, a:hover, a:active {
     margin: 0;
     padding: 10px 0px 10px 10px; /* Add padding to the drawer itself */
     overflow: hidden;
-    background-color: var(--offwhite2);
+    background-color: var(--aDrawerBG);
 }
 
 #drawerContent {
@@ -336,7 +408,7 @@ a:link, a:visited, a:hover, a:active {
     padding-left: 5px;
     width: auto; /* Let the content define the width */
     overflow: hidden;
-    background-color: var(--offwhite2);
+    background-color: var(--aDrawerBG);
 }
 
 #drawerContent a {
@@ -361,7 +433,7 @@ a:link, a:visited, a:hover, a:active {
     overflow-x: hidden;
     resize: horizontal;
     position: relative;
-    background-color: var(--offwhite1);
+    background-color: var(--aFileTreeBG);
     margin: 0px;
     padding: 0px;
 }
@@ -373,15 +445,15 @@ a:link, a:visited, a:hover, a:active {
 }
 
 .scroller {
-    --scrollbar-color-thumb: #222;
-    --scrollbar-color-track: #555;
+    --scrollbar-color-thumb: var(--aScrollbarColorThumb);
+    --scrollbar-color-track: var(--aScrollbarColorTrack);
     --scrollbar-width: thin;
     --scrollbar-width-legacy: 0.5rem;
 }
 
 @supports (scrollbar-width: auto) {
     .scroller {
-      scrollbar-color: var(--scrollbar-color-thumb) var (--scrollbar-color-track);
+      scrollbar-color: var(--scrollbar-color-thumb) var(--scrollbar-color-track);
       scrollbar-width: var(--scrollbar-width);
     }
 }
@@ -461,7 +533,7 @@ a:link, a:visited, a:hover, a:active {
     padding: 10px;
     width: calc(100% - 25px);
     font-weight: bold;
-    background-color: var(--offwhite2);
+    background-color: var(--aExplorerHeaderBG);
 }
 
 #expandCollapseControls {
@@ -474,10 +546,14 @@ a:link, a:visited, a:hover, a:active {
 #expandCollapseControls i {
     cursor: pointer;
     font-size: 16px;
-    color: var(--offblack2);
+    color: var(--aText);
     transition: color 0.3s;
 }
 
 #expandCollapseControls i:hover {
-    color: #007bff;
+    color: var(--accent1);
+}
+
+#settings {
+    margin: 10px;
 }

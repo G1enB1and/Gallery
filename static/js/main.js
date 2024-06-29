@@ -56,12 +56,17 @@ document.addEventListener('DOMContentLoaded', () => {
         mutations.forEach((mutation) => {
             if (mutation.addedNodes.length) {
                 mutation.addedNodes.forEach((node) => {
-                    if (node.nodeType === Node.ELEMENT_NODE && node.querySelector('#nextButton')) {
-                        console.log('Slideshow content loaded, attaching event listeners.');
-                        attachSlideshowEventListeners();
-                        const image = new URLSearchParams(window.location.search).get('image');
-                        if (image) {
-                            displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
+                    if (node.nodeType === Node.ELEMENT_NODE) {
+                        if (node.querySelector('#nextButton')) {
+                            console.log('Slideshow content loaded, attaching event listeners.');
+                            attachSlideshowEventListeners();
+                            const image = new URLSearchParams(window.location.search).get('image');
+                            if (image) {
+                                displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
+                            }
+                        }
+                        if (node.querySelector('#themeSwitcher')) {
+                            initializeThemeSwitcher(); // Initialize theme switcher when settings are loaded
                         }
                     }
                 });
@@ -73,6 +78,9 @@ document.addEventListener('DOMContentLoaded', () => {
         childList: true,
         subtree: true
     });
+
+    // Initialize theme on initial load
+    initializeTheme();
 });
 
 function changeView(view, image = null) {
@@ -92,7 +100,7 @@ function changeView(view, image = null) {
             mainContent.innerHTML = newContent;
             console.log(`View changed to: ${view}, content updated.`);
             window.history.pushState({}, '', url);
-            
+
             if (view === 'gallery') {
                 console.log('Initializing gallery view.');
                 const currentPage = getCurrentPage();
@@ -130,4 +138,26 @@ function toggleSettingsView() {
         }
         changeView('settings');
     }
+}
+
+// Initialize theme switcher and handle theme changes
+function initializeThemeSwitcher() {
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    if (!themeSwitcher) return;
+
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.body.classList.toggle('dark-mode', currentTheme === 'dark');
+    themeSwitcher.value = currentTheme;
+
+    themeSwitcher.addEventListener('change', (event) => {
+        const selectedTheme = event.target.value;
+        document.body.classList.toggle('dark-mode', selectedTheme === 'dark');
+        localStorage.setItem('theme', selectedTheme);
+    });
+}
+
+// Initialize theme on initial load
+function initializeTheme() {
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    document.body.classList.toggle('dark-mode', currentTheme === 'dark');
 }
