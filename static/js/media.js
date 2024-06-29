@@ -203,9 +203,16 @@ export function displayImageWithUrlUpdate(mediaUrl) {
     }
 }
 
-// Clear video source and hide video element on initial page load
+// Clear video source and hide video element on initial page load if view is slideshow
 document.addEventListener('DOMContentLoaded', () => {
-    const videoElement = document.getElementById('slideshowDisplayedVideo');
-    videoElement.src = '';
-    videoElement.style.display = 'none';
+    const view = new URLSearchParams(window.location.search).get('view');
+    if (view === 'slideshow') {
+        const videoElement = document.getElementById('slideshowDisplayedVideo');
+        if (videoElement) {
+            videoElement.src = '';
+            videoElement.style.display = 'none';
+        } else {
+            console.error('Video element not found.');
+        }
+    }
 });

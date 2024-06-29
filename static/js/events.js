@@ -78,14 +78,9 @@ export function attachSlideshowEventListeners() {
 
 // Add event listeners for slideshow controls on initial load and URL change
 document.addEventListener('DOMContentLoaded', () => {
+    const view = new URLSearchParams(window.location.search).get('view');
     console.log('Document loaded, attaching slideshow event listeners.');
-    attachSlideshowEventListeners();
-    window.addEventListener('popstate', () => {
-        const urlParams = new URLSearchParams(window.location.search);
-        const view = urlParams.get('view');
-        if (view === 'slideshow') {
-            console.log('URL changed to slideshow view, attaching event listeners.');
-            attachSlideshowEventListeners();
-        }
-    });
+    if (view === 'slideshow') {
+        attachSlideshowEventListeners();
+    }
 });
