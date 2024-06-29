@@ -1,7 +1,7 @@
 // fileTree.js
 import { setData, displayImageWithUrlUpdate } from './media.js';
 import { expandAll, collapseAll } from './events.js';
-import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
+import { initializeGallery, getCurrentPage, setCurrentPage } from './dom_pinterest.js';
 
 // Function to populate the file tree
 export function populateFileTree() {
@@ -71,11 +71,12 @@ export function buildFileTree(container, nodes) {
                                     // Display the first media after data is loaded and update the URL
                                     const firstMediaUrl = images[0];
                                     displayImageWithUrlUpdate(firstMediaUrl);
+                                    // Reset the current page to 1 when loading a new folder
+                                    setCurrentPage(1);
                                     // Refresh the gallery with the new images if the view is gallery
                                     const view = new URLSearchParams(window.location.search).get('view');
                                     if (view === 'gallery' || !view) {
-                                        const currentPage = getCurrentPage();
-                                        initializeGallery(images, currentPage);
+                                        initializeGallery(images, 1);
                                     }
                                 } else {
                                     console.error('No media found in the selected directory.');
@@ -118,11 +119,12 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // Display the first media after data is loaded and update the URL
                                 const firstMediaUrl = images[0];
                                 displayImageWithUrlUpdate(firstMediaUrl);
+                                // Reset the current page to 1 when loading a new folder
+                                setCurrentPage(1);
                                 // Refresh the gallery with the new images if the view is gallery
                                 const view = new URLSearchParams(window.location.search).get('view');
                                 if (view === 'gallery' || !view) {
-                                    const currentPage = getCurrentPage();
-                                    initializeGallery(images, currentPage);
+                                    initializeGallery(images, 1);
                                 }
                             } else {
                                 console.error('No media found in the selected directory.');

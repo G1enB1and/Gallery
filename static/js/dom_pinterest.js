@@ -15,6 +15,7 @@ export function getCurrentPage() {
 
 export function setCurrentPage(page) {
     currentPage = page;
+    sessionStorage.setItem('currentPage', page);
 }
 
 // Function to fetch image dimensions
