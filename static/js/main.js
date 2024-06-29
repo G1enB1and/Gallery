@@ -2,6 +2,7 @@ import { initializePage, adjustMainContent } from './dom.js';
 import { handleKeyPress, expandAll, collapseAll, attachSlideshowEventListeners } from './events.js'; // Ensure attachSlideshowEventListeners is imported
 import { populateFileTree } from './fileTree.js';
 import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
+import { displayMedia } from './media.js'; // Import displayMedia function
 
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Document loaded, initializing page.');
@@ -44,6 +45,10 @@ document.addEventListener('DOMContentLoaded', () => {
     if (view === 'slideshow') {
         console.log('Initial load of slideshow view, attaching event listeners.');
         attachSlideshowEventListeners(); // Attach slideshow event listeners on initial load if view is slideshow
+        const image = new URLSearchParams(window.location.search).get('image');
+        if (image) {
+            displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
+        }
     }
 
     // Use MutationObserver to detect changes in the DOM
@@ -54,6 +59,10 @@ document.addEventListener('DOMContentLoaded', () => {
                     if (node.nodeType === Node.ELEMENT_NODE && node.querySelector('#nextButton')) {
                         console.log('Slideshow content loaded, attaching event listeners.');
                         attachSlideshowEventListeners();
+                        const image = new URLSearchParams(window.location.search).get('image');
+                        if (image) {
+                            displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
+                        }
                     }
                 });
             }
@@ -96,6 +105,9 @@ function changeView(view, image = null) {
             } else if (view === 'slideshow') {
                 console.log('Initializing slideshow view, attaching event listeners.');
                 attachSlideshowEventListeners(); // Ensure event listeners are set up for the slideshow
+                if (image) {
+                    displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
+                }
             }
         })
         .catch(error => console.error('Error changing view:', error));
