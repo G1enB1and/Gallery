@@ -27,7 +27,7 @@ document.addEventListener('DOMContentLoaded', () => {
     const settingsIcon = document.getElementById('settings-icon');
     if (settingsIcon) {
         settingsIcon.addEventListener('click', () => {
-            changeView('settings');
+            toggleSettingsView();
         });
     }
 
@@ -66,9 +66,14 @@ document.addEventListener('DOMContentLoaded', () => {
     });
 });
 
-function changeView(view) {
+function changeView(view, image = null) {
     console.log(`Changing view to: ${view}`);
-    fetch(`index.html?view=${view}`)
+    let url = `index.html?view=${view}`;
+    if (view === 'slideshow' && image) {
+        url += `&image=${encodeURIComponent(image)}`;
+    }
+
+    fetch(url)
         .then(response => response.text())
         .then(html => {
             const parser = new DOMParser();
@@ -77,7 +82,7 @@ function changeView(view) {
             const newContent = doc.querySelector('#mainContent').innerHTML;
             mainContent.innerHTML = newContent;
             console.log(`View changed to: ${view}, content updated.`);
-            window.history.pushState({}, '', `index.html?view=${view}`);
+            window.history.pushState({}, '', url);
             
             if (view === 'gallery') {
                 console.log('Initializing gallery view.');
@@ -88,7 +93,29 @@ function changeView(view) {
                         initializeGallery(images, currentPage);
                     })
                     .catch(error => console.error('Error fetching images:', error));
+            } else if (view === 'slideshow') {
+                console.log('Initializing slideshow view, attaching event listeners.');
+                attachSlideshowEventListeners(); // Ensure event listeners are set up for the slideshow
             }
         })
         .catch(error => console.error('Error changing view:', error));
+}
+
+function toggleSettingsView() {
+    const currentView = new URLSearchParams(window.location.search).get('view') || 'gallery';
+    const previousView = sessionStorage.getItem('previousView');
+    const currentImage = new URLSearchParams(window.location.search).get('image');
+
+    if (currentView === 'settings' && previousView) {
+        const previousImage = sessionStorage.getItem('previousImage');
+        changeView(previousView, previousImage);
+        sessionStorage.removeItem('previousView');
+        sessionStorage.removeItem('previousImage');
+    } else {
+        sessionStorage.setItem('previousView', currentView);
+        if (currentView === 'slideshow' && currentImage) {
+            sessionStorage.setItem('previousImage', currentImage);
+        }
+        changeView('settings');
+    }
 }
