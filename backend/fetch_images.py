@@ -21,8 +21,14 @@ def fetch_and_randomize_images(directory):
 
     random.shuffle(images)
     images_json_path = os.path.join(os.path.dirname(__file__), '..', 'images.json')
+
+    total_images = len(images)
     with open(images_json_path, 'w') as f:
         json.dump(images, f)
+        for index, image in enumerate(images):
+            progress = (index + 1) / total_images * 100
+            print(f'Progress: {progress:.2f}%')
+            f.flush()
 
 if __name__ == '__main__':
     if len(sys.argv) > 1:

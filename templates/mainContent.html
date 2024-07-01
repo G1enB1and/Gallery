@@ -1,16 +1,23 @@
-<div id="mainContent" class="main-content">
-    {% if view == 'slideshow' %}
-        <div class="slideshow-container">
-            <div class="slideshow">
-                {% include 'slideshow.html' %}
-            </div>
+<div id="loading" class="loading" style="display: flex; position: absolute; top: 0; left: 0; width: 100%; height: 100%; z-index: 1000; backdrop-filter: blur(10px); background: rgba(255, 255, 255, 0.3);">
+    <div class="loading-content">
+        <h1 id="loading-text">LOADING</h1>
+        <p id="loading-subtext">Fetching images...</p>
+        <div class="progress-bar-container">
+            <div id="progress" class="progress-bar"></div>
         </div>
-    {% elif view == 'settings' %}
-        {% include 'settings.html' %}
-    {% else %}
-        <div class="gallery-container">
-            {% include 'gallery.html' %}
-            <div id="pagination"></div>
-        </div>
-    {% endif %}
+    </div>
 </div>
+{% if view == 'slideshow' %}
+    <div class="slideshow-container">
+        <div class="slideshow">
+            {% include 'slideshow.html' %}
+        </div>
+    </div>
+{% elif view == 'settings' %}
+    {% include 'settings.html' %}
+{% else %}
+    <div class="gallery-container">
+        {% include 'gallery.html' %}
+        <div id="pagination"></div>
+    </div>
+{% endif %}

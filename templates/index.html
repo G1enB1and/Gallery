@@ -22,7 +22,6 @@
     <script src="static/js/fileTree.js" type="module"></script>
     <script src="static/js/main.js" type="module"></script>
     <script src="static/js/resizer.js" type="module"></script>
-
 </head>
 <body>
     {% include 'header.html' %}
@@ -33,17 +32,7 @@
             <div class="resizer" id="resizer-filetree"></div>
         </div>
         <div id="mainContent" class="main-content">
-            {% if view == 'slideshow' %}
-                <div class="slideshow-container">
-                    <div class="slideshow">
-                        {% include 'slideshow.html' %}
-                    </div>
-                </div>
-            {% elif view == 'settings' %}
-                {% include 'settings.html' %}
-            {% else %}
-                {% include 'gallery.html' %}
-            {% endif %}
+            {% include 'mainContent.html' %}
         </div>
         <div id="dataPanel" class="data-panel">
             {% include 'dataPanel.html' %}

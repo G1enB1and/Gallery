@@ -1,7 +1,7 @@
-// fileTree.js
 import { setData, displayImageWithUrlUpdate } from './media.js';
 import { expandAll, collapseAll } from './events.js';
-import { initializeGallery, getCurrentPage, setCurrentPage } from './dom_pinterest.js';
+import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
+import { showLoadingScreen, hideLoadingScreen, setSubtext } from './main.js';
 
 // Function to populate the file tree
 export function populateFileTree() {
@@ -50,6 +50,7 @@ export function buildFileTree(container, nodes) {
 
             li.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent event from bubbling up to parent elements
+                showLoadingScreen();
                 fetch('/update-images', {
                     method: 'POST',
                     headers: {
@@ -71,21 +72,31 @@ export function buildFileTree(container, nodes) {
                                     // Display the first media after data is loaded and update the URL
                                     const firstMediaUrl = images[0];
                                     displayImageWithUrlUpdate(firstMediaUrl);
-                                    // Reset the current page to 1 when loading a new folder
-                                    setCurrentPage(1);
                                     // Refresh the gallery with the new images if the view is gallery
                                     const view = new URLSearchParams(window.location.search).get('view');
                                     if (view === 'gallery' || !view) {
-                                        initializeGallery(images, 1);
+                                        const currentPage = 1; // Reset to the first page
+                                        initializeGallery(images, currentPage);
                                     }
                                 } else {
                                     console.error('No media found in the selected directory.');
                                 }
                             })
-                            .catch(error => console.error('Error fetching images:', error));
+                            .catch(error => console.error('Error fetching images:', error))
+                            .finally(() => {
+                                setSubtext('Loading Placeholders...');
+                                setTimeout(() => {
+                                    setSubtext('Loading initial screen space images...');
+                                    // Simulate loading of initial screen space images
+                                    setTimeout(hideLoadingScreen, 3000); // Adjust the timeout as needed
+                                }, 3000); // Adjust the timeout as needed
+                            });
                     }, 300); // Delay of 3 seconds to ensure images.json is updated
                 })
-                .catch(error => console.error('Error updating images:', error));
+                .catch(error => {
+                    console.error('Error updating images:', error);
+                    hideLoadingScreen();
+                });
             });
         }
         container.appendChild(li);
@@ -98,6 +109,7 @@ document.addEventListener('DOMContentLoaded', () => {
     if (rootDirectoryLink) {
         rootDirectoryLink.addEventListener('click', (e) => {
             e.preventDefault();
+            showLoadingScreen();
             fetch('/update-images', {
                 method: 'POST',
                 headers: {
@@ -119,21 +131,31 @@ document.addEventListener('DOMContentLoaded', () => {
                                 // Display the first media after data is loaded and update the URL
                                 const firstMediaUrl = images[0];
                                 displayImageWithUrlUpdate(firstMediaUrl);
-                                // Reset the current page to 1 when loading a new folder
-                                setCurrentPage(1);
                                 // Refresh the gallery with the new images if the view is gallery
                                 const view = new URLSearchParams(window.location.search).get('view');
                                 if (view === 'gallery' || !view) {
-                                    initializeGallery(images, 1);
+                                    const currentPage = 1; // Reset to the first page
+                                    initializeGallery(images, currentPage);
                                 }
                             } else {
                                 console.error('No media found in the selected directory.');
                             }
                         })
-                        .catch(error => console.error('Error fetching images:', error));
+                        .catch(error => console.error('Error fetching images:', error))
+                        .finally(() => {
+                            setSubtext('Loading Placeholders...');
+                            setTimeout(() => {
+                                setSubtext('Loading initial screen space images...');
+                                // Simulate loading of initial screen space images
+                                setTimeout(hideLoadingScreen, 3000); // Adjust the timeout as needed
+                            }, 3000); // Adjust the timeout as needed
+                        });
                 }, 300); // Delay of 3 seconds to ensure images.json is updated
             })
-            .catch(error => console.error('Error updating images:', error));
+            .catch(error => {
+                console.error('Error updating images:', error);
+                hideLoadingScreen();
+            });
         });
     }
 });

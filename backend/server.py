@@ -1,4 +1,3 @@
-# server.py
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 import json
@@ -6,6 +5,7 @@ import os
 import subprocess
 import urllib.parse
 import webbrowser
+import time
 
 # Define the root directory for the file tree
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -30,7 +30,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
     def do_GET(self):
         parsed_path = urllib.parse.urlparse(self.path)
         query_params = urllib.parse.parse_qs(parsed_path.query)
-        view = query_params.get('view', ['gallery'])[0]  # Default to 'gallery' view
+        view = query_params.get('view', ['loading'])[0]  # Default to 'loading' view
 
         print(f"View parameter: {view}")  # Add logging to verify the view parameter
 
@@ -92,10 +92,21 @@ class RequestHandler(SimpleHTTPRequestHandler):
             directory = json.loads(post_data).get('directory')
             if directory:
                 full_path = os.path.join(PROJECT_ROOT, directory)
-                subprocess.run(['python', 'backend/fetch_images.py', full_path])
+                process = subprocess.Popen(
+                    ['python', 'backend/fetch_images.py', full_path],
+                    stdout=subprocess.PIPE,
+                    stderr=subprocess.PIPE,
+                    universal_newlines=True,
+                )
+
                 self.send_response(200)
+                self.send_header('Content-type', 'text/plain')
                 self.end_headers()
-                self.wfile.write(b'Images updated successfully.')
+
+                for line in iter(process.stdout.readline, ''):
+                    self.wfile.write(line.encode())
+                process.stdout.close()
+                process.wait()
             else:
                 self.send_response(400)
                 self.end_headers()
