@@ -78,18 +78,12 @@ document.addEventListener('DOMContentLoaded', () => {
     initializeTheme();
 
     // Start fetching images on initial load
-    showLoadingScreen();
-    fetchImages().finally(() => {
-        setSubtext('Loading Placeholders...');
-        setTimeout(() => {
-            setSubtext('Loading initial screen space images...');
-            // Simulate loading of initial screen space images
-            setTimeout(hideLoadingScreen, 3000); // Adjust the timeout as needed
-        }, 3000); // Adjust the timeout as needed
+    fetchImages().then(() => {
+        hideLoadingScreen();
     });
 });
 
-export function changeView(view, image = null) {
+function changeView(view, image = null) {
     console.log(`Changing view to: ${view}`);
     let url = `index.html?view=${view}`;
     if (view === 'slideshow' && image) {
@@ -114,6 +108,14 @@ export function changeView(view, image = null) {
                     .then(response => response.json())
                     .then(images => {
                         initializeGallery(images, currentPage);
+                        // Update loading screen text for placeholders
+                        updateLoadingText('Loading placeholders...');
+                        // Simulate placeholder loading with a timeout for demonstration
+                        setTimeout(() => {
+                            // Update loading screen text for initial screen space images
+                            updateLoadingText('Loading initial screen space images...');
+                            setTimeout(hideLoadingScreen, 1000); // Hide after loading
+                        }, 1000); // Simulate placeholder loading time
                     })
                     .catch(error => console.error('Error fetching images:', error));
             } else if (view === 'slideshow') {
@@ -121,6 +123,7 @@ export function changeView(view, image = null) {
                 attachSlideshowEventListeners(); // Ensure event listeners are set up for the slideshow
                 if (image) {
                     displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
+                    hideLoadingScreen(); // Hide loading screen after displaying media
                 }
             }
         })
@@ -143,6 +146,7 @@ function toggleSettingsView() {
             sessionStorage.setItem('previousImage', currentImage);
         }
         changeView('settings');
+        hideLoadingScreen(); // Ensure loading screen is hidden when opening settings
     }
 }
 
@@ -168,70 +172,66 @@ function initializeTheme() {
     document.body.classList.toggle('dark-mode', currentTheme === 'dark');
 }
 
-// Show loading screen
+// Show the loading screen
 export function showLoadingScreen() {
-    const loadingElement = document.getElementById('loading');
-    if (loadingElement) {
-        loadingElement.style.display = 'flex';
-    } else {
-        console.error('Loading screen element not found');
+    const loadingScreen = document.getElementById('loading');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'flex';
     }
 }
 
-// Hide loading screen
+// Hide the loading screen
 export function hideLoadingScreen() {
-    const loadingElement = document.getElementById('loading');
-    if (loadingElement) {
-        loadingElement.style.display = 'none';
-    } else {
-        console.error('Loading screen element not found');
+    const loadingScreen = document.getElementById('loading');
+    if (loadingScreen) {
+        loadingScreen.style.display = 'none';
     }
 }
 
-// Set loading screen subtext
-export function setSubtext(text) {
-    const subtextElement = document.getElementById('loading-subtext');
-    if (subtextElement) {
-        subtextElement.innerText = text;
-    } else {
-        console.error('Loading subtext element not found');
+// Update loading screen text
+export function updateLoadingText(text) {
+    const loadingSubtext = document.getElementById('loading-subtext');
+    if (loadingSubtext) {
+        loadingSubtext.textContent = text;
     }
 }
 
 // Fetch images and update progress bar
 function fetchImages() {
-    return fetch('/update-images', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json'
-        },
-        body: JSON.stringify({ directory: 'Pictures' }) // Adjust the directory as needed
-    })
-    .then(response => {
-        const reader = response.body.getReader();
-        const contentLength = +response.headers.get('Content-Length');
-        let receivedLength = 0;
-        let chunks = [];
+    return new Promise((resolve, reject) => {
+        showLoadingScreen();
+        updateLoadingText('Fetching images...');
 
-        reader.read().then(function processText({ done, value }) {
-            if (done) {
-                console.log('Fetch complete');
-                changeView('gallery'); // Change view to gallery when fetch is complete
-                hideLoadingScreen();
-                return;
-            }
+        fetch('/update-images', {
+            method: 'POST',
+            headers: {
+                'Content-Type': 'application/json'
+            },
+            body: JSON.stringify({ directory: 'Pictures' }) // Adjust the directory as needed
+        })
+        .then(response => {
+            const reader = response.body.getReader();
+            const contentLength = +response.headers.get('Content-Length');
+            let receivedLength = 0;
+            let chunks = [];
 
-            receivedLength += value.length;
-            chunks.push(value);
-            let progress = (receivedLength / contentLength) * 100;
-            const progressBar = document.getElementById('progress');
-            if (progressBar) {
-                progressBar.style.width = `${progress}%`;
-            } else {
-                console.error('Progress bar element not found');
-            }
-            return reader.read().then(processText);
+            reader.read().then(function processText({ done, value }) {
+                if (done) {
+                    console.log('Fetch complete');
+                    resolve(); // Resolve the promise when fetch is complete
+                    return;
+                }
+
+                receivedLength += value.length;
+                chunks.push(value);
+                let progress = (receivedLength / contentLength) * 100;
+                document.getElementById('progress').style.width = `${progress}%`;
+                return reader.read().then(processText);
+            });
+        })
+        .catch(error => {
+            console.error('Error fetching images:', error);
+            reject(error);
         });
-    })
-    .catch(error => console.error('Error fetching images:', error));
+    });
 }

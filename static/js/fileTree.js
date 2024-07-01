@@ -1,7 +1,7 @@
+import { showLoadingScreen, hideLoadingScreen, updateLoadingText } from './main.js';
 import { setData, displayImageWithUrlUpdate } from './media.js';
 import { expandAll, collapseAll } from './events.js';
 import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
-import { showLoadingScreen, hideLoadingScreen, setSubtext } from './main.js';
 
 // Function to populate the file tree
 export function populateFileTree() {
@@ -51,6 +51,7 @@ export function buildFileTree(container, nodes) {
             li.addEventListener('click', (e) => {
                 e.stopPropagation(); // Prevent event from bubbling up to parent elements
                 showLoadingScreen();
+                updateLoadingText('Fetching images...');
                 fetch('/update-images', {
                     method: 'POST',
                     headers: {
@@ -81,22 +82,17 @@ export function buildFileTree(container, nodes) {
                                 } else {
                                     console.error('No media found in the selected directory.');
                                 }
-                            })
-                            .catch(error => console.error('Error fetching images:', error))
-                            .finally(() => {
-                                setSubtext('Loading Placeholders...');
+                                updateLoadingText('Loading placeholders...');
+                                // Simulate placeholder loading with a timeout for demonstration
                                 setTimeout(() => {
-                                    setSubtext('Loading initial screen space images...');
-                                    // Simulate loading of initial screen space images
-                                    setTimeout(hideLoadingScreen, 3000); // Adjust the timeout as needed
-                                }, 3000); // Adjust the timeout as needed
-                            });
+                                    updateLoadingText('Loading initial screen space images...');
+                                    setTimeout(hideLoadingScreen, 1000); // Hide after loading
+                                }, 1000); // Simulate placeholder loading time
+                            })
+                            .catch(error => console.error('Error fetching images:', error));
                     }, 300); // Delay of 3 seconds to ensure images.json is updated
                 })
-                .catch(error => {
-                    console.error('Error updating images:', error);
-                    hideLoadingScreen();
-                });
+                .catch(error => console.error('Error updating images:', error));
             });
         }
         container.appendChild(li);
@@ -110,6 +106,7 @@ document.addEventListener('DOMContentLoaded', () => {
         rootDirectoryLink.addEventListener('click', (e) => {
             e.preventDefault();
             showLoadingScreen();
+            updateLoadingText('Fetching images...');
             fetch('/update-images', {
                 method: 'POST',
                 headers: {
@@ -140,22 +137,17 @@ document.addEventListener('DOMContentLoaded', () => {
                             } else {
                                 console.error('No media found in the selected directory.');
                             }
-                        })
-                        .catch(error => console.error('Error fetching images:', error))
-                        .finally(() => {
-                            setSubtext('Loading Placeholders...');
+                            updateLoadingText('Loading placeholders...');
+                            // Simulate placeholder loading with a timeout for demonstration
                             setTimeout(() => {
-                                setSubtext('Loading initial screen space images...');
-                                // Simulate loading of initial screen space images
-                                setTimeout(hideLoadingScreen, 3000); // Adjust the timeout as needed
-                            }, 3000); // Adjust the timeout as needed
-                        });
+                                updateLoadingText('Loading initial screen space images...');
+                                setTimeout(hideLoadingScreen, 1000); // Hide after loading
+                            }, 1000); // Simulate placeholder loading time
+                        })
+                        .catch(error => console.error('Error fetching images:', error));
                 }, 300); // Delay of 3 seconds to ensure images.json is updated
             })
-            .catch(error => {
-                console.error('Error updating images:', error);
-                hideLoadingScreen();
-            });
+            .catch(error => console.error('Error updating images:', error));
         });
     }
 });
