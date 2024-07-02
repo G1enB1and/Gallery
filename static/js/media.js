@@ -1,3 +1,5 @@
+import { hideLoadingScreen } from "./main.js"; // Ensure the correct path and extension
+
 let data = [];
 let intervalId = null;
 let preloadedNextImage = new Image();
@@ -37,6 +39,7 @@ export function displayMedia(src) {
         videoElement.autoplay = true;
         videoElement.load();
         console.log(`Displaying video: ${src}`);
+        hideLoadingScreen(); // Hide loading screen after displaying media
     } else {
         const preloader = new Image();
         preloader.onload = () => {
@@ -45,9 +48,11 @@ export function displayMedia(src) {
             videoElement.style.display = 'none'; // Ensure video element is hidden
             videoElement.src = ''; // Clear the video source explicitly
             console.log(`Displaying image: ${src}`);
+            hideLoadingScreen(); // Hide loading screen after displaying media
         };
         preloader.onerror = () => {
             console.error(`Failed to load image: ${src}`);
+            hideLoadingScreen(); // Ensure loading screen is hidden even if there is an error
         };
         preloader.src = src;
     }

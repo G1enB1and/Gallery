@@ -92,8 +92,11 @@ function changeView(view, image = null) {
         url += `&image=${encodeURIComponent(image)}`;
     }
 
-    loadingCount++;
-    showLoadingScreen();
+    /* only show loading screen on view change if the new view is the gallery */
+    if (view === 'gallery') {
+        loadingCount++;
+        showLoadingScreen(); /* show loading screen when view changes */
+    }
 
     fetch(url)
         .then(response => response.text())
@@ -109,6 +112,10 @@ function changeView(view, image = null) {
             if (view === 'gallery') {
                 console.log('Initializing gallery view.');
                 const currentPage = getCurrentPage();
+
+                loadingCount++; 
+                showLoadingScreen(); /* show loading screen when view changes from slideshow to gallery */
+
                 fetch('images.json')
                     .then(response => response.json())
                     .then(images => {
@@ -265,8 +272,16 @@ function fetchImages() {
 }
 
 // Check if the loading screen should be hidden
-function checkHideLoadingScreen() {
-    if (loadingCount <= 0) {
+function checkHideLoadingScreen() { 
+    /* if all loading stages are complete or if the documents readystate is complete */
+    if (loadingCount <= 0 || document.readyState === "complete") {
         hideLoadingScreen();
     }
 }
+
+document.onreadystatechange = function () {
+    if (document.readyState === "complete") {
+        console.log("Page is fully loaded.");
+        hideLoadingScreen();
+    }
+};
