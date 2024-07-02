@@ -4,6 +4,8 @@ import { populateFileTree } from './fileTree.js';
 import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
 import { displayMedia } from './media.js';
 
+let loadingCount = 0;
+
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Document loaded, initializing page.');
     initializePage();
@@ -114,20 +116,32 @@ function changeView(view, image = null) {
                         setTimeout(() => {
                             // Update loading screen text for initial screen space images
                             updateLoadingText('Loading initial screen space images...');
-                            setTimeout(hideLoadingScreen, 1000); // Hide after loading
+                            setTimeout(() => {
+                                loadingCount--;
+                                checkHideLoadingScreen();
+                            }, 1000); // Simulate initial screen space image loading time
                         }, 1000); // Simulate placeholder loading time
                     })
-                    .catch(error => console.error('Error fetching images:', error));
+                    .catch(error => {
+                        console.error('Error fetching images:', error);
+                        loadingCount--;
+                        checkHideLoadingScreen();
+                    });
             } else if (view === 'slideshow') {
                 console.log('Initializing slideshow view, attaching event listeners.');
                 attachSlideshowEventListeners(); // Ensure event listeners are set up for the slideshow
                 if (image) {
                     displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
-                    hideLoadingScreen(); // Hide loading screen after displaying media
+                    loadingCount--;
+                    checkHideLoadingScreen();
                 }
             }
         })
-        .catch(error => console.error('Error changing view:', error));
+        .catch(error => {
+            console.error('Error changing view:', error);
+            loadingCount--;
+            checkHideLoadingScreen();
+        });
 }
 
 function toggleSettingsView() {
@@ -234,4 +248,11 @@ function fetchImages() {
             reject(error);
         });
     });
+}
+
+// Check if the loading screen should be hidden
+function checkHideLoadingScreen() {
+    if (loadingCount <= 0) {
+        hideLoadingScreen();
+    }
 }
