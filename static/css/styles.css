@@ -39,7 +39,7 @@ body, html {
     --lmScrollbarColorThumb: var(--offwhite2);
     --lmScrollbarColorTrack: var(--medlightgrey);
     --lmExplorerHeaderBG: var(--offwhite2);
-    --lmGlassMorphismBG: rgba(255,255, 255, 0.3);
+    --lmGlassMorphismBG: rgba(0,123, 255, 0.3);
     --lmGlassMorphismText: var(--offblack2);
     --lmGlassMorphismBorder: var(--medlightgrey);
     --lmProgressBarBG: var(--medgrey);
@@ -123,9 +123,9 @@ a:link, a:visited, a:hover, a:active {
     position: absolute;
     top: 0;
     left: 0;
-    width: calc(100% - 20px); /* accommodate for margin */
-    height: calc(100% - 20px); /* accommodate for margin */
-    margin: 10px;
+    width: calc(100% - 100px); /* accommodate for margin */
+    height: calc(100% - 100px); /* accommodate for margin */
+    margin: 50px;
     z-index: 1000;
     overflow: hidden;
     backdrop-filter: blur(20px);

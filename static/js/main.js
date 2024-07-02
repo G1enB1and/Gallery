@@ -92,6 +92,9 @@ function changeView(view, image = null) {
         url += `&image=${encodeURIComponent(image)}`;
     }
 
+    loadingCount++;
+    showLoadingScreen();
+
     fetch(url)
         .then(response => response.text())
         .then(html => {
@@ -131,10 +134,16 @@ function changeView(view, image = null) {
                 console.log('Initializing slideshow view, attaching event listeners.');
                 attachSlideshowEventListeners(); // Ensure event listeners are set up for the slideshow
                 if (image) {
-                    displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
+                    displayMedia(decodeURIComponent(image)).then(() => {
+                        loadingCount--;
+                        checkHideLoadingScreen();
+                    }); // Ensure the image is displayed
+                } else {
                     loadingCount--;
                     checkHideLoadingScreen();
                 }
+            } else if (view === 'settings') {
+                hideLoadingScreen(); // Ensure loading screen is hidden when opening settings
             }
         })
         .catch(error => {
@@ -213,6 +222,7 @@ export function updateLoadingText(text) {
 // Fetch images and update progress bar
 function fetchImages() {
     return new Promise((resolve, reject) => {
+        loadingCount++;
         showLoadingScreen();
         updateLoadingText('Fetching images...');
 
@@ -232,6 +242,8 @@ function fetchImages() {
             reader.read().then(function processText({ done, value }) {
                 if (done) {
                     console.log('Fetch complete');
+                    loadingCount--;
+                    checkHideLoadingScreen();
                     resolve(); // Resolve the promise when fetch is complete
                     return;
                 }
@@ -245,6 +257,8 @@ function fetchImages() {
         })
         .catch(error => {
             console.error('Error fetching images:', error);
+            loadingCount--;
+            checkHideLoadingScreen();
             reject(error);
         });
     });
