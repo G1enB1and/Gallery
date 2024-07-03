@@ -42,6 +42,9 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
+    // Initialize theme switcher
+    initializeThemeSwitcher();
+
     const view = new URLSearchParams(window.location.search).get('view') || 'gallery';
     console.log(`Initial view: ${view}`);
     if (view === 'slideshow') {
@@ -183,7 +186,10 @@ function toggleSettingsView() {
 // Initialize theme switcher and handle theme changes
 function initializeThemeSwitcher() {
     const themeSwitcher = document.getElementById('themeSwitcher');
-    if (!themeSwitcher) return;
+    if (!themeSwitcher) {
+        console.error('Theme switcher element not found.');
+        return;
+    }
 
     const currentTheme = localStorage.getItem('theme') || 'light';
     document.body.classList.toggle('dark-mode', currentTheme === 'dark');
@@ -191,6 +197,7 @@ function initializeThemeSwitcher() {
 
     themeSwitcher.addEventListener('change', (event) => {
         const selectedTheme = event.target.value;
+        console.log(`Theme changed to: ${selectedTheme}`);
         document.body.classList.toggle('dark-mode', selectedTheme === 'dark');
         localStorage.setItem('theme', selectedTheme);
     });
@@ -200,6 +207,7 @@ function initializeThemeSwitcher() {
 function initializeTheme() {
     const currentTheme = localStorage.getItem('theme') || 'light';
     document.body.classList.toggle('dark-mode', currentTheme === 'dark');
+    console.log(`Initial theme: ${currentTheme}`);
 }
 
 // Show the loading screen
