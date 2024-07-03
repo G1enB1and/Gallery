@@ -42,8 +42,11 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Initialize theme switcher
-    initializeThemeSwitcher();
+    // Event listener for Apply button in settings
+    const applySettingsButton = document.getElementById('applySettings');
+    if (applySettingsButton) {
+        applySettingsButton.addEventListener('click', applySettings);
+    }
 
     const view = new URLSearchParams(window.location.search).get('view') || 'gallery';
     console.log(`Initial view: ${view}`);
@@ -183,31 +186,43 @@ function toggleSettingsView() {
     }
 }
 
-// Initialize theme switcher and handle theme changes
-function initializeThemeSwitcher() {
+// Apply settings
+function applySettings() {
     const themeSwitcher = document.getElementById('themeSwitcher');
-    if (!themeSwitcher) {
-        console.error('Theme switcher element not found.');
-        return;
-    }
-
-    const currentTheme = localStorage.getItem('theme') || 'light';
-    document.body.classList.toggle('dark-mode', currentTheme === 'dark');
-    themeSwitcher.value = currentTheme;
-
-    themeSwitcher.addEventListener('change', (event) => {
-        const selectedTheme = event.target.value;
-        console.log(`Theme changed to: ${selectedTheme}`);
-        document.body.classList.toggle('dark-mode', selectedTheme === 'dark');
+    if (themeSwitcher) {
+        const selectedTheme = themeSwitcher.value;
         localStorage.setItem('theme', selectedTheme);
-    });
+
+        // Remove existing theme stylesheet
+        const existingThemeLink = document.getElementById('theme-stylesheet');
+        if (existingThemeLink) {
+            existingThemeLink.remove();
+        }
+
+        // Add new theme stylesheet
+        const newThemeLink = document.createElement('link');
+        newThemeLink.id = 'theme-stylesheet';
+        newThemeLink.rel = 'stylesheet';
+        newThemeLink.href = selectedTheme === 'dark' ? '/static/css/dark.css' : '/static/css/light.css';
+        document.head.appendChild(newThemeLink);
+
+        console.log(`Theme applied: ${selectedTheme}`);
+    }
 }
 
 // Initialize theme on initial load
 function initializeTheme() {
     const currentTheme = localStorage.getItem('theme') || 'light';
-    document.body.classList.toggle('dark-mode', currentTheme === 'dark');
-    console.log(`Initial theme: ${currentTheme}`);
+    const themeSwitcher = document.getElementById('themeSwitcher');
+    if (themeSwitcher) {
+        themeSwitcher.value = currentTheme;
+    }
+
+    const themeLink = document.createElement('link');
+    themeLink.id = 'theme-stylesheet';
+    themeLink.rel = 'stylesheet';
+    themeLink.href = currentTheme === 'dark' ? '/static/css/dark.css' : '/static/css/light.css';
+    document.head.appendChild(themeLink);
 }
 
 // Show the loading screen

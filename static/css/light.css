@@ -1,0 +1,43 @@
+    body, html {
+        /* light mode colors */
+        --lmText: var(--offblack2);
+        --lmHeaderBG: var(--offwhite2);
+        --lmMainContentBG: var(--white);
+        --lmDataPanelBG: var(--offwhite1);
+        --lmResizer: var(--lightgrey);
+        --lmGalleryPlaceholder: var(--medgrey);
+        --lmPreviousNextBG: rgba(0, 0, 0, 0.5);
+        --lmPreviousNextFG: var(--offwhite1);
+        --lmPlayPauseBG: rgba(255, 255, 255, 0.5);
+        --lmPlayPauseFG: var(--offblack2);
+        --lmDrawerBG: var(--offwhite2);
+        --lmFileTreeBG: var(--offwhite1);
+        --lmScrollbarColorThumb: var(--offwhite2);
+        --lmScrollbarColorTrack: var(--medlightgrey);
+        --lmExplorerHeaderBG: var(--offwhite2);
+        --lmGlassMorphismBG: rgba(0, 0, 0, 0.5); 
+        --lmGlassMorphismText: var(--lightgrey);
+        --lmGlassMorphismBorder: var(--medlightgrey);
+        --lmProgressBarBG: var(--accent1);
+
+        /* active colors */
+        --aText: var(--lmText);
+        --aHeaderBG: var(--lmHeaderBG);
+        --aMainContentBG: var(--lmMainContentBG);
+        --aDataPanelBG: var(--lmDataPanelBG);
+        --aResizer: var(--lmResizer);
+        --aGalleryPlaceholder: var(--lmGalleryPlaceholder);
+        --aPreviousNextBG: var(--lmPreviousNextBG);
+        --aPreviousNextFG: var(--lmPreviousNextFG);
+        --aPlayPauseBG: var(--lmPlayPauseBG);
+        --aPlayPauseFG: var(--lmPlayPauseFG);
+        --aDrawerBG: var(--lmDrawerBG);
+        --aFileTreeBG: var(--lmFileTreeBG);
+        --aScrollbarColorThumb: var(--lmScrollbarColorThumb);
+        --aScrollbarColorTrack: var(--lmScrollbarColorTrack);
+        --aExplorerHeaderBG: var(--lmExplorerHeaderBG);
+        --aGlassMorphismBG: var(--lmGlassMorphismBG);
+        --aGlassMorphismText: var(--lmGlassMorphismText);
+        --aGlassMorphismBorder: var(--lmGlassMorphismBorder);
+        --aProgressBarBG: var(--lmProgressBarBG);
+    }
