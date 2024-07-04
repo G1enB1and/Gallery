@@ -10,6 +10,11 @@ from PIL import Image
 from PIL.ExifTags import TAGS
 from mutagen import File as MutagenFile
 import magic
+import logging
+from urllib.parse import unquote
+
+# Set up logging
+logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
 
 # Define the root directory for the file tree
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -23,7 +28,7 @@ env = Environment(loader=FileSystemLoader(TEMPLATES_ROOT))
 class RequestHandler(SimpleHTTPRequestHandler):
     def translate_path(self, path):
         """Translate a /-separated PATH to the local filename syntax."""
-        path = urllib.parse.unquote(path)
+        path = unquote(path)
         path = path.lstrip('/')
         if path.startswith('static/'):
             return os.path.join(STATIC_ROOT, path[len('static/'):])
@@ -36,7 +41,8 @@ class RequestHandler(SimpleHTTPRequestHandler):
         query_params = urllib.parse.parse_qs(parsed_path.query)
         view = query_params.get('view', ['loading'])[0]  # Default to 'loading' view
 
-        print(f"View parameter: {view}")  # Add logging to verify the view parameter
+        logging.info(f"GET request: {self.path}")
+        logging.info(f"View parameter: {view}")
 
         if parsed_path.path == '/images.json':
             self.send_response(200)
@@ -79,7 +85,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
     def render_template(self, template_name, context={}):
         try:
-            print(f"Rendering template: {template_name} with context: {context}")  # Add logging for template rendering
+            logging.info(f"Rendering template: {template_name} with context: {context}")
             template = env.get_template(template_name)
             self.send_response(200)
             self.send_header('Content-type', 'text/html')
@@ -89,6 +95,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
         except TemplateNotFound:
             raise
         except Exception as e:
+            logging.error(f'Error rendering template: {str(e)}')
             self.send_response(500)
             self.end_headers()
             self.wfile.write(f'Error rendering template: {str(e)}'.encode())
@@ -97,6 +104,8 @@ class RequestHandler(SimpleHTTPRequestHandler):
         content_length = int(self.headers['Content-Length'])
         post_data = self.rfile.read(content_length)
         data = json.loads(post_data)
+
+        logging.info(f"POST request: {self.path}")
 
         if self.path == '/update-images':
             directory = data.get('directory')
@@ -129,7 +138,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(b'Not Found')
 
     def handle_get_image_info(self, query_params):
-        file_path = query_params.get('path', [''])[0]
+        file_path = unquote(query_params.get('path', [''])[0])
         if file_path:
             info = get_image_info(file_path)
             self.send_response(200)
@@ -142,7 +151,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(b'Missing path parameter')
 
     def handle_get_tags(self, query_params):
-        file_path = query_params.get('path', [''])[0]
+        file_path = unquote(query_params.get('path', [''])[0])
         if file_path:
             tags = get_tags(file_path)
             self.send_response(200)
@@ -155,7 +164,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(b'Missing path parameter')
 
     def handle_add_tag(self, data):
-        file_path = data.get('path')
+        file_path = unquote(data.get('path', ''))
         new_tag = data.get('tag')
         if file_path and new_tag:
             success = add_tag(file_path, new_tag)
@@ -191,6 +200,7 @@ def get_file_tree(path):
     return build_tree(path)
 
 def get_image_info(file_path):
+    logging.info(f"Getting image info for: {file_path}")
     file_name = os.path.basename(file_path)
     file_size = os.path.getsize(file_path)
     
@@ -205,44 +215,73 @@ def get_image_info(file_path):
     }
     
     if file_type.startswith('image'):
-        with Image.open(file_path) as img:
-            info["Dimensions"] = f"{img.width}x{img.height}"
-            exif_data = img._getexif()
-            if exif_data:
-                for tag_id, value in exif_data.items():
-                    tag = TAGS.get(tag_id, tag_id)
-                    info[tag] = str(value)
+        try:
+            with Image.open(file_path) as img:
+                info["Dimensions"] = f"{img.width}x{img.height}"
+                exif_data = img._getexif()
+                if exif_data:
+                    for tag_id, value in exif_data.items():
+                        tag = TAGS.get(tag_id, tag_id)
+                        info[tag] = str(value)
+        except Exception as e:
+            logging.error(f"Error getting image info: {str(e)}")
     
     return info
 
 def get_tags(file_path):
-    if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff')):
-        with Image.open(file_path) as img:
-            exif_data = img._getexif()
-            if exif_data:
-                for tag_id, value in exif_data.items():
-                    if TAGS.get(tag_id) == 'UserComment':
-                        return value.split(',')
-    elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
-        file = MutagenFile(file_path)
-        if 'comment' in file.tags:
-            return file.tags['comment'][0].split(',')
-    return []
-
-def add_tag(file_path, new_tag):
-    tags = get_tags(file_path)
-    if new_tag not in tags:
-        tags.append(new_tag)
+    logging.info(f"Getting tags for file: {file_path}")
+    try:
         if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff')):
             with Image.open(file_path) as img:
-                exif_data = img._getexif() or {}
-                exif_data[TAGS['UserComment']] = ','.join(tags)
-                img.save(file_path, exif=exif_data)
+                exif_data = img._getexif()
+                if exif_data:
+                    for tag_id, value in exif_data.items():
+                        if TAGS.get(tag_id) == 'UserComment':
+                            tags = value.split(',')
+                            logging.info(f"Tags found: {tags}")
+                            return tags
+                logging.info("No UserComment tag found in EXIF data")
         elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
             file = MutagenFile(file_path)
-            file.tags['comment'] = ','.join(tags)
-            file.save()
-    return True
+            if 'comment' in file.tags:
+                tags = file.tags['comment'][0].split(',')
+                logging.info(f"Tags found: {tags}")
+                return tags
+            logging.info("No comment tag found in video file")
+        else:
+            logging.warning(f"Unsupported file type: {file_path}")
+        return []
+    except Exception as e:
+        logging.error(f"Error getting tags for {file_path}: {str(e)}")
+        return []
+
+def add_tag(file_path, new_tag):
+    logging.info(f"Attempting to add tag '{new_tag}' to file: {file_path}")
+    try:
+        tags = get_tags(file_path)
+        if new_tag not in tags:
+            tags.append(new_tag)
+            if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff')):
+                with Image.open(file_path) as img:
+                    exif_data = img._getexif() or {}
+                    exif_data[TAGS['UserComment']] = ','.join(tags)
+                    img.save(file_path, exif=exif_data)
+                    logging.info(f"Tag added successfully to image file")
+            elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
+                file = MutagenFile(file_path)
+                file.tags['comment'] = ','.join(tags)
+                file.save()
+                logging.info(f"Tag added successfully to video file")
+            else:
+                logging.warning(f"Unsupported file type: {file_path}")
+                return False
+            return True
+        else:
+            logging.info(f"Tag '{new_tag}' already exists")
+            return True
+    except Exception as e:
+        logging.error(f"Error adding tag to {file_path}: {str(e)}")
+        return False
 
 def run_server():
     web_dir = os.path.join(os.path.dirname(__file__), '..')
@@ -252,7 +291,12 @@ def run_server():
     print('Server running at http://localhost:8000/')
     webbrowser.open('http://localhost:8000/')
 
-    httpd.serve_forever()
+    try:
+        httpd.serve_forever()
+    except KeyboardInterrupt:
+        pass
+    httpd.server_close()
+    print("Server stopped.")
 
 if __name__ == '__main__':
     run_server()

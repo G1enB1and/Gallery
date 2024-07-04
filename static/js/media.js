@@ -212,15 +212,33 @@ export function displayImageWithUrlUpdate(mediaUrl) {
 
 export function updateDataPanel(imagePath) {
     fetch(`/get_image_info?path=${encodeURIComponent(imagePath)}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(data => {
             const dataPanel = document.getElementById('dataPanel');
             if (dataPanel) {
                 dataPanel.innerHTML = '';
-                for (const [key, value] of Object.entries(data)) {
-                    const p = document.createElement('p');
-                    p.textContent = `${key}: ${value}`;
-                    dataPanel.appendChild(p);
+                
+                // Define the keys we want to display and their labels
+                const keysToDisplay = {
+                    'File Name': 'File Name',
+                    'File Path': 'File Path',
+                    'File Size': 'File Size',
+                    'File Type': 'File Type',
+                    'Dimensions': 'Dimensions'
+                };
+
+                // Create and append elements for each piece of information
+                for (const [key, label] of Object.entries(keysToDisplay)) {
+                    if (data[key]) {
+                        const p = document.createElement('p');
+                        p.textContent = `${label}: ${data[key]}`;
+                        dataPanel.appendChild(p);
+                    }
                 }
                 
                 // Add tag functionality
@@ -248,13 +266,21 @@ export function updateDataPanel(imagePath) {
                                 },
                                 body: JSON.stringify({ path: imagePath, tag: newTag }),
                             })
-                            .then(response => response.json())
+                            .then(response => {
+                                if (!response.ok) {
+                                    throw new Error(`HTTP error! status: ${response.status}`);
+                                }
+                                return response.json();
+                            })
                             .then(data => {
                                 if (data.success) {
                                     updateTags(imagePath);
                                     newTagInput.value = '';
+                                } else {
+                                    console.error('Failed to add tag');
                                 }
-                            });
+                            })
+                            .catch(error => console.error('Error adding tag:', error));
                         }
                     });
                 }
@@ -267,7 +293,12 @@ export function updateDataPanel(imagePath) {
 
 function updateTags(imagePath) {
     fetch(`/get_tags?path=${encodeURIComponent(imagePath)}`)
-        .then(response => response.json())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
         .then(tags => {
             const existingTags = document.getElementById('existingTags');
             if (existingTags) {
