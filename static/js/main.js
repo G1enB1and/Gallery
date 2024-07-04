@@ -43,9 +43,13 @@ document.addEventListener('DOMContentLoaded', () => {
     }
 
     // Event listener for Apply button in settings
-    const applySettingsButton = document.getElementById('applySettings');
-    if (applySettingsButton) {
-        applySettingsButton.addEventListener('click', applySettings);
+    const applyButton = document.getElementById('applySettings');
+    if (applyButton) {
+        applyButton.addEventListener('click', () => {
+            const selectedTheme = document.getElementById('themeSwitcher').value;
+            applyTheme(selectedTheme);
+            localStorage.setItem('theme', selectedTheme);
+        });
     }
 
     const view = new URLSearchParams(window.location.search).get('view') || 'gallery';
@@ -114,13 +118,10 @@ function changeView(view, image = null) {
             mainContent.innerHTML = newContent;
             console.log(`View changed to: ${view}, content updated.`);
             window.history.pushState({}, '', url);
-            
+
             if (view === 'gallery') {
                 console.log('Initializing gallery view.');
                 const currentPage = getCurrentPage();
-
-                loadingCount++; 
-                showLoadingScreen(); /* show loading screen when view changes from slideshow to gallery */
 
                 fetch('images.json')
                     .then(response => response.json())
@@ -186,43 +187,36 @@ function toggleSettingsView() {
     }
 }
 
-// Apply settings
-function applySettings() {
+// Initialize theme switcher and handle theme changes
+function initializeThemeSwitcher() {
     const themeSwitcher = document.getElementById('themeSwitcher');
-    if (themeSwitcher) {
-        const selectedTheme = themeSwitcher.value;
+    if (!themeSwitcher) return;
+
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    themeSwitcher.value = currentTheme;
+
+    themeSwitcher.addEventListener('change', (event) => {
+        const selectedTheme = event.target.value;
+        applyTheme(selectedTheme);
         localStorage.setItem('theme', selectedTheme);
-
-        // Remove existing theme stylesheet
-        const existingThemeLink = document.getElementById('theme-stylesheet');
-        if (existingThemeLink) {
-            existingThemeLink.remove();
-        }
-
-        // Add new theme stylesheet
-        const newThemeLink = document.createElement('link');
-        newThemeLink.id = 'theme-stylesheet';
-        newThemeLink.rel = 'stylesheet';
-        newThemeLink.href = selectedTheme === 'dark' ? '/static/css/dark.css' : '/static/css/light.css';
-        document.head.appendChild(newThemeLink);
-
-        console.log(`Theme applied: ${selectedTheme}`);
-    }
+    });
 }
 
 // Initialize theme on initial load
 function initializeTheme() {
     const currentTheme = localStorage.getItem('theme') || 'light';
-    const themeSwitcher = document.getElementById('themeSwitcher');
-    if (themeSwitcher) {
-        themeSwitcher.value = currentTheme;
-    }
+    applyTheme(currentTheme);
+}
 
-    const themeLink = document.createElement('link');
-    themeLink.id = 'theme-stylesheet';
-    themeLink.rel = 'stylesheet';
-    themeLink.href = currentTheme === 'dark' ? '/static/css/dark.css' : '/static/css/light.css';
-    document.head.appendChild(themeLink);
+function applyTheme(theme) {
+    let link = document.querySelector('link[data-theme="theme"]');
+    if (!link) {
+        link = document.createElement('link');
+        link.rel = 'stylesheet';
+        link.dataset.theme = 'theme';
+        document.head.appendChild(link);
+    }
+    link.href = theme === 'dark' ? '/static/css/dark.css' : '/static/css/light.css';
 }
 
 // Show the loading screen
