@@ -47,8 +47,9 @@ document.addEventListener('DOMContentLoaded', () => {
     if (applyButton) {
         applyButton.addEventListener('click', () => {
             const selectedTheme = document.getElementById('themeSwitcher').value;
-            applyTheme(selectedTheme);
-            localStorage.setItem('theme', selectedTheme);
+            const slideshowInterval = document.getElementById('slideshowInterval').value;
+            const showHiddenFiles = document.getElementById('showHiddenFiles').checked;
+            applySettings(selectedTheme, slideshowInterval, showHiddenFiles);
         });
     }
 
@@ -301,4 +302,48 @@ document.onreadystatechange = function () {
         console.log("Page is fully loaded.");
         hideLoadingScreen();
     }
+};
+
+// New function to apply settings
+function applySettings(theme, slideshowInterval, showHiddenFiles) {
+    applyTheme(theme);
+    localStorage.setItem('theme', theme);
+    localStorage.setItem('slideshowInterval', slideshowInterval);
+    localStorage.setItem('showHiddenFiles', showHiddenFiles);
+
+    // Apply slideshow interval
+    if (window.slideshowTimer) {
+        clearInterval(window.slideshowTimer);
+        window.slideshowTimer = setInterval(() => {
+            // Call your next image function here
+        }, slideshowInterval * 1000);
+    }
+
+    // Apply show hidden files setting
+    fetch('/update_hidden_files', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ showHidden: showHiddenFiles }),
+    })
+    .then(response => response.json())
+    .then(data => {
+        if (data.success) {
+            // Reload the file tree and gallery
+            populateFileTree();
+            changeView('gallery');
+        }
+    });
+}
+
+// Export functions that need to be accessible from other modules
+export {
+    changeView,
+    toggleSettingsView,
+    initializeThemeSwitcher,
+    initializeTheme,
+    applyTheme,
+    fetchImages,
+    applySettings
 };

@@ -59,6 +59,7 @@ export function displayMedia(src) {
 
     preloadAdjacentMedia(src);
     restorePlayPauseState();
+    updateDataPanel(src);
 }
 
 export function preloadAdjacentMedia(currentSrc) {
@@ -206,6 +207,80 @@ export function displayImageWithUrlUpdate(mediaUrl) {
         };
         preloader.src = mediaUrl;
     }
+    updateDataPanel(mediaUrl);
+}
+
+export function updateDataPanel(imagePath) {
+    fetch(`/get_image_info?path=${encodeURIComponent(imagePath)}`)
+        .then(response => response.json())
+        .then(data => {
+            const dataPanel = document.getElementById('dataPanel');
+            if (dataPanel) {
+                dataPanel.innerHTML = '';
+                for (const [key, value] of Object.entries(data)) {
+                    const p = document.createElement('p');
+                    p.textContent = `${key}: ${value}`;
+                    dataPanel.appendChild(p);
+                }
+                
+                // Add tag functionality
+                const tagContainer = document.createElement('div');
+                tagContainer.id = 'tagContainer';
+                tagContainer.innerHTML = `
+                    <h3>Tags</h3>
+                    <div id="existingTags"></div>
+                    <input type="text" id="newTag" placeholder="Add a new tag">
+                    <button id="addTagButton">Add Tag</button>
+                `;
+                dataPanel.appendChild(tagContainer);
+
+                const addTagButton = document.getElementById('addTagButton');
+                const newTagInput = document.getElementById('newTag');
+
+                if (addTagButton && newTagInput) {
+                    addTagButton.addEventListener('click', () => {
+                        const newTag = newTagInput.value.trim();
+                        if (newTag) {
+                            fetch('/add_tag', {
+                                method: 'POST',
+                                headers: {
+                                    'Content-Type': 'application/json',
+                                },
+                                body: JSON.stringify({ path: imagePath, tag: newTag }),
+                            })
+                            .then(response => response.json())
+                            .then(data => {
+                                if (data.success) {
+                                    updateTags(imagePath);
+                                    newTagInput.value = '';
+                                }
+                            });
+                        }
+                    });
+                }
+
+                updateTags(imagePath);
+            }
+        })
+        .catch(error => console.error('Error updating data panel:', error));
+}
+
+function updateTags(imagePath) {
+    fetch(`/get_tags?path=${encodeURIComponent(imagePath)}`)
+        .then(response => response.json())
+        .then(tags => {
+            const existingTags = document.getElementById('existingTags');
+            if (existingTags) {
+                existingTags.innerHTML = '';
+                tags.forEach(tag => {
+                    const span = document.createElement('span');
+                    span.textContent = tag;
+                    span.className = 'tag';
+                    existingTags.appendChild(span);
+                });
+            }
+        })
+        .catch(error => console.error('Error updating tags:', error));
 }
 
 // Clear video source and hide video element on initial page load if view is slideshow

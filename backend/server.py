@@ -6,6 +6,10 @@ import subprocess
 import urllib.parse
 import webbrowser
 import time
+from PIL import Image
+from PIL.ExifTags import TAGS
+from mutagen import File as MutagenFile
+import magic
 
 # Define the root directory for the file tree
 PROJECT_ROOT = os.path.abspath(os.path.join(os.path.dirname(__file__), '..'))
@@ -46,6 +50,10 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps(get_file_tree(PICTURES_ROOT)).encode())
+        elif parsed_path.path == '/get_image_info':
+            self.handle_get_image_info(query_params)
+        elif parsed_path.path == '/get_tags':
+            self.handle_get_tags(query_params)
         elif parsed_path.path.startswith('/static/') or parsed_path.path.startswith('/Pictures/'):
             file_path = self.translate_path(parsed_path.path)
             if os.path.exists(file_path) and os.path.isfile(file_path):
@@ -86,10 +94,12 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.wfile.write(f'Error rendering template: {str(e)}'.encode())
 
     def do_POST(self):
+        content_length = int(self.headers['Content-Length'])
+        post_data = self.rfile.read(content_length)
+        data = json.loads(post_data)
+
         if self.path == '/update-images':
-            content_length = int(self.headers['Content-Length'])
-            post_data = self.rfile.read(content_length)
-            directory = json.loads(post_data).get('directory')
+            directory = data.get('directory')
             if directory:
                 full_path = os.path.join(PROJECT_ROOT, directory)
                 process = subprocess.Popen(
@@ -111,6 +121,52 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 self.send_response(400)
                 self.end_headers()
                 self.wfile.write(b'Missing directory parameter.')
+        elif self.path == '/add_tag':
+            self.handle_add_tag(data)
+        else:
+            self.send_response(404)
+            self.end_headers()
+            self.wfile.write(b'Not Found')
+
+    def handle_get_image_info(self, query_params):
+        file_path = query_params.get('path', [''])[0]
+        if file_path:
+            info = get_image_info(file_path)
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(info).encode())
+        else:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b'Missing path parameter')
+
+    def handle_get_tags(self, query_params):
+        file_path = query_params.get('path', [''])[0]
+        if file_path:
+            tags = get_tags(file_path)
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps(tags).encode())
+        else:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b'Missing path parameter')
+
+    def handle_add_tag(self, data):
+        file_path = data.get('path')
+        new_tag = data.get('tag')
+        if file_path and new_tag:
+            success = add_tag(file_path, new_tag)
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': success}).encode())
+        else:
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b'Missing path or tag parameter')
 
 def get_file_tree(path):
     def build_tree(directory):
@@ -133,6 +189,60 @@ def get_file_tree(path):
         return tree
 
     return build_tree(path)
+
+def get_image_info(file_path):
+    file_name = os.path.basename(file_path)
+    file_size = os.path.getsize(file_path)
+    
+    mime = magic.Magic(mime=True)
+    file_type = mime.from_file(file_path)
+    
+    info = {
+        "File Name": file_name,
+        "File Path": file_path,
+        "File Size": f"{file_size / 1024:.2f} KB",
+        "File Type": file_type,
+    }
+    
+    if file_type.startswith('image'):
+        with Image.open(file_path) as img:
+            info["Dimensions"] = f"{img.width}x{img.height}"
+            exif_data = img._getexif()
+            if exif_data:
+                for tag_id, value in exif_data.items():
+                    tag = TAGS.get(tag_id, tag_id)
+                    info[tag] = str(value)
+    
+    return info
+
+def get_tags(file_path):
+    if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff')):
+        with Image.open(file_path) as img:
+            exif_data = img._getexif()
+            if exif_data:
+                for tag_id, value in exif_data.items():
+                    if TAGS.get(tag_id) == 'UserComment':
+                        return value.split(',')
+    elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
+        file = MutagenFile(file_path)
+        if 'comment' in file.tags:
+            return file.tags['comment'][0].split(',')
+    return []
+
+def add_tag(file_path, new_tag):
+    tags = get_tags(file_path)
+    if new_tag not in tags:
+        tags.append(new_tag)
+        if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff')):
+            with Image.open(file_path) as img:
+                exif_data = img._getexif() or {}
+                exif_data[TAGS['UserComment']] = ','.join(tags)
+                img.save(file_path, exif=exif_data)
+        elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
+            file = MutagenFile(file_path)
+            file.tags['comment'] = ','.join(tags)
+            file.save()
+    return True
 
 def run_server():
     web_dir = os.path.join(os.path.dirname(__file__), '..')

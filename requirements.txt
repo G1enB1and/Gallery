@@ -1,0 +1,4 @@
+pip install Jinja2
+pip install Pillow
+pip install mutagen
+pip install python-magic-bin
