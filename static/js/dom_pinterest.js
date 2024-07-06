@@ -23,7 +23,11 @@ async function fetchImageDimensions(url) {
     return new Promise((resolve, reject) => {
         const img = new Image();
         img.onload = () => resolve({ url, width: img.width, height: img.height });
-        img.onerror = (error) => reject(new Error(`Failed to load image dimensions for ${url}: ${error.message}`));
+        img.onerror = (error) => {
+            console.error(`Failed to load image: ${url}`);
+            console.error('Error object:', error);
+            reject(new Error(`Failed to load image dimensions for ${url}: ${error.type}`));
+        };
         img.src = url;
     });
 }
@@ -122,10 +126,15 @@ async function renderImages(images, page, loadCount = imagesPerPage) {
 
     try {
         const imagePromises = pageImages.map(async (url) => {
-            if (url.endsWith('.mp4')) {
-                return await fetchVideoDimensions(url);
-            } else {
-                return await fetchImageDimensions(url);
+            try {
+                if (url.endsWith('.mp4')) {
+                    return await fetchVideoDimensions(url);
+                } else {
+                    return await fetchImageDimensions(url);
+                }
+            } catch (error) {
+                console.error(`Error loading media: ${url}`, error);
+                return { url, width: 300, height: 200 }; // Default dimensions for failed loads
             }
         });
         const imagesWithDimensions = await Promise.all(imagePromises);

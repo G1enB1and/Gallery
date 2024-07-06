@@ -8,11 +8,12 @@ import urllib.parse
 import webbrowser
 import time
 from PIL import Image
-from PIL.ExifTags import TAGS
+from PIL.ExifTags import TAGS, GPSTAGS
 from mutagen import File as MutagenFile
 import magic
 import logging
 from urllib.parse import unquote
+import struct
 
 # Set up logging
 logging.basicConfig(level=logging.DEBUG, format='%(asctime)s - %(levelname)s - %(message)s')
@@ -172,11 +173,11 @@ class RequestHandler(SimpleHTTPRequestHandler):
         new_tag = data.get('tag')
         logging.info(f"Handling add_tag request for file: {file_path}, tag: {new_tag}")
         if file_path and new_tag:
-            success = add_tag(file_path, new_tag)
+            success, message = add_tag(file_path, new_tag)
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            response = json.dumps({'success': success})
+            response = json.dumps({'success': success, 'message': message})
             self.wfile.write(response.encode())
             logging.info(f"Add tag response: {response}")
         else:
@@ -283,9 +284,32 @@ def add_tag(file_path, new_tag):
             if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff')):
                 with Image.open(file_path) as img:
                     exif_data = img._getexif() or {}
-                    exif_data[TAGS['XPKeywords']] = ','.join(tags).encode('utf-16')
-                    img.save(file_path, exif=exif_data)
-                    logging.info(f"Tag added successfully to image file")
+                    logging.info(f"Current EXIF data: {exif_data}")
+                    
+                    # Convert the EXIF data to a mutable dictionary
+                    exif_dict = dict(exif_data)
+                    
+                    # Try different tag IDs for keywords
+                    keyword_tag_ids = [TAGS.get('XPKeywords'), 40094, 18246]  # 40094 and 18246 are alternative IDs for XPKeywords
+                    
+                    tags_string = ','.join(tags).encode('utf-16le')
+                    for tag_id in keyword_tag_ids:
+                        try:
+                            exif_dict[tag_id] = tags_string
+                            logging.info(f"Successfully set tag {tag_id}")
+                            break
+                        except Exception as e:
+                            logging.warning(f"Failed to set tag {tag_id}: {str(e)}")
+                    
+                    # Convert the dictionary back to bytes
+                    exif_bytes = b""
+                    for tag_id, value in exif_dict.items():
+                        exif_bytes += struct.pack('>HH', tag_id, len(value))
+                        exif_bytes += value
+                    
+                    # Save the image with the updated EXIF data
+                    img.save(file_path, exif=exif_bytes)
+                    logging.info(f"Tag added successfully to image file. New EXIF data: {exif_dict}")
             elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
                 file = MutagenFile(file_path)
                 file.tags['comment'] = ','.join(tags)
