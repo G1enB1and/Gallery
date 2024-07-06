@@ -1,3 +1,4 @@
+# fetch_images.py
 import json
 import os
 import random

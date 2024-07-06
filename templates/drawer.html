@@ -1,10 +1,9 @@
+<!-- drawer.html -->
 <div id="drawerContent">
     <a href="index.html?leftPanelToggle=toggle" id="file-tree-icon"> 
         <i class="fa-solid fa-folder-tree" alt="Close file tree"></i>
     </a>
-    
     <a href="#" id="gallery-button">
-        <!--<img src="/static/images/galleryLightMode.png" alt="Gallery" class="gallery-button">-->
         <img id="gallery-img" alt="Gallery" class="gallery-button">
     </a>
     <script>
@@ -14,6 +13,4 @@
             img.src = currentTheme === 'dark' ? '/static/images/galleryDarkMode.png' : '/static/images/galleryLightMode.png';
         })();
     </script>
-    
-    
 </div>

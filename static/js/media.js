@@ -1,4 +1,5 @@
-import { hideLoadingScreen } from "./main.js"; // Ensure the correct path and extension
+/* media.js */
+import { hideLoadingScreen } from "./main.js"; 
 
 let data = [];
 let intervalId = null;
@@ -282,10 +283,14 @@ export function updateDataPanel(imagePath) {
                                     updateTags(imagePath);
                                     newTagInput.value = '';
                                 } else {
-                                    console.error('Failed to add tag');
+                                    console.error('Failed to add tag:', data.message);
+                                    alert(`Failed to add tag: ${data.message}`);
                                 }
                             })
-                            .catch(error => console.error('Error adding tag:', error));
+                            .catch(error => {
+                                console.error('Error adding tag:', error);
+                                alert(`Error adding tag: ${error.message}`);
+                            });
                         }
                     });
                 }
@@ -297,7 +302,7 @@ export function updateDataPanel(imagePath) {
             console.error('Error updating data panel:', error);
             const dataPanel = document.getElementById('dataPanel');
             if (dataPanel) {
-                dataPanel.innerHTML = '<p>Error loading image information</p>';
+                dataPanel.innerHTML = `<p>Error loading image information: ${error.message}</p>`;
             }
         });
 }
@@ -316,12 +321,16 @@ function updateTags(imagePath) {
             const existingTags = document.getElementById('existingTags');
             if (existingTags) {
                 existingTags.innerHTML = '';
-                tags.forEach(tag => {
-                    const span = document.createElement('span');
-                    span.textContent = tag;
-                    span.className = 'tag';
-                    existingTags.appendChild(span);
-                });
+                if (tags && tags.length > 0) {
+                    tags.forEach(tag => {
+                        const span = document.createElement('span');
+                        span.textContent = tag;
+                        span.className = 'tag';
+                        existingTags.appendChild(span);
+                    });
+                } else {
+                    existingTags.textContent = 'No tags found';
+                }
             }
         })
         .catch(error => console.error('Error updating tags:', error));

@@ -1,3 +1,4 @@
+# server.py
 from http.server import SimpleHTTPRequestHandler, HTTPServer
 from jinja2 import Environment, FileSystemLoader, TemplateNotFound
 import json
@@ -242,18 +243,27 @@ def get_tags(file_path):
             with Image.open(file_path) as img:
                 exif_data = img._getexif()
                 if exif_data:
+                    logging.info(f"EXIF data: {exif_data}")
+                    tags = []
                     for tag_id, value in exif_data.items():
                         tag = TAGS.get(tag_id, tag_id)
-                        if tag == 'UserComment' or tag == 'XPKeywords':
-                            tags = value.decode('utf-16').split('\x00') if isinstance(value, bytes) else value.split(',')
-                            tags = [tag.strip() for tag in tags if tag.strip()]
-                            logging.info(f"Tags found: {tags}")
-                            return tags
-                logging.info("No tags found in EXIF data")
+                        logging.info(f"Tag: {tag}, Value: {value}")
+                        if tag in ['UserComment', 'XPKeywords', 'Keywords', 'Subject']:
+                            if isinstance(value, bytes):
+                                value = value.decode('utf-16').strip('\x00')
+                            elif isinstance(value, str):
+                                value = value.strip()
+                            tags.extend([t.strip() for t in value.split(',') if t.strip()])
+                    if tags:
+                        logging.info(f"Tags found: {tags}")
+                        return tags
+                    logging.info("No tags found in EXIF data")
+                else:
+                    logging.info("No EXIF data found")
         elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
             file = MutagenFile(file_path)
             if 'comment' in file.tags:
-                tags = file.tags['comment'][0].split(',')
+                tags = [t.strip() for t in file.tags['comment'][0].split(',') if t.strip()]
                 logging.info(f"Tags found: {tags}")
                 return tags
             logging.info("No comment tag found in video file")
@@ -273,7 +283,7 @@ def add_tag(file_path, new_tag):
             if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff')):
                 with Image.open(file_path) as img:
                     exif_data = img._getexif() or {}
-                    exif_data[TAGS['UserComment']] = ','.join(tags)
+                    exif_data[TAGS['XPKeywords']] = ','.join(tags).encode('utf-16')
                     img.save(file_path, exif=exif_data)
                     logging.info(f"Tag added successfully to image file")
             elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
@@ -283,14 +293,15 @@ def add_tag(file_path, new_tag):
                 logging.info(f"Tag added successfully to video file")
             else:
                 logging.warning(f"Unsupported file type: {file_path}")
-                return False
-            return True
+                return False, "Unsupported file type"
+            return True, "Tag added successfully"
         else:
             logging.info(f"Tag '{new_tag}' already exists")
-            return True
+            return True, "Tag already exists"
     except Exception as e:
-        logging.error(f"Error adding tag to {file_path}: {str(e)}")
-        return False
+        error_message = f"Error adding tag to {file_path}: {str(e)}"
+        logging.error(error_message)
+        return False, error_message
 
 def run_server():
     web_dir = os.path.join(os.path.dirname(__file__), '..')
