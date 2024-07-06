@@ -152,13 +152,16 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
     def handle_get_tags(self, query_params):
         file_path = unquote(query_params.get('path', [''])[0])
+        logging.info(f"Handling get_tags request for file: {file_path}")
         if file_path:
             tags = get_tags(file_path)
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
             self.wfile.write(json.dumps(tags).encode())
+            logging.info(f"Sent tags: {tags}")
         else:
+            logging.warning("Missing path parameter in get_tags request")
             self.send_response(400)
             self.end_headers()
             self.wfile.write(b'Missing path parameter')
@@ -166,13 +169,17 @@ class RequestHandler(SimpleHTTPRequestHandler):
     def handle_add_tag(self, data):
         file_path = unquote(data.get('path', ''))
         new_tag = data.get('tag')
+        logging.info(f"Handling add_tag request for file: {file_path}, tag: {new_tag}")
         if file_path and new_tag:
             success = add_tag(file_path, new_tag)
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps({'success': success}).encode())
+            response = json.dumps({'success': success})
+            self.wfile.write(response.encode())
+            logging.info(f"Add tag response: {response}")
         else:
+            logging.warning("Missing path or tag parameter in add_tag request")
             self.send_response(400)
             self.end_headers()
             self.wfile.write(b'Missing path or tag parameter')
@@ -236,11 +243,13 @@ def get_tags(file_path):
                 exif_data = img._getexif()
                 if exif_data:
                     for tag_id, value in exif_data.items():
-                        if TAGS.get(tag_id) == 'UserComment':
-                            tags = value.split(',')
+                        tag = TAGS.get(tag_id, tag_id)
+                        if tag == 'UserComment' or tag == 'XPKeywords':
+                            tags = value.decode('utf-16').split('\x00') if isinstance(value, bytes) else value.split(',')
+                            tags = [tag.strip() for tag in tags if tag.strip()]
                             logging.info(f"Tags found: {tags}")
                             return tags
-                logging.info("No UserComment tag found in EXIF data")
+                logging.info("No tags found in EXIF data")
         elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
             file = MutagenFile(file_path)
             if 'comment' in file.tags:

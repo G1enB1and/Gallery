@@ -4,6 +4,16 @@
     </a>
     
     <a href="#" id="gallery-button">
-        <img src="/static/images/galleryLightMode.png" alt="Gallery" class="gallery-button">
+        <!--<img src="/static/images/galleryLightMode.png" alt="Gallery" class="gallery-button">-->
+        <img id="gallery-img" alt="Gallery" class="gallery-button">
     </a>
+    <script>
+        (function() {
+            const currentTheme = localStorage.getItem('theme') || 'light';
+            const img = document.getElementById('gallery-img');
+            img.src = currentTheme === 'dark' ? '/static/images/galleryDarkMode.png' : '/static/images/galleryLightMode.png';
+        })();
+    </script>
+    
+    
 </div>

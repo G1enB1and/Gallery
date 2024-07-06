@@ -211,6 +211,7 @@ export function displayImageWithUrlUpdate(mediaUrl) {
 }
 
 export function updateDataPanel(imagePath) {
+    console.log(`Updating data panel for image: ${imagePath}`);
     fetch(`/get_image_info?path=${encodeURIComponent(imagePath)}`)
         .then(response => {
             if (!response.ok) {
@@ -219,6 +220,7 @@ export function updateDataPanel(imagePath) {
             return response.json();
         })
         .then(data => {
+            console.log('Image info received:', data);
             const dataPanel = document.getElementById('dataPanel');
             if (dataPanel) {
                 dataPanel.innerHTML = '';
@@ -259,6 +261,7 @@ export function updateDataPanel(imagePath) {
                     addTagButton.addEventListener('click', () => {
                         const newTag = newTagInput.value.trim();
                         if (newTag) {
+                            console.log(`Attempting to add tag: ${newTag}`);
                             fetch('/add_tag', {
                                 method: 'POST',
                                 headers: {
@@ -273,7 +276,9 @@ export function updateDataPanel(imagePath) {
                                 return response.json();
                             })
                             .then(data => {
+                                console.log('Add tag response:', data);
                                 if (data.success) {
+                                    console.log('Tag added successfully');
                                     updateTags(imagePath);
                                     newTagInput.value = '';
                                 } else {
@@ -288,10 +293,17 @@ export function updateDataPanel(imagePath) {
                 updateTags(imagePath);
             }
         })
-        .catch(error => console.error('Error updating data panel:', error));
+        .catch(error => {
+            console.error('Error updating data panel:', error);
+            const dataPanel = document.getElementById('dataPanel');
+            if (dataPanel) {
+                dataPanel.innerHTML = '<p>Error loading image information</p>';
+            }
+        });
 }
 
 function updateTags(imagePath) {
+    console.log(`Updating tags for image: ${imagePath}`);
     fetch(`/get_tags?path=${encodeURIComponent(imagePath)}`)
         .then(response => {
             if (!response.ok) {
@@ -300,6 +312,7 @@ function updateTags(imagePath) {
             return response.json();
         })
         .then(tags => {
+            console.log('Tags received:', tags);
             const existingTags = document.getElementById('existingTags');
             if (existingTags) {
                 existingTags.innerHTML = '';
