@@ -2,3 +2,5 @@ pip install Jinja2
 pip install Pillow
 pip install mutagen
 pip install python-magic-bin
+pip install piexif
+pip install pyexiv2

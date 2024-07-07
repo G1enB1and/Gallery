@@ -11,6 +11,8 @@ from PIL import Image
 from PIL.ExifTags import TAGS, GPSTAGS
 from mutagen import File as MutagenFile
 import magic
+import piexif
+import pyexiv2
 import logging
 from urllib.parse import unquote
 import struct
@@ -240,37 +242,27 @@ def get_image_info(file_path):
 def get_tags(file_path):
     logging.info(f"Getting tags for file: {file_path}")
     try:
-        if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff')):
-            with Image.open(file_path) as img:
-                exif_data = img._getexif()
-                if exif_data:
-                    logging.info(f"EXIF data: {exif_data}")
-                    tags = []
-                    for tag_id, value in exif_data.items():
-                        tag = TAGS.get(tag_id, tag_id)
-                        logging.info(f"Tag: {tag}, Value: {value}")
-                        if tag in ['UserComment', 'XPKeywords', 'Keywords', 'Subject']:
-                            if isinstance(value, bytes):
-                                value = value.decode('utf-16').strip('\x00')
-                            elif isinstance(value, str):
-                                value = value.strip()
-                            tags.extend([t.strip() for t in value.split(',') if t.strip()])
-                    if tags:
-                        logging.info(f"Tags found: {tags}")
-                        return tags
-                    logging.info("No tags found in EXIF data")
+        if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff', '.png')):
+            with pyexiv2.Image(file_path) as img:
+                xmp_data = img.read_xmp()
+                if 'Xmp.dc.subject' in xmp_data:
+                    tags = xmp_data['Xmp.dc.subject']
+                    logging.info(f"Tags found: {tags}")
+                    return tags
                 else:
-                    logging.info("No EXIF data found")
+                    logging.info("No tags found in XMP data")
+                    return []
         elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
             file = MutagenFile(file_path)
             if 'comment' in file.tags:
-                tags = [t.strip() for t in file.tags['comment'][0].split(',') if t.strip()]
+                tags = file.tags['comment'][0].split(';')
                 logging.info(f"Tags found: {tags}")
                 return tags
             logging.info("No comment tag found in video file")
+            return []
         else:
             logging.warning(f"Unsupported file type: {file_path}")
-        return []
+            return []
     except Exception as e:
         logging.error(f"Error getting tags for {file_path}: {str(e)}")
         return []
@@ -281,40 +273,17 @@ def add_tag(file_path, new_tag):
         tags = get_tags(file_path)
         if new_tag not in tags:
             tags.append(new_tag)
-            if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff')):
-                with Image.open(file_path) as img:
-                    exif_data = img._getexif() or {}
-                    logging.info(f"Current EXIF data: {exif_data}")
-                    
-                    # Convert the EXIF data to a mutable dictionary
-                    exif_dict = dict(exif_data)
-                    
-                    # Try different tag IDs for keywords
-                    keyword_tag_ids = [TAGS.get('XPKeywords'), 40094, 18246]  # 40094 and 18246 are alternative IDs for XPKeywords
-                    
-                    tags_string = ','.join(tags).encode('utf-16le')
-                    for tag_id in keyword_tag_ids:
-                        try:
-                            exif_dict[tag_id] = tags_string
-                            logging.info(f"Successfully set tag {tag_id}")
-                            break
-                        except Exception as e:
-                            logging.warning(f"Failed to set tag {tag_id}: {str(e)}")
-                    
-                    # Convert the dictionary back to bytes
-                    exif_bytes = b""
-                    for tag_id, value in exif_dict.items():
-                        exif_bytes += struct.pack('>HH', tag_id, len(value))
-                        exif_bytes += value
-                    
-                    # Save the image with the updated EXIF data
-                    img.save(file_path, exif=exif_bytes)
-                    logging.info(f"Tag added successfully to image file. New EXIF data: {exif_dict}")
+            if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff', '.png')):
+                with pyexiv2.Image(file_path) as img:
+                    xmp_data = img.read_xmp()
+                    xmp_data['Xmp.dc.subject'] = tags
+                    img.modify_xmp(xmp_data)
+                logging.info(f"Tag added successfully to image file. New tags: {tags}")
             elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
                 file = MutagenFile(file_path)
-                file.tags['comment'] = ','.join(tags)
+                file.tags['comment'] = ';'.join(tags)
                 file.save()
-                logging.info(f"Tag added successfully to video file")
+                logging.info(f"Tag added successfully to video file. New tags: {tags}")
             else:
                 logging.warning(f"Unsupported file type: {file_path}")
                 return False, "Unsupported file type"
