@@ -162,7 +162,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(tags).encode())
+            self.wfile.write(json.dumps(', '.join(tags)).encode())  # Join tags with comma and space
             logging.info(f"Sent tags: {tags}")
         else:
             logging.warning("Missing path parameter in get_tags request")
@@ -248,7 +248,7 @@ def get_tags(file_path):
                 if 'Xmp.dc.subject' in xmp_data:
                     tags = xmp_data['Xmp.dc.subject']
                     logging.info(f"Tags found: {tags}")
-                    return tags
+                    return tags  # Return list of tags
                 else:
                     logging.info("No tags found in XMP data")
                     return []
@@ -257,7 +257,7 @@ def get_tags(file_path):
             if 'comment' in file.tags:
                 tags = file.tags['comment'][0].split(';')
                 logging.info(f"Tags found: {tags}")
-                return tags
+                return tags  # Return list of tags
             logging.info("No comment tag found in video file")
             return []
         else:
@@ -266,6 +266,7 @@ def get_tags(file_path):
     except Exception as e:
         logging.error(f"Error getting tags for {file_path}: {str(e)}")
         return []
+
 
 def add_tag(file_path, new_tag):
     logging.info(f"Attempting to add tag '{new_tag}' to file: {file_path}")

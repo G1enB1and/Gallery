@@ -316,17 +316,23 @@ function updateTags(imagePath) {
             }
             return response.json();
         })
-        .then(tags => {
-            console.log('Tags received:', tags);
+        .then(tagsString => {
+            console.log('Tags received:', tagsString);
             const existingTags = document.getElementById('existingTags');
             if (existingTags) {
                 existingTags.innerHTML = '';
-                if (tags && tags.length > 0) {
-                    tags.forEach(tag => {
+                if (tagsString) {
+                    const tags = tagsString.split(', ');  // Split the string into an array
+                    tags.forEach((tag, index) => {
                         const span = document.createElement('span');
                         span.textContent = tag;
                         span.className = 'tag';
                         existingTags.appendChild(span);
+                        
+                        // Add comma and space after each tag except the last one
+                        if (index < tags.length - 1) {
+                            existingTags.appendChild(document.createTextNode(', '));
+                        }
                     });
                 } else {
                     existingTags.textContent = 'No tags found';
