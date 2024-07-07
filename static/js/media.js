@@ -17,6 +17,7 @@ export function setIntervalId(id) {
 
 export function setData(images) {
     data = images;
+    document.dispatchEvent(new CustomEvent('dataLoaded'));
 }
 
 // Function to display the media (image or video) in slideshow
@@ -58,7 +59,12 @@ export function displayMedia(src) {
         preloader.src = src;
     }
 
-    preloadAdjacentMedia(src);
+    if (data.length > 0) {
+        preloadAdjacentMedia(src);
+    } else {
+        document.addEventListener('dataLoaded', () => preloadAdjacentMedia(src), { once: true });
+    }
+    
     restorePlayPauseState();
     updateDataPanel(src);
 }
