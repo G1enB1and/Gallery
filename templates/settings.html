@@ -18,3 +18,10 @@
     </div>
     <button id="applySettings">Apply</button>
 </div>
+
+<script>
+    document.addEventListener('DOMContentLoaded', () => {
+        const showHiddenFiles = localStorage.getItem('showHiddenFiles') === 'true';
+        document.getElementById('showHiddenFiles').checked = showHiddenFiles;
+    });
+</script>

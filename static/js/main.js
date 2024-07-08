@@ -10,8 +10,8 @@ let loadingCount = 0;
 document.addEventListener('DOMContentLoaded', () => {
     console.log('Document loaded, initializing page.');
     initializePage();
-    adjustMainContent(); // Ensure content is adjusted initially
-    populateFileTree(); // Populate the file tree initially
+    adjustMainContent();
+    populateFileTree();
 
     const expandAllButton = document.getElementById('expandAll');
     if (expandAllButton) {
@@ -58,10 +58,10 @@ document.addEventListener('DOMContentLoaded', () => {
     console.log(`Initial view: ${view}`);
     if (view === 'slideshow') {
         console.log('Initial load of slideshow view, attaching event listeners.');
-        attachSlideshowEventListeners(); // Attach slideshow event listeners on initial load if view is slideshow
+        attachSlideshowEventListeners();
         const image = new URLSearchParams(window.location.search).get('image');
         if (image) {
-            displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
+            displayMedia(decodeURIComponent(image));
         }
     }
 
@@ -75,7 +75,7 @@ document.addEventListener('DOMContentLoaded', () => {
                         attachSlideshowEventListeners();
                         const image = new URLSearchParams(window.location.search).get('image');
                         if (image) {
-                            displayMedia(decodeURIComponent(image)); // Ensure the image is displayed
+                            displayMedia(decodeURIComponent(image));
                         }
                     }
                 });
@@ -219,6 +219,13 @@ function applyTheme(theme) {
         document.head.appendChild(link);
     }
     link.href = theme === 'dark' ? '/static/css/dark.css' : '/static/css/light.css';
+
+    // Update gallery button image
+    const galleryImg = document.getElementById('gallery-img');
+    if (galleryImg) {
+        galleryImg.src = theme === 'dark' ? '/static/images/galleryDarkMode.png' : '/static/images/galleryLightMode.png';
+    }
+    document.dispatchEvent(new CustomEvent('themeChanged', { detail: { theme } }));
 }
 
 // Show the loading screen
@@ -321,6 +328,10 @@ function applySettings(theme, slideshowInterval, showHiddenFiles) {
     }
 
     // Apply show hidden files setting
+    showLoadingScreen();
+    updateLoadingText('Updating settings...');
+
+    // Apply show hidden files setting
     fetch('/update_hidden_files', {
         method: 'POST',
         headers: {
@@ -333,8 +344,33 @@ function applySettings(theme, slideshowInterval, showHiddenFiles) {
         if (data.success) {
             // Reload the file tree and gallery
             populateFileTree();
-            changeView('gallery');
+
+            // Reload the root folder images
+            return fetch('/update-images', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ directory: 'Pictures', showHidden: showHiddenFiles })
+            });
         }
+        throw new Error('Failed to update hidden files setting');
+    })
+    .then(response => response.text())
+    .then(() => {
+        // Fetch updated images
+        return fetch('images.json');
+    })
+    .then(response => response.json())
+    .then(images => {
+        setData(images);
+        // Refresh the gallery with the new images
+        initializeGallery(images, 1);
+        hideLoadingScreen();
+    })
+    .catch(error => {
+        console.error('Error applying settings:', error);
+        hideLoadingScreen();
     });
 }
 
@@ -346,5 +382,5 @@ export {
     initializeTheme,
     applyTheme,
     fetchImages,
-    applySettings
+    applySettings,
 };

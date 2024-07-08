@@ -59,7 +59,8 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(get_file_tree(PICTURES_ROOT)).encode())
+            show_hidden = query_params.get('showHidden', ['false'])[0] == 'true'
+            self.wfile.write(json.dumps(get_file_tree(PICTURES_ROOT, show_hidden)).encode())
         elif parsed_path.path == '/get_image_info':
             self.handle_get_image_info(query_params)
         elif parsed_path.path == '/get_tags':
@@ -113,10 +114,11 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
         if self.path == '/update-images':
             directory = data.get('directory')
+            show_hidden = data.get('showHidden', False)
             if directory:
                 full_path = os.path.join(PROJECT_ROOT, directory)
                 process = subprocess.Popen(
-                    ['python', 'backend/fetch_images.py', full_path],
+                    ['python', 'backend/fetch_images.py', full_path, str(show_hidden)],
                     stdout=subprocess.PIPE,
                     stderr=subprocess.PIPE,
                     universal_newlines=True,
@@ -136,6 +138,13 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(b'Missing directory parameter.')
         elif self.path == '/add_tag':
             self.handle_add_tag(data)
+        elif self.path == '/update_hidden_files':
+            show_hidden = data.get('showHidden', False)
+            update_hidden_files(show_hidden)
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            self.wfile.write(json.dumps({'success': True}).encode())
         else:
             self.send_response(404)
             self.end_headers()
@@ -188,7 +197,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.end_headers()
             self.wfile.write(b'Missing path or tag parameter')
 
-def get_file_tree(path):
+def get_file_tree(path, show_hidden=False):
     def build_tree(directory):
         tree = []
         for root, dirs, files in os.walk(directory):
@@ -196,6 +205,8 @@ def get_file_tree(path):
             dirs.sort()
             files.sort()
             for dir in dirs:
+                if not show_hidden and dir.startswith('.'):
+                    continue
                 dir_path = os.path.join(root, dir)
                 relative_path = os.path.relpath(dir_path, start=PROJECT_ROOT)
                 tree.append({
@@ -209,6 +220,23 @@ def get_file_tree(path):
         return tree
 
     return build_tree(path)
+
+def update_hidden_files(show_hidden):
+    # Update the images.json file based on the show_hidden setting
+    with open('images.json', 'r') as f:
+        images = json.load(f)
+
+    if not show_hidden:
+        # Filter out images from hidden folders
+        images = [img for img in images if not any(part.startswith('.') for part in img.split('/')[1:])]
+
+    with open('images.json', 'w') as f:
+        json.dump(images, f)
+        
+    # Also update the file tree
+    file_tree = get_file_tree(PICTURES_ROOT, show_hidden)
+    with open('file_tree.json', 'w') as f:
+        json.dump(file_tree, f)
 
 def get_image_info(file_path):
     logging.info(f"Getting image info for: {file_path}")

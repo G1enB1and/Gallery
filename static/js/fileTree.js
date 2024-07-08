@@ -6,12 +6,41 @@ import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
 // Function to populate the file tree
 export function populateFileTree() {
     const fileTreeContainer = document.getElementById('fileTree');
-    fetch('/file-tree')
+    const showHidden = localStorage.getItem('showHiddenFiles') === 'true';
+
+    showLoadingScreen();
+    updateLoadingText('Updating file tree...');
+
+    fetch(`/file-tree?showHidden=${showHidden}`)
         .then(response => response.json())
         .then(data => {
             buildFileTree(fileTreeContainer, data);
+
+            // After rebuilding the file tree, reload the root folder
+            return fetch('/update-images', {
+                method: 'POST',
+                headers: {
+                    'Content-Type': 'application/json'
+                },
+                body: JSON.stringify({ directory: 'Pictures', showHidden: showHidden })
+            });
         })
-        .catch(error => console.error('Error fetching file tree:', error));
+        .then(response => response.text())
+        .then(() => {
+            // Fetch updated images
+            return fetch('images.json');
+        })
+        .then(response => response.json())
+        .then(images => {
+            setData(images);
+            // Refresh the gallery with the new images
+            initializeGallery(images, 1);
+            hideLoadingScreen();
+        })
+        .catch(error => {
+            console.error('Error updating file tree and images:', error);
+            hideLoadingScreen();
+        });
 }
 
 // Function to build the file tree
@@ -52,12 +81,13 @@ export function buildFileTree(container, nodes) {
                 e.stopPropagation(); // Prevent event from bubbling up to parent elements
                 showLoadingScreen();
                 updateLoadingText('Fetching images...');
+                const showHidden = localStorage.getItem('showHiddenFiles') === 'true';
                 fetch('/update-images', {
                     method: 'POST',
                     headers: {
                         'Content-Type': 'application/json'
                     },
-                    body: JSON.stringify({ directory: node.path })
+                    body: JSON.stringify({ directory: node.path, showHidden: showHidden })
                 })
                 .then(response => response.text())
                 .then(message => {
@@ -90,7 +120,7 @@ export function buildFileTree(container, nodes) {
                                 }, 1000); // Simulate placeholder loading time
                             })
                             .catch(error => console.error('Error fetching images:', error));
-                    }, 300); // Delay of 3 seconds to ensure images.json is updated
+                    }, 300); // Delay of 300ms to ensure images.json is updated
                 })
                 .catch(error => console.error('Error updating images:', error));
             });
@@ -107,12 +137,13 @@ document.addEventListener('DOMContentLoaded', () => {
             e.preventDefault();
             showLoadingScreen();
             updateLoadingText('Fetching images...');
+            const showHidden = localStorage.getItem('showHiddenFiles') === 'true';
             fetch('/update-images', {
                 method: 'POST',
                 headers: {
                     'Content-Type': 'application/json'
                 },
-                body: JSON.stringify({ directory: 'Pictures' }) // Adjust the directory as needed
+                body: JSON.stringify({ directory: 'Pictures', showHidden: showHidden })
             })
             .then(response => response.text())
             .then(message => {
@@ -145,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
                             }, 1000); // Simulate placeholder loading time
                         })
                         .catch(error => console.error('Error fetching images:', error));
-                }, 300); // Delay of 3 seconds to ensure images.json is updated
+                }, 300); // Delay of 300ms to ensure images.json is updated
             })
             .catch(error => console.error('Error updating images:', error));
         });
