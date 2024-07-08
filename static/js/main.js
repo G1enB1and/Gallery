@@ -3,7 +3,7 @@ import { initializePage, adjustMainContent } from './dom.js';
 import { handleKeyPress, expandAll, collapseAll, attachSlideshowEventListeners } from './events.js';
 import { populateFileTree } from './fileTree.js';
 import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
-import { displayMedia } from './media.js';
+import { displayMedia, setData } from './media.js';
 
 let loadingCount = 0;
 
@@ -120,6 +120,9 @@ function changeView(view, image = null) {
             mainContent.innerHTML = newContent;
             console.log(`View changed to: ${view}, content updated.`);
             window.history.pushState({}, '', url);
+
+            // Dispatch a custom event when the view changes
+            document.dispatchEvent(new CustomEvent('viewChanged', { detail: { view } }));
 
             if (view === 'gallery') {
                 console.log('Initializing gallery view.');

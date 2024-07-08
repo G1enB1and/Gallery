@@ -19,9 +19,42 @@
     <button id="applySettings">Apply</button>
 </div>
 
-<script>
+<script type="module">
+    import { applySettings, initializeTheme } from './static/js/main.js';
+
+    function loadSettings() {
+        const showHiddenFilesCheckbox = document.getElementById('showHiddenFiles');
+        const themeSwitcher = document.getElementById('themeSwitcher');
+        const slideshowInterval = document.getElementById('slideshowInterval');
+
+        showHiddenFilesCheckbox.checked = localStorage.getItem('showHiddenFiles') === 'true';
+        themeSwitcher.value = localStorage.getItem('theme') || 'light';
+        slideshowInterval.value = localStorage.getItem('slideshowInterval') || '3';
+
+        // Apply the current theme immediately
+        initializeTheme();
+    }
+
+    function setupEventListeners() {
+        const applyButton = document.getElementById('applySettings');
+        applyButton.addEventListener('click', () => {
+            const theme = document.getElementById('themeSwitcher').value;
+            const interval = parseInt(document.getElementById('slideshowInterval').value, 10);
+            const showHidden = document.getElementById('showHiddenFiles').checked;
+            applySettings(theme, interval, showHidden);
+        });
+    }
+
+    // Load settings and set up event listeners when the content is loaded
     document.addEventListener('DOMContentLoaded', () => {
-        const showHiddenFiles = localStorage.getItem('showHiddenFiles') === 'true';
-        document.getElementById('showHiddenFiles').checked = showHiddenFiles;
+        loadSettings();
+        setupEventListeners();
+    });
+
+    // Also load settings when the settings view is shown
+    document.addEventListener('viewChanged', (event) => {
+        if (event.detail.view === 'settings') {
+            loadSettings();
+        }
     });
 </script>
