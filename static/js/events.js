@@ -1,6 +1,19 @@
 import { nextImage, prevImage, togglePlayPause } from './media.js';
 
+let isTyping = false;
+
 export function handleKeyPress(event) {
+    // Check if the event target is an input or textarea
+    if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
+        isTyping = true;
+        return; // Exit the function early if the user is typing
+    }
+
+    // Check if we're in a typing state
+    if (isTyping) {
+        return; // Exit the function early if we're in a typing state
+    }
+
     console.log(`Key pressed: ${event.code}`);
     if (event.code === 'Space') {
         event.preventDefault();
@@ -76,6 +89,25 @@ export function attachSlideshowEventListeners() {
     }
 }
 
+// Function to handle focus on input fields
+function handleInputFocus() {
+    isTyping = true;
+}
+
+// Function to handle blur (losing focus) on input fields
+function handleInputBlur() {
+    isTyping = false;
+}
+
+// Add event listeners for focus and blur on input fields
+export function attachInputEventListeners() {
+    const inputFields = document.querySelectorAll('input[type="text"], textarea');
+    inputFields.forEach(input => {
+        input.addEventListener('focus', handleInputFocus);
+        input.addEventListener('blur', handleInputBlur);
+    });
+}
+
 // Add event listeners for slideshow controls on initial load and URL change
 document.addEventListener('DOMContentLoaded', () => {
     const view = new URLSearchParams(window.location.search).get('view');
@@ -83,4 +115,23 @@ document.addEventListener('DOMContentLoaded', () => {
     if (view === 'slideshow') {
         attachSlideshowEventListeners();
     }
+    attachInputEventListeners();
+
+    // Add global keydown event listener
+    document.addEventListener('keydown', handleKeyPress);
 });
+
+// Listen for dynamic content changes
+document.addEventListener('viewChanged', (event) => {
+    if (event.detail.view === 'slideshow') {
+        attachSlideshowEventListeners();
+    }
+    attachInputEventListeners();
+});
+
+// Export the isTyping variable and its setter
+export function setIsTyping(value) {
+    isTyping = value;
+}
+
+export { isTyping };

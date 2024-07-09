@@ -1,5 +1,6 @@
 /* media.js */
-import { hideLoadingScreen } from "./main.js"; 
+import { hideLoadingScreen } from "./main.js";
+import { setIsTyping } from "./events.js";
 
 let data = [];
 let intervalId = null;
@@ -265,6 +266,9 @@ export function updateDataPanel(imagePath) {
                 const newTagInput = document.getElementById('newTag');
 
                 if (addTagButton && newTagInput) {
+                    newTagInput.addEventListener('focus', () => setIsTyping(true));
+                    newTagInput.addEventListener('blur', () => setIsTyping(false));
+                    
                     addTagButton.addEventListener('click', () => {
                         const newTag = newTagInput.value.trim();
                         if (newTag) {
