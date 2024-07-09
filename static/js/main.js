@@ -233,7 +233,7 @@ function applyTheme(theme) {
 }
 
 // Show the loading screen
-export function showLoadingScreen() {
+function showLoadingScreen() {
     const loadingScreen = document.getElementById('loading');
     if (loadingScreen) {
         loadingScreen.style.display = 'flex';
@@ -241,7 +241,7 @@ export function showLoadingScreen() {
 }
 
 // Hide the loading screen
-export function hideLoadingScreen() {
+function hideLoadingScreen() {
     const loadingScreen = document.getElementById('loading');
     if (loadingScreen) {
         loadingScreen.style.display = 'none';
@@ -249,7 +249,7 @@ export function hideLoadingScreen() {
 }
 
 // Update loading screen text
-export function updateLoadingText(text) {
+function updateLoadingText(text) {
     const loadingSubtext = document.getElementById('loading-subtext');
     if (loadingSubtext) {
         loadingSubtext.textContent = text;
@@ -387,4 +387,7 @@ export {
     applyTheme,
     fetchImages,
     applySettings,
+    showLoadingScreen,
+    hideLoadingScreen,
+    updateLoadingText,
 };
