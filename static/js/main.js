@@ -141,6 +141,7 @@ function changeView(view, image = null) {
                             setTimeout(() => {
                                 loadingCount--;
                                 checkHideLoadingScreen();
+                                setFocusToGallery();  // Set focus after loading
                             }, 1000); // Simulate initial screen space image loading time
                         }, 1000); // Simulate placeholder loading time
                     })

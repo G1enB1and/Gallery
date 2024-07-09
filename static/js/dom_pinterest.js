@@ -171,6 +171,30 @@ async function renderImages(images, page, loadCount = imagesPerPage) {
     }
 }
 
+// New function to set focus to the gallery
+function setFocusToGallery() {
+    const gallery = document.getElementById('gallery');
+    if (gallery) {
+        // Make the gallery focusable
+        gallery.tabIndex = -1;
+        // Set focus to the gallery
+        gallery.focus();
+        console.log('Focus set to gallery');
+    }
+}
+
+// New function to initialize the gallery
+export async function initializeGallery(images, page) {
+    setData(images);
+    try {
+        await renderImages(images, page);
+        renderPagination();
+        setFocusToGallery();
+    } catch (error) {
+        console.error('Error initializing gallery:', error);
+    }
+}
+
 // Function to render pagination controls
 function renderPagination() {
     const pagination = document.getElementById('pagination');
@@ -266,17 +290,6 @@ function renderPagination() {
     pagination.appendChild(nextButton);
 }
 
-// New function to initialize the gallery
-export async function initializeGallery(images, page) {
-    setData(images);
-    try {
-        await renderImages(images, page);
-        renderPagination();
-    } catch (error) {
-        console.error('Error initializing gallery:', error);
-    }
-}
-
 // Function to change view and update the URL
 function changeView(view, image = null) {
     let url = `index.html?view=${view}`;
@@ -320,6 +333,13 @@ function changeView(view, image = null) {
         })
         .catch(error => console.error('Error changing view:', error));
 }
+
+// Listen for view changes
+document.addEventListener('viewChanged', (event) => {
+    if (event.detail.view === 'gallery') {
+        setFocusToGallery();
+    }
+});
 
 // Ensure functions are only called when the appropriate view is active
 document.addEventListener('DOMContentLoaded', () => {
