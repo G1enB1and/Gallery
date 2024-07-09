@@ -2,7 +2,7 @@
 import { initializePage, adjustMainContent } from './dom.js';
 import { handleKeyPress, expandAll, collapseAll, attachSlideshowEventListeners } from './events.js';
 import { populateFileTree } from './fileTree.js';
-import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
+import { initializeGallery, getCurrentPage, setFocusToGallery } from './dom_pinterest.js';
 import { displayMedia, setData } from './media.js';
 
 let loadingCount = 0;
@@ -56,14 +56,28 @@ document.addEventListener('DOMContentLoaded', () => {
 
     const view = new URLSearchParams(window.location.search).get('view') || 'gallery';
     console.log(`Initial view: ${view}`);
-    if (view === 'slideshow') {
+
+    // If no view is specified, set it to gallery
+    if (!window.location.search.includes('view=')) {
+        changeView('gallery');
+    } else if (view === 'slideshow') {
         console.log('Initial load of slideshow view, attaching event listeners.');
         attachSlideshowEventListeners();
         const image = new URLSearchParams(window.location.search).get('image');
         if (image) {
             displayMedia(decodeURIComponent(image));
         }
+    } else {
+        changeView(view);
     }
+
+    // Initialize theme on initial load
+    initializeTheme();
+
+    // Start fetching images on initial load
+    fetchImages().then(() => {
+        hideLoadingScreen();
+    });
 
     // Use MutationObserver to detect changes in the DOM
     const observer = new MutationObserver((mutations) => {
@@ -111,12 +125,23 @@ function changeView(view, image = null) {
     }
 
     fetch(url)
-        .then(response => response.text())
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.text();
+        })
         .then(html => {
             const parser = new DOMParser();
             const doc = parser.parseFromString(html, 'text/html');
             const mainContent = document.getElementById('mainContent');
+            if (!mainContent) {
+                throw new Error('Main content element not found');
+            }
             const newContent = doc.querySelector('#mainContent').innerHTML;
+            if (!newContent) {
+                throw new Error('New content not found in fetched HTML');
+            }
             mainContent.innerHTML = newContent;
             console.log(`View changed to: ${view}, content updated.`);
             window.history.pushState({}, '', url);
@@ -128,46 +153,44 @@ function changeView(view, image = null) {
                 console.log('Initializing gallery view.');
                 const currentPage = getCurrentPage();
 
-                fetch('images.json')
-                    .then(response => response.json())
+                return fetch('images.json')
+                    .then(response => {
+                        if (!response.ok) {
+                            throw new Error(`HTTP error! status: ${response.status}`);
+                        }
+                        return response.json();
+                    })
                     .then(images => {
                         initializeGallery(images, currentPage);
-                        // Update loading screen text for placeholders
                         updateLoadingText('Loading placeholders...');
-                        // Simulate placeholder loading with a timeout for demonstration
-                        setTimeout(() => {
-                            // Update loading screen text for initial screen space images
-                            updateLoadingText('Loading initial screen space images...');
-                            setTimeout(() => {
-                                loadingCount--;
-                                checkHideLoadingScreen();
-                                setFocusToGallery();  // Set focus after loading
-                            }, 1000); // Simulate initial screen space image loading time
-                        }, 1000); // Simulate placeholder loading time
+                        return new Promise(resolve => setTimeout(resolve, 1000));
                     })
-                    .catch(error => {
-                        console.error('Error fetching images:', error);
+                    .then(() => {
+                        updateLoadingText('Loading initial screen space images...');
+                        return new Promise(resolve => setTimeout(resolve, 1000));
+                    })
+                    .then(() => {
                         loadingCount--;
                         checkHideLoadingScreen();
+                        setFocusToGallery();
                     });
             } else if (view === 'slideshow') {
                 console.log('Initializing slideshow view, attaching event listeners.');
                 attachSlideshowEventListeners(); // Ensure event listeners are set up for the slideshow
                 if (image) {
-                    displayMedia(decodeURIComponent(image)).then(() => {
-                        loadingCount--;
-                        checkHideLoadingScreen();
-                    }); // Ensure the image is displayed
-                } else {
-                    loadingCount--;
-                    checkHideLoadingScreen();
+                    return displayMedia(decodeURIComponent(image))
+                        .then(() => {
+                            loadingCount--;
+                            checkHideLoadingScreen();
+                        });
                 }
             } else if (view === 'settings') {
-                hideLoadingScreen(); // Ensure loading screen is hidden when opening settings
+                hideLoadingScreen();
             }
         })
         .catch(error => {
             console.error('Error changing view:', error);
+            alert(`Failed to change view: ${error.message}`);
             loadingCount--;
             checkHideLoadingScreen();
         });

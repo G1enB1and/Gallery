@@ -5,15 +5,15 @@ let data = [];
 let currentPage = parseInt(sessionStorage.getItem('currentPage')) || 1;
 const imagesPerPage = 60;
 
-export function setData(images) {
+function setData(images) {
     data = images;
 }
 
-export function getCurrentPage() {
+function getCurrentPage() {
     return currentPage;
 }
 
-export function setCurrentPage(page) {
+function setCurrentPage(page) {
     currentPage = page;
     sessionStorage.setItem('currentPage', page);
 }
@@ -184,6 +184,10 @@ async function renderImages(images, page, loadCount = imagesPerPage) {
 
 // New function to set focus to the gallery
 function setFocusToGallery() {
+    if (!isGalleryView()) {
+        console.log('Not in gallery view, skipping focus set');
+        return;
+    }
     const gallery = document.getElementById('gallery');
     if (gallery) {
         // Make the gallery focusable
@@ -191,16 +195,18 @@ function setFocusToGallery() {
         // Set focus to the gallery
         gallery.focus();
         console.log('Focus set to gallery');
+    } else {
+        console.log('Gallery element not found, could not set focus');
     }
 }
 
 // New function to initialize the gallery
-export async function initializeGallery(images, page) {
+async function initializeGallery(images, page) {
     if (!isGalleryView()) {
         console.log('Not in gallery view, skipping gallery initialization');
         return;
     }
-    
+
     setData(images);
     try {
         await renderImages(images, page);
@@ -210,6 +216,15 @@ export async function initializeGallery(images, page) {
         console.error('Error initializing gallery:', error);
     }
 }
+
+// Export all necessary functions
+export {
+    setData,
+    getCurrentPage,
+    setCurrentPage,
+    setFocusToGallery,
+    initializeGallery
+};
 
 // Function to render pagination controls
 function renderPagination() {
