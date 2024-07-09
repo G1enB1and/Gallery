@@ -138,6 +138,10 @@ class RequestHandler(SimpleHTTPRequestHandler):
                 self.wfile.write(b'Missing directory parameter.')
         elif self.path == '/add_tag':
             self.handle_add_tag(data)
+        elif self.path == '/update_tags':
+            self.handle_update_tags(data)
+        elif self.path == '/clear_tags':
+            self.handle_clear_tags(data)
         elif self.path == '/update_hidden_files':
             show_hidden = data.get('showHidden', False)
             update_hidden_files(show_hidden)
@@ -149,6 +153,41 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.send_response(404)
             self.end_headers()
             self.wfile.write(b'Not Found')
+
+    def handle_update_tags(self, data):
+        file_path = unquote(data.get('path', ''))
+        new_tags = data.get('tags', [])
+        logging.info(f"Handling update_tags request for file: {file_path}, tags: {new_tags}")
+        if file_path and new_tags is not None:
+            success, message = update_tags(file_path, new_tags)
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = json.dumps({'success': success, 'message': message})
+            self.wfile.write(response.encode())
+            logging.info(f"Update tags response: {response}")
+        else:
+            logging.warning("Missing path or tags parameter in update_tags request")
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b'Missing path or tags parameter')
+
+    def handle_clear_tags(self, data):
+        file_path = unquote(data.get('path', ''))
+        logging.info(f"Handling clear_tags request for file: {file_path}")
+        if file_path:
+            success, message = clear_tags(file_path)
+            self.send_response(200)
+            self.send_header('Content-type', 'application/json')
+            self.end_headers()
+            response = json.dumps({'success': success, 'message': message})
+            self.wfile.write(response.encode())
+            logging.info(f"Clear tags response: {response}")
+        else:
+            logging.warning("Missing path parameter in clear_tags request")
+            self.send_response(400)
+            self.end_headers()
+            self.wfile.write(b'Missing path parameter')
 
     def handle_get_image_info(self, query_params):
         file_path = unquote(query_params.get('path', [''])[0])
@@ -322,6 +361,54 @@ def add_tag(file_path, new_tag):
             return True, "Tag already exists"
     except Exception as e:
         error_message = f"Error adding tag to {file_path}: {str(e)}"
+        logging.error(error_message)
+        return False, error_message
+
+def update_tags(file_path, new_tags):
+    logging.info(f"Updating tags for file: {file_path}")
+    try:
+        if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff', '.png')):
+            with pyexiv2.Image(file_path) as img:
+                xmp_data = img.read_xmp()
+                xmp_data['Xmp.dc.subject'] = new_tags
+                img.modify_xmp(xmp_data)
+            logging.info(f"Tags updated successfully for image file. New tags: {new_tags}")
+        elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
+            file = MutagenFile(file_path)
+            file.tags['comment'] = ';'.join(new_tags)
+            file.save()
+            logging.info(f"Tags updated successfully for video file. New tags: {new_tags}")
+        else:
+            logging.warning(f"Unsupported file type: {file_path}")
+            return False, "Unsupported file type"
+        return True, "Tags updated successfully"
+    except Exception as e:
+        error_message = f"Error updating tags for {file_path}: {str(e)}"
+        logging.error(error_message)
+        return False, error_message
+
+def clear_tags(file_path):
+    logging.info(f"Clearing tags for file: {file_path}")
+    try:
+        if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff', '.png')):
+            with pyexiv2.Image(file_path) as img:
+                xmp_data = img.read_xmp()
+                if 'Xmp.dc.subject' in xmp_data:
+                    del xmp_data['Xmp.dc.subject']
+                img.modify_xmp(xmp_data)
+            logging.info("Tags cleared successfully for image file.")
+        elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
+            file = MutagenFile(file_path)
+            if 'comment' in file.tags:
+                del file.tags['comment']
+            file.save()
+            logging.info("Tags cleared successfully for video file.")
+        else:
+            logging.warning(f"Unsupported file type: {file_path}")
+            return False, "Unsupported file type"
+        return True, "Tags cleared successfully"
+    except Exception as e:
+        error_message = f"Error clearing tags for {file_path}: {str(e)}"
         logging.error(error_message)
         return False, error_message
 

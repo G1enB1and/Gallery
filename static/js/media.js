@@ -257,51 +257,40 @@ export function updateDataPanel(imagePath) {
                 tagContainer.innerHTML = `
                     <h3>Tags</h3>
                     <div id="existingTags"></div>
+                    <textarea id="bulkTagEdit" placeholder="Edit tags (comma-separated)"></textarea>
+                    <button id="applyTagsButton">Apply Changes</button>
                     <input type="text" id="newTag" placeholder="Add a new tag">
                     <button id="addTagButton">Add Tag</button>
+                    <button id="clearTagsButton">Clear All Tags</button>
                 `;
                 dataPanel.appendChild(tagContainer);
 
+                const bulkTagEdit = document.getElementById('bulkTagEdit');
+                const applyTagsButton = document.getElementById('applyTagsButton');
                 const addTagButton = document.getElementById('addTagButton');
                 const newTagInput = document.getElementById('newTag');
+                const clearTagsButton = document.getElementById('clearTagsButton');
 
-                if (addTagButton && newTagInput) {
+                if (bulkTagEdit && applyTagsButton && addTagButton && newTagInput && clearTagsButton) {
+                    bulkTagEdit.addEventListener('focus', () => setIsTyping(true));
+                    bulkTagEdit.addEventListener('blur', () => setIsTyping(false));
                     newTagInput.addEventListener('focus', () => setIsTyping(true));
                     newTagInput.addEventListener('blur', () => setIsTyping(false));
-                    
+
+                    applyTagsButton.addEventListener('click', () => {
+                        const tags = bulkTagEdit.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+                        updateImageTags(imagePath, tags);
+                    });
+
                     addTagButton.addEventListener('click', () => {
                         const newTag = newTagInput.value.trim();
                         if (newTag) {
-                            console.log(`Attempting to add tag: ${newTag}`);
-                            fetch('/add_tag', {
-                                method: 'POST',
-                                headers: {
-                                    'Content-Type': 'application/json',
-                                },
-                                body: JSON.stringify({ path: imagePath, tag: newTag }),
-                            })
-                            .then(response => {
-                                if (!response.ok) {
-                                    throw new Error(`HTTP error! status: ${response.status}`);
-                                }
-                                return response.json();
-                            })
-                            .then(data => {
-                                console.log('Add tag response:', data);
-                                if (data.success) {
-                                    console.log('Tag added successfully');
-                                    updateTags(imagePath);
-                                    newTagInput.value = '';
-                                } else {
-                                    console.error('Failed to add tag:', data.message);
-                                    alert(`Failed to add tag: ${data.message}`);
-                                }
-                            })
-                            .catch(error => {
-                                console.error('Error adding tag:', error);
-                                alert(`Error adding tag: ${error.message}`);
-                            });
+                            addTag(imagePath, newTag);
                         }
+                    });
+
+                    clearTagsButton.addEventListener('click', () => {
+                        clearTags(imagePath);
                     });
                 }
 
@@ -329,7 +318,8 @@ function updateTags(imagePath) {
         .then(tagsString => {
             console.log('Tags received:', tagsString);
             const existingTags = document.getElementById('existingTags');
-            if (existingTags) {
+            const bulkTagEdit = document.getElementById('bulkTagEdit');
+            if (existingTags && bulkTagEdit) {
                 existingTags.innerHTML = '';
                 if (tagsString) {
                     const tags = tagsString.split(', ');  // Split the string into an array
@@ -344,12 +334,108 @@ function updateTags(imagePath) {
                             existingTags.appendChild(document.createTextNode(', '));
                         }
                     });
+                    bulkTagEdit.value = tagsString;
                 } else {
                     existingTags.textContent = 'No tags found';
+                    bulkTagEdit.value = '';
                 }
             }
         })
         .catch(error => console.error('Error updating tags:', error));
+}
+
+function addTag(imagePath, newTag) {
+    console.log(`Attempting to add tag: ${newTag}`);
+    fetch('/add_tag', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path: imagePath, tag: newTag }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Add tag response:', data);
+        if (data.success) {
+            console.log('Tag added successfully');
+            updateTags(imagePath);
+            document.getElementById('newTag').value = '';
+        } else {
+            console.error('Failed to add tag:', data.message);
+            alert(`Failed to add tag: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error adding tag:', error);
+        alert(`Error adding tag: ${error.message}`);
+    });
+}
+
+function updateImageTags(imagePath, tags) {
+    console.log(`Updating tags for image: ${imagePath}`);
+    fetch('/update_tags', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path: imagePath, tags: tags }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Update tags response:', data);
+        if (data.success) {
+            console.log('Tags updated successfully');
+            updateTags(imagePath);
+        } else {
+            console.error('Failed to update tags:', data.message);
+            alert(`Failed to update tags: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error updating tags:', error);
+        alert(`Error updating tags: ${error.message}`);
+    });
+}
+
+function clearTags(imagePath) {
+    console.log(`Clearing all tags for image: ${imagePath}`);
+    fetch('/clear_tags', {
+        method: 'POST',
+        headers: {
+            'Content-Type': 'application/json',
+        },
+        body: JSON.stringify({ path: imagePath }),
+    })
+    .then(response => {
+        if (!response.ok) {
+            throw new Error(`HTTP error! status: ${response.status}`);
+        }
+        return response.json();
+    })
+    .then(data => {
+        console.log('Clear tags response:', data);
+        if (data.success) {
+            console.log('Tags cleared successfully');
+            updateTags(imagePath);
+        } else {
+            console.error('Failed to clear tags:', data.message);
+            alert(`Failed to clear tags: ${data.message}`);
+        }
+    })
+    .catch(error => {
+        console.error('Error clearing tags:', error);
+        alert(`Error clearing tags: ${error.message}`);
+    });
 }
 
 // Clear video source and hide video element on initial page load if view is slideshow

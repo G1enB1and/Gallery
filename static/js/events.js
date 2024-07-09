@@ -6,7 +6,22 @@ export function handleKeyPress(event) {
     // Check if the event target is an input or textarea
     if (event.target.tagName === 'INPUT' || event.target.tagName === 'TEXTAREA') {
         isTyping = true;
-        return; // Exit the function early if the user is typing
+        
+        // Allow Enter key for tag input
+        if (event.code === 'Enter' && event.target.id === 'newTag') {
+            event.preventDefault();
+            document.getElementById('addTagButton').click();
+            return;
+        }
+        
+        // Allow Enter key for bulk tag editing
+        if (event.code === 'Enter' && event.target.id === 'bulkTagEdit') {
+            event.preventDefault();
+            document.getElementById('applyTagsButton').click();
+            return;
+        }
+        
+        return; // Exit the function early for other keys if the user is typing
     }
 
     // Check if we're in a typing state
