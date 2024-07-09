@@ -3,6 +3,11 @@ import { setData, displayImageWithUrlUpdate } from './media.js';
 import { expandAll, collapseAll } from './events.js';
 import { initializeGallery, getCurrentPage } from './dom_pinterest.js';
 
+// Function to check if we're in gallery view
+function isGalleryView() {
+    return new URLSearchParams(window.location.search).get('view') === 'gallery';
+}
+
 // Function to populate the file tree
 export function populateFileTree() {
     const fileTreeContainer = document.getElementById('fileTree');
@@ -33,8 +38,10 @@ export function populateFileTree() {
         .then(response => response.json())
         .then(images => {
             setData(images);
-            // Refresh the gallery with the new images
-            initializeGallery(images, 1);
+            // Refresh the gallery with the new images only if in gallery view
+            if (isGalleryView()) {
+                initializeGallery(images, 1);
+            }
             hideLoadingScreen();
         })
         .catch(error => {

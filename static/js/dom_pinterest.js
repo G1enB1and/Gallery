@@ -18,6 +18,11 @@ export function setCurrentPage(page) {
     sessionStorage.setItem('currentPage', page);
 }
 
+// Function to check if we're in gallery view
+function isGalleryView() {
+    return new URLSearchParams(window.location.search).get('view') === 'gallery';
+}
+
 // Function to fetch image dimensions
 async function fetchImageDimensions(url) {
     return new Promise((resolve, reject) => {
@@ -114,11 +119,17 @@ function createVideoElement(url, index) {
 
 // Function to render images for a specific page
 async function renderImages(images, page, loadCount = imagesPerPage) {
+    if (!isGalleryView()) {
+        console.log('Not in gallery view, skipping renderImages');
+        return;
+    }
+
     const gallery = document.getElementById('gallery');
     if (!gallery) {
         console.error('Gallery element not found');
         return;
     }
+
     gallery.innerHTML = ''; // Clear previous images
     const startIndex = (page - 1) * imagesPerPage;
     const endIndex = startIndex + loadCount;
@@ -185,6 +196,11 @@ function setFocusToGallery() {
 
 // New function to initialize the gallery
 export async function initializeGallery(images, page) {
+    if (!isGalleryView()) {
+        console.log('Not in gallery view, skipping gallery initialization');
+        return;
+    }
+    
     setData(images);
     try {
         await renderImages(images, page);
@@ -197,11 +213,17 @@ export async function initializeGallery(images, page) {
 
 // Function to render pagination controls
 function renderPagination() {
+    if (!isGalleryView()) {
+        console.log('Not in gallery view, skipping renderPagination');
+        return;
+    }
+
     const pagination = document.getElementById('pagination');
     if (!pagination) {
         console.error('Pagination element not found');
         return;
     }
+
     const totalPages = Math.ceil(data.length / imagesPerPage);
     pagination.innerHTML = '';
     pagination.setAttribute('data-pagination', '');
