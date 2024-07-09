@@ -237,8 +237,8 @@ export function updateDataPanel(imagePath) {
                 const keysToDisplay = {
                     'File Name': 'File Name',
                     'File Path': 'File Path',
-                    'File Size': 'File Size',
                     'File Type': 'File Type',
+                    'File Size': 'File Size',
                     'Dimensions': 'Dimensions'
                 };
 
@@ -255,12 +255,12 @@ export function updateDataPanel(imagePath) {
                 const tagContainer = document.createElement('div');
                 tagContainer.id = 'tagContainer';
                 tagContainer.innerHTML = `
-                    <h3>Tags</h3>
+                    <h3>Tags:</h3>
                     <div id="existingTags"></div>
-                    <textarea id="bulkTagEdit" placeholder="Edit tags (comma-separated)"></textarea>
-                    <button id="applyTagsButton">Apply Changes</button>
                     <input type="text" id="newTag" placeholder="Add a new tag">
                     <button id="addTagButton">Add Tag</button>
+                    <textarea id="bulkTagEdit" placeholder="Edit tags (comma-separated)"></textarea>
+                    <button id="applyTagsButton">Apply Changes</button>
                     <button id="clearTagsButton">Clear All Tags</button>
                 `;
                 dataPanel.appendChild(tagContainer);
@@ -436,7 +436,7 @@ function updateTagsDisplay(tags) {
             });
             bulkTagEdit.value = tags.join(', ');
         } else {
-            existingTags.textContent = 'No tags found';
+            existingTags.textContent = 'No tags found.';
             bulkTagEdit.value = '';
         }
     }

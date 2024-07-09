@@ -166,11 +166,41 @@ a:link, a:visited, a:hover, a:active {
 }
 
 .data-panel {
-    width: 20%;
+    /*width: 20%;*/
     background-color: var(--aDataPanelBG);
 }
 
 .dataPanelContent {
+    margin: 10px;
+}
+
+#existingTags {
+    width: calc(100% - 40px);
+    margin: 10px;
+}
+
+#newTag {
+    width: calc(100% - 40px);
+    margin: 10px;
+}
+
+#bulkTagEdit {
+    width: calc(100% - 40px);
+    margin: 10px;
+}
+
+#addTagButton {
+    width: calc(100% - 40px);
+    margin: 10px;
+}
+
+#applyTagsButton {
+    width: calc(100% - 40px);
+    margin: 10px;
+}
+
+#clearTagsButton {
+    width: calc(100% - 40px);
     margin: 10px;
 }
 
