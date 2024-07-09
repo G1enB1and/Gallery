@@ -285,7 +285,9 @@ export function updateDataPanel(imagePath) {
                     addTagButton.addEventListener('click', () => {
                         const newTag = newTagInput.value.trim();
                         if (newTag) {
-                            addTag(imagePath, newTag);
+                            const currentTags = bulkTagEdit.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+                            updateImageTags(imagePath, [...currentTags, newTag]);
+                            newTagInput.value = '';
                         }
                     });
 
@@ -294,7 +296,8 @@ export function updateDataPanel(imagePath) {
                     });
                 }
 
-                updateTags(imagePath);
+                // Fetch and display the latest tags
+                fetchAndUpdateTags(imagePath);
             }
         })
         .catch(error => {
@@ -306,6 +309,7 @@ export function updateDataPanel(imagePath) {
         });
 }
 
+// Update the existing updateTags function to use the new updateTagsDisplay function
 function updateTags(imagePath) {
     console.log(`Updating tags for image: ${imagePath}`);
     fetch(`/get_tags?path=${encodeURIComponent(imagePath)}`)
@@ -315,31 +319,9 @@ function updateTags(imagePath) {
             }
             return response.json();
         })
-        .then(tagsString => {
-            console.log('Tags received:', tagsString);
-            const existingTags = document.getElementById('existingTags');
-            const bulkTagEdit = document.getElementById('bulkTagEdit');
-            if (existingTags && bulkTagEdit) {
-                existingTags.innerHTML = '';
-                if (tagsString) {
-                    const tags = tagsString.split(', ');  // Split the string into an array
-                    tags.forEach((tag, index) => {
-                        const span = document.createElement('span');
-                        span.textContent = tag;
-                        span.className = 'tag';
-                        existingTags.appendChild(span);
-                        
-                        // Add comma and space after each tag except the last one
-                        if (index < tags.length - 1) {
-                            existingTags.appendChild(document.createTextNode(', '));
-                        }
-                    });
-                    bulkTagEdit.value = tagsString;
-                } else {
-                    existingTags.textContent = 'No tags found';
-                    bulkTagEdit.value = '';
-                }
-            }
+        .then(tags => {
+            console.log('Tags received:', tags);
+            updateTagsDisplay(tags);
         })
         .catch(error => console.error('Error updating tags:', error));
 }
@@ -363,8 +345,9 @@ function addTag(imagePath, newTag) {
         console.log('Add tag response:', data);
         if (data.success) {
             console.log('Tag added successfully');
-            updateTags(imagePath);
             document.getElementById('newTag').value = '';
+            // Fetch and update tags after successful addition
+            fetchAndUpdateTags(imagePath);
         } else {
             console.error('Failed to add tag:', data.message);
             alert(`Failed to add tag: ${data.message}`);
@@ -395,7 +378,8 @@ function updateImageTags(imagePath, tags) {
         console.log('Update tags response:', data);
         if (data.success) {
             console.log('Tags updated successfully');
-            updateTags(imagePath);
+            // Fetch and update tags after successful update
+            fetchAndUpdateTags(imagePath);
         } else {
             console.error('Failed to update tags:', data.message);
             alert(`Failed to update tags: ${data.message}`);
@@ -409,33 +393,53 @@ function updateImageTags(imagePath, tags) {
 
 function clearTags(imagePath) {
     console.log(`Clearing all tags for image: ${imagePath}`);
-    fetch('/clear_tags', {
-        method: 'POST',
-        headers: {
-            'Content-Type': 'application/json',
-        },
-        body: JSON.stringify({ path: imagePath }),
-    })
-    .then(response => {
-        if (!response.ok) {
-            throw new Error(`HTTP error! status: ${response.status}`);
-        }
-        return response.json();
-    })
-    .then(data => {
-        console.log('Clear tags response:', data);
-        if (data.success) {
-            console.log('Tags cleared successfully');
-            updateTags(imagePath);
+    // Use the updateImageTags function with an empty array to clear all tags
+    updateImageTags(imagePath, []);
+}
+
+function fetchAndUpdateTags(imagePath) {
+    console.log(`Fetching latest tags for image: ${imagePath}`);
+    fetch(`/get_tags?path=${encodeURIComponent(imagePath)}`)
+        .then(response => {
+            if (!response.ok) {
+                throw new Error(`HTTP error! status: ${response.status}`);
+            }
+            return response.json();
+        })
+        .then(tags => {
+            console.log('Latest tags received:', tags);
+            updateTagsDisplay(tags);
+        })
+        .catch(error => {
+            console.error('Error fetching latest tags:', error);
+            updateTagsDisplay([]); // Update with empty array in case of error
+        });
+}
+
+function updateTagsDisplay(tags) {
+    console.log('Updating tags display with:', tags);
+    const existingTags = document.getElementById('existingTags');
+    const bulkTagEdit = document.getElementById('bulkTagEdit');
+    if (existingTags && bulkTagEdit) {
+        existingTags.innerHTML = '';
+        if (Array.isArray(tags) && tags.length > 0) {
+            tags.forEach((tag, index) => {
+                const span = document.createElement('span');
+                span.textContent = tag;
+                span.className = 'tag';
+                existingTags.appendChild(span);
+                
+                // Add comma and space after each tag except the last one
+                if (index < tags.length - 1) {
+                    existingTags.appendChild(document.createTextNode(', '));
+                }
+            });
+            bulkTagEdit.value = tags.join(', ');
         } else {
-            console.error('Failed to clear tags:', data.message);
-            alert(`Failed to clear tags: ${data.message}`);
+            existingTags.textContent = 'No tags found';
+            bulkTagEdit.value = '';
         }
-    })
-    .catch(error => {
-        console.error('Error clearing tags:', error);
-        alert(`Error clearing tags: ${error.message}`);
-    });
+    }
 }
 
 // Clear video source and hide video element on initial page load if view is slideshow

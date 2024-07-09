@@ -180,14 +180,22 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            response = json.dumps({'success': success, 'message': message})
+            
+            # Get updated tags after clearing
+            updated_tags = get_tags(file_path)
+            
+            response = json.dumps({
+                'success': success, 
+                'message': message,
+                'updatedTags': updated_tags
+            })
             self.wfile.write(response.encode())
             logging.info(f"Clear tags response: {response}")
         else:
             logging.warning("Missing path parameter in clear_tags request")
             self.send_response(400)
             self.end_headers()
-            self.wfile.write(b'Missing path parameter')
+            self.wfile.write(json.dumps({'success': False, 'message': 'Missing path parameter'}).encode())
 
     def handle_get_image_info(self, query_params):
         file_path = unquote(query_params.get('path', [''])[0])
@@ -210,7 +218,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
             self.send_response(200)
             self.send_header('Content-type', 'application/json')
             self.end_headers()
-            self.wfile.write(json.dumps(', '.join(tags)).encode())  # Join tags with comma and space
+            self.wfile.write(json.dumps(tags).encode())  # Always send as JSON array
             logging.info(f"Sent tags: {tags}")
         else:
             logging.warning("Missing path parameter in get_tags request")
@@ -312,19 +320,36 @@ def get_tags(file_path):
         if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff', '.png')):
             with pyexiv2.Image(file_path) as img:
                 xmp_data = img.read_xmp()
-                if 'Xmp.dc.subject' in xmp_data:
-                    tags = xmp_data['Xmp.dc.subject']
-                    logging.info(f"Tags found: {tags}")
-                    return tags  # Return list of tags
-                else:
-                    logging.info("No tags found in XMP data")
-                    return []
+                iptc_data = img.read_iptc()
+                exif_data = img.read_exif()
+                
+                tags = []
+                # XMP tags
+                xmp_keys = ['Xmp.dc.subject', 'Xmp.MicrosoftPhoto.LastKeywordXMP', 'Xmp.MicrosoftPhoto.LastKeywordIPTC']
+                for key in xmp_keys:
+                    if key in xmp_data:
+                        tags.extend(xmp_data[key] if isinstance(xmp_data[key], list) else [xmp_data[key]])
+
+                # IPTC keywords
+                iptc_keys = ['Iptc.Application2.Keywords', 'Iptc.Application2.Subject']
+                for key in iptc_keys:
+                    if key in iptc_data:
+                        tags.extend(iptc_data[key] if isinstance(iptc_data[key], list) else [iptc_data[key]])
+
+                # EXIF tags
+                exif_keys = ['Exif.Photo.UserComment', 'Exif.Image.XPKeywords', 'Exif.Image.XPSubject']
+                for key in exif_keys:
+                    if key in exif_data:
+                        tags.extend(exif_data[key].split(';') if isinstance(exif_data[key], str) else [exif_data[key]])
+
+                logging.info(f"Tags found: {tags}")
+                return list(set(tags))  # Remove duplicates
         elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
             file = MutagenFile(file_path)
             if 'comment' in file.tags:
                 tags = file.tags['comment'][0].split(';')
                 logging.info(f"Tags found: {tags}")
-                return tags  # Return list of tags
+                return tags
             logging.info("No comment tag found in video file")
             return []
         else:
@@ -392,20 +417,62 @@ def clear_tags(file_path):
     try:
         if file_path.lower().endswith(('.jpg', '.jpeg', '.tiff', '.png')):
             with pyexiv2.Image(file_path) as img:
+                # Log initial state
+                logging.info(f"Initial XMP data: {img.read_xmp()}")
+                logging.info(f"Initial IPTC data: {img.read_iptc()}")
+                logging.info(f"Initial EXIF data: {img.read_exif()}")
+
+                # Clear XMP tags
                 xmp_data = img.read_xmp()
-                if 'Xmp.dc.subject' in xmp_data:
-                    del xmp_data['Xmp.dc.subject']
+                xmp_keys_to_clear = ['Xmp.dc.subject', 'Xmp.MicrosoftPhoto.LastKeywordXMP', 'Xmp.MicrosoftPhoto.LastKeywordIPTC']
+                for key in xmp_keys_to_clear:
+                    if key in xmp_data:
+                        del xmp_data[key]
                 img.modify_xmp(xmp_data)
-            logging.info("Tags cleared successfully for image file.")
+                logging.info("XMP tags cleared.")
+
+                # Clear IPTC keywords
+                iptc_data = img.read_iptc()
+                iptc_keys_to_clear = ['Iptc.Application2.Keywords', 'Iptc.Application2.Subject']
+                for key in iptc_keys_to_clear:
+                    if key in iptc_data:
+                        del iptc_data[key]
+                img.modify_iptc(iptc_data)
+                logging.info("IPTC keywords cleared.")
+
+                # Clear EXIF UserComment
+                exif_data = img.read_exif()
+                exif_keys_to_clear = ['Exif.Photo.UserComment', 'Exif.Image.XPKeywords', 'Exif.Image.XPSubject']
+                for key in exif_keys_to_clear:
+                    if key in exif_data:
+                        del exif_data[key]
+                img.modify_exif(exif_data)
+                logging.info("EXIF UserComment and related fields cleared.")
+
+                # Log final state
+                logging.info(f"Final XMP data: {img.read_xmp()}")
+                logging.info(f"Final IPTC data: {img.read_iptc()}")
+                logging.info(f"Final EXIF data: {img.read_exif()}")
+
         elif file_path.lower().endswith(('.mp4', '.avi', '.mov')):
             file = MutagenFile(file_path)
             if 'comment' in file.tags:
                 del file.tags['comment']
-            file.save()
-            logging.info("Tags cleared successfully for video file.")
+                file.save()
+                logging.info("Tags cleared successfully for video file.")
+            
+            # Verify tags are cleared
+            file = MutagenFile(file_path)
+            logging.info(f"Video tags after clearing: {file.tags}")
         else:
             logging.warning(f"Unsupported file type: {file_path}")
             return False, "Unsupported file type"
+        
+        # Double-check tags are cleared
+        remaining_tags = get_tags(file_path)
+        if remaining_tags:
+            logging.warning(f"Tags still present after clearing: {remaining_tags}")
+            return False, f"Failed to clear all tags. Remaining tags: {remaining_tags}"
         return True, "Tags cleared successfully"
     except Exception as e:
         error_message = f"Error clearing tags for {file_path}: {str(e)}"
