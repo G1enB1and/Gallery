@@ -43,17 +43,6 @@ document.addEventListener('DOMContentLoaded', () => {
         });
     }
 
-    // Event listener for Apply button in settings
-    const applyButton = document.getElementById('applySettings');
-    if (applyButton) {
-        applyButton.addEventListener('click', () => {
-            const selectedTheme = document.getElementById('themeSwitcher').value;
-            const slideshowInterval = document.getElementById('slideshowInterval').value;
-            const showHiddenFiles = document.getElementById('showHiddenFiles').checked;
-            applySettings(selectedTheme, slideshowInterval, showHiddenFiles);
-        });
-    }
-
     const view = new URLSearchParams(window.location.search).get('view') || 'gallery';
     console.log(`Initial view: ${view}`);
 
@@ -363,6 +352,9 @@ function initializeSettings() {
     document.getElementById('themeSwitcher').value = currentTheme;
     document.getElementById('slideshowInterval').value = currentSlideshowInterval;
     document.getElementById('showHiddenFiles').checked = currentShowHiddenFiles;
+
+    // Apply the current theme immediately (why??)
+    applyTheme(currentTheme);
 
     // Attach event listener to apply button
     const applyButton = document.getElementById('applySettings');
