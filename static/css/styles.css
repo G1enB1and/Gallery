@@ -235,6 +235,8 @@ a:link, a:visited, a:hover, a:active {
 .gallery {
     column-gap: 10px;
     padding: 10px;
+    opacity: 0; /* Initially hide the gallery */
+    transition: opacity 0.3s ease; /* Smooth transition for opacity changes */
 }
 
 .gallery-item {
@@ -253,6 +255,8 @@ a:link, a:visited, a:hover, a:active {
     display: block;
     border-radius: 15px;
     cursor: pointer;
+    opacity: 0; /* Initially hide images and videos */
+    transition: opacity 0.3s ease; /* Smooth transition for opacity changes */
 }
 
 .placeholder {

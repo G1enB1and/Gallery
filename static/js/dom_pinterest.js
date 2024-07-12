@@ -65,16 +65,17 @@ function createImageElement(url, index) {
     img.className = 'lazy gallery-image';
     img.dataset.src = url;
     img.dataset.index = index;
+    img.style.opacity = '0'; // Initially hide the image using opacity
 
     // Add event listener for when the image is loaded
     img.addEventListener('load', () => {
+        img.style.opacity = '1'; // Show the image using opacity
         const placeholder = img.closest('.placeholder');
         if (placeholder) {
-            img.style.display = 'block'; // Show the image
             placeholder.style.paddingBottom = '0'; // Remove padding from placeholder
             placeholder.classList.remove('placeholder'); // Remove the placeholder class
-            console.log(`Image loaded: ${img.src}`);
         }
+        console.log(`Image loaded: ${img.src}`);
     });
 
     // Add click event listener to switch to slideshow view
@@ -96,17 +97,18 @@ function createVideoElement(url, index) {
     video.style.maxHeight = '100%';
     video.style.width = 'auto';
     video.style.height = 'auto';
-    video.style.objectFit = 'contain'; // Ensure the video fits within the container
+    video.style.objectFit = 'contain';
+    video.style.opacity = '0'; // Initially hide the video using opacity
 
     // Add event listener for when the video is loaded
     video.addEventListener('loadeddata', () => {
+        video.style.opacity = '1'; // Show the video using opacity
         const placeholder = video.closest('.placeholder');
         if (placeholder) {
-            video.style.display = 'block'; // Show the video
             placeholder.style.paddingBottom = '0'; // Remove padding from placeholder
             placeholder.classList.remove('placeholder'); // Remove the placeholder class
-            console.log(`Video loaded: ${video.src}`);
         }
+        console.log(`Video loaded: ${video.src}`);
     });
 
     // Add click event listener to switch to slideshow view
@@ -136,6 +138,7 @@ async function renderImages(images, page, loadCount = imagesPerPage) {
     const pageImages = images.slice(startIndex, endIndex);
 
     try {
+        // First, create all placeholders
         const imagePromises = pageImages.map(async (url) => {
             try {
                 if (url.endsWith('.mp4')) {
@@ -148,29 +151,38 @@ async function renderImages(images, page, loadCount = imagesPerPage) {
                 return { url, width: 300, height: 200 }; // Default dimensions for failed loads
             }
         });
+
         const imagesWithDimensions = await Promise.all(imagePromises);
 
         imagesWithDimensions.forEach(({ url, width, height }, index) => {
             const placeholder = createPlaceholder({ width, height });
+            gallery.appendChild(placeholder);
+            console.log(`Placeholder created for media: ${url}`);
+        });
+
+        // Then, create and append all media elements
+        imagesWithDimensions.forEach(({ url }, index) => {
+            const placeholder = gallery.children[index];
             let mediaElement;
             if (url.endsWith('.mp4')) {
                 mediaElement = createVideoElement(url, startIndex + index);
             } else {
                 mediaElement = createImageElement(url, startIndex + index);
             }
-
             placeholder.appendChild(mediaElement);
-            gallery.appendChild(placeholder);
-            console.log(`Placeholder created for media: ${url}`);
         });
 
-        // Initialize lazy loading
-        new LazyLoad({
+        // Initialize lazy loading after all placeholders and media elements are in place
+        const lazyLoadInstance = new LazyLoad({
             elements_selector: ".lazy",
-            callback_load: (media) => {
+            callback_loaded: (media) => {
                 console.log(`LazyLoad callback: ${media.dataset.src}`);
+                media.style.opacity = '1';  // Ensure the media is visible after loading
             }
         });
+
+        // Trigger lazy loading manually
+        lazyLoadInstance.update();
 
         // Recalculate layout after images are loaded
         $(gallery).imagesLoaded(() => {
