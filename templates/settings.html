@@ -1,22 +1,24 @@
 <!-- settings.html -->
 <div id="settingsContainer" class="settings">
     <h1>Settings</h1>
-    <div>
-        <label for="themeSwitcher">Theme:</label>
-        <select id="themeSwitcher">
-            <option value="light">Light Mode</option>
-            <option value="dark">Dark Mode</option>
-        </select>
-    </div>
-    <div>
-        <label for="slideshowInterval">Slideshow Interval (seconds):</label>
-        <input type="number" id="slideshowInterval" min="1" value="3">
-    </div>
-    <div>
-        <label for="showHiddenFiles">Show Hidden Files:</label>
-        <input type="checkbox" id="showHiddenFiles">
-    </div>
-    <button id="applySettings">Apply</button>
+    <form id="settingsForm">
+        <div>
+            <label for="themeSwitcher">Theme:</label>
+            <select id="themeSwitcher" name="theme">
+                <option value="light">Light Mode</option>
+                <option value="dark">Dark Mode</option>
+            </select>
+        </div>
+        <div>
+            <label for="slideshowInterval">Slideshow Interval (seconds):</label>
+            <input type="number" id="slideshowInterval" name="slideshowInterval" min="1" value="3">
+        </div>
+        <div>
+            <label for="showHiddenFiles">Show Hidden Files:</label>
+            <input type="checkbox" id="showHiddenFiles" name="showHiddenFiles">
+        </div>
+        <button type="button" id="applySettings">Apply</button>
+    </form>
 </div>
 
 <script type="module">

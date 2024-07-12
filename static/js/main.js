@@ -92,6 +92,10 @@ document.addEventListener('DOMContentLoaded', () => {
                             displayMedia(decodeURIComponent(image));
                         }
                     }
+                    if (node.nodeType === Node.ELEMENT_NODE && node.querySelector('#settingsForm')) {
+                        console.log('Settings form loaded, initializing settings.');
+                        initializeSettings();
+                    }
                 });
             }
         });
@@ -185,6 +189,8 @@ function changeView(view, image = null) {
                         });
                 }
             } else if (view === 'settings') {
+                console.log('Initializing settings view.');
+                initializeSettings();
                 hideLoadingScreen();
             }
         })
@@ -339,11 +345,47 @@ document.onreadystatechange = function () {
     }
 };
 
+// New function to initialize settings
+function initializeSettings() {
+    console.log('Initializing settings.');
+    const settingsForm = document.getElementById('settingsForm');
+    if (!settingsForm) {
+        console.error('Settings form not found');
+        return;
+    }
+
+    // Load current settings
+    const currentTheme = localStorage.getItem('theme') || 'light';
+    const currentSlideshowInterval = localStorage.getItem('slideshowInterval') || '3';
+    const currentShowHiddenFiles = localStorage.getItem('showHiddenFiles') === 'true';
+
+    // Set form values
+    document.getElementById('themeSwitcher').value = currentTheme;
+    document.getElementById('slideshowInterval').value = currentSlideshowInterval;
+    document.getElementById('showHiddenFiles').checked = currentShowHiddenFiles;
+
+    // Attach event listener to apply button
+    const applyButton = document.getElementById('applySettings');
+    if (applyButton) {
+        applyButton.addEventListener('click', applySettings);
+    }
+}
+
 // New function to apply settings
-function applySettings(theme, slideshowInterval, showHiddenFiles) {
+function applySettings() {
+    console.log('Applying settings');
+    const theme = document.getElementById('themeSwitcher').value;
+    const slideshowInterval = document.getElementById('slideshowInterval').value;
+    const showHiddenFiles = document.getElementById('showHiddenFiles').checked;
+
+    // Apply theme
     applyTheme(theme);
     localStorage.setItem('theme', theme);
+
+    // Save slideshow interval
     localStorage.setItem('slideshowInterval', slideshowInterval);
+
+    // Apply show hidden files setting
     localStorage.setItem('showHiddenFiles', showHiddenFiles);
 
     // Apply slideshow interval
@@ -394,12 +436,20 @@ function applySettings(theme, slideshowInterval, showHiddenFiles) {
         // Refresh the gallery with the new images
         initializeGallery(images, 1);
         hideLoadingScreen();
+        console.log('Settings applied successfully');
     })
     .catch(error => {
         console.error('Error applying settings:', error);
         hideLoadingScreen();
     });
 }
+
+// Listen for view changes
+document.addEventListener('viewChanged', (event) => {
+    if (event.detail.view === 'settings') {
+        initializeSettings();
+    }
+});
 
 // Export functions that need to be accessible from other modules
 export {
