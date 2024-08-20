@@ -5,25 +5,18 @@ export function initializePage() {
     const view = new URLSearchParams(window.location.search).get('view');
     const image = new URLSearchParams(window.location.search).get('image');
 
-    if (view === 'slideshow' && image) {
-        fetch('images.json')
-            .then(response => response.json())
-            .then(images => {
-                setData(images); // Ensure data is set
+    fetch('images.json')
+        .then(response => response.json())
+        .then(images => {
+            setData(images); // Set data only once
+            if (view === 'slideshow' && image) {
                 displayMedia(image);
-                setupEventListeners();
-            })
-            .catch(error => console.error('Error fetching images:', error));
-    } else {
-        fetch('images.json')
-            .then(response => response.json())
-            .then(images => {
-                setData(images); // Ensure data is set
-                initializeGallery(images); // Call the new initializeGallery function
-                setupEventListeners();
-            })
-            .catch(error => console.error('Error fetching images:', error));
-    }
+            } else {
+                initializeGallery(images);
+            }
+            setupEventListeners();
+        })
+        .catch(error => console.error('Error fetching images:', error));
 }
 
 function setupEventListeners() {

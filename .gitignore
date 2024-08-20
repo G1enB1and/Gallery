@@ -1,3 +1,4 @@
 Pictures/
 images.json
 static/images/*.psd
+.aider*

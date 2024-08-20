@@ -199,6 +199,7 @@ class RequestHandler(SimpleHTTPRequestHandler):
 
     def handle_get_image_info(self, query_params):
         file_path = unquote(query_params.get('path', [''])[0])
+        logging.info(f"handle_get_image_info called for file: {file_path}")
         if file_path:
             info = get_image_info(file_path)
             self.send_response(200)

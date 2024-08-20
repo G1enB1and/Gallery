@@ -35,7 +35,9 @@ export function setData(newImages) {
         console.log('Old data:', data);
         data = newImages;
         console.log('New data:', data);
-        document.dispatchEvent(new CustomEvent('dataLoaded'));
+        if (!isGalleryInitialized()) {
+            document.dispatchEvent(new CustomEvent('dataLoaded'));
+        }
     } else {
         console.log('Data array unchanged, skipping update');
     }

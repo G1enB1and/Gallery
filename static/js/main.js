@@ -46,25 +46,24 @@ document.addEventListener('DOMContentLoaded', () => {
     const view = new URLSearchParams(window.location.search).get('view') || 'gallery';
     console.log(`Initial view: ${view}`);
 
-    // If no view is specified, set it to gallery
-    if (!window.location.search.includes('view=')) {
-        changeView('gallery');
-    } else if (view === 'slideshow') {
-        console.log('Initial load of slideshow view, attaching event listeners.');
-        attachSlideshowEventListeners();
-        const image = new URLSearchParams(window.location.search).get('image');
-        if (image) {
-            displayMedia(decodeURIComponent(image));
-        }
-    } else {
-        changeView(view);
-    }
-
     // Initialize theme on initial load
     initializeTheme();
 
     // Start fetching images on initial load
     fetchImages().then(() => {
+        // After fetching images, initialize the view
+        if (!window.location.search.includes('view=')) {
+            changeView('gallery');
+        } else if (view === 'slideshow') {
+            console.log('Initial load of slideshow view, attaching event listeners.');
+            attachSlideshowEventListeners();
+            const image = new URLSearchParams(window.location.search).get('image');
+            if (image) {
+                displayMedia(decodeURIComponent(image));
+            }
+        } else {
+            changeView(view);
+        }
         hideLoadingScreen();
     });
 
