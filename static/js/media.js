@@ -7,6 +7,18 @@ let intervalId = null;
 let preloadedNextImage = new Image();
 let preloadedPrevImage = new Image();
 let isTogglePlayPauseRunning = false;
+let previousImage = null;
+let currentImageList = [];
+
+function updateImageList(newList) {
+    if (JSON.stringify(currentImageList) !== JSON.stringify(newList)) {
+        console.warn("Image list has changed unexpectedly");
+        console.log("Old list:", currentImageList);
+        console.log("New list:", newList);
+    }
+    currentImageList = newList;
+}
+
 
 export function getIntervalId() {
     return intervalId;
@@ -16,15 +28,44 @@ export function setIntervalId(id) {
     intervalId = id;
 }
 
-export function setData(images) {
-    data = images;
-    document.dispatchEvent(new CustomEvent('dataLoaded'));
+export function setData(newImages) {
+    console.log('setData called with:', newImages);
+    if (!data.length || JSON.stringify(data) !== JSON.stringify(newImages)) {
+        console.log('Updating data array');
+        console.log('Old data:', data);
+        data = newImages;
+        console.log('New data:', data);
+        document.dispatchEvent(new CustomEvent('dataLoaded'));
+    } else {
+        console.log('Data array unchanged, skipping update');
+    }
+}
+
+// Add this function to check if the data array has changed
+function hasDataChanged(newData) {
+    return JSON.stringify(data) !== JSON.stringify(newData);
 }
 
 // Function to display the media (image or video) in slideshow
 export function displayMedia(src) {
     const imageElement = document.getElementById('slideshowDisplayedImage');
     const videoElement = document.getElementById('slideshowDisplayedVideo');
+
+    console.log(`Displaying media: ${src}`);
+    console.log(`Last navigation direction: ${lastNavigationDirection}`);
+    console.log(`Current data array:`, data);
+
+    // Add this check
+    if (lastNavigationDirection) {
+        const currentIndex = data.indexOf(src);
+        const expectedIndex = lastNavigationDirection === 'next' ? 
+            (data.indexOf(previousImage) + 1) % data.length :
+            (data.indexOf(previousImage) - 1 + data.length) % data.length;
+        
+        if (currentIndex !== expectedIndex) {
+            console.error(`Unexpected image order. Expected index: ${expectedIndex}, Actual index: ${currentIndex}`);
+        }
+    }
 
     if (!imageElement || !videoElement) {
         console.error('Image or Video element not found.');
@@ -68,6 +109,7 @@ export function displayMedia(src) {
     
     restorePlayPauseState();
     updateDataPanel(src);
+    previousImage = src;
 }
 
 export function preloadAdjacentMedia(currentSrc) {
@@ -109,6 +151,8 @@ export function nextImage() {
     const nextIndex = (currentIndex + 1) % data.length;
     const nextSrc = data[nextIndex];
     console.log(`Navigating to next image: ${nextSrc}`);
+    console.log(`Current data array:`, data);
+    lastNavigationDirection = 'next';
     window.location.href = `index.html?view=slideshow&image=${encodeURIComponent(nextSrc)}`;
 }
 
@@ -122,6 +166,8 @@ export function prevImage() {
     const prevIndex = (currentIndex - 1 + data.length) % data.length;
     const prevSrc = data[prevIndex];
     console.log(`Navigating to previous image: ${prevSrc}`);
+    console.log(`Current data array:`, data);
+    lastNavigationDirection = 'prev';
     window.location.href = `index.html?view=slideshow&image=${encodeURIComponent(prevSrc)}`;
 }
 
@@ -220,93 +266,94 @@ export function displayImageWithUrlUpdate(mediaUrl) {
 
 export function updateDataPanel(imagePath) {
     console.log(`Updating data panel for image: ${imagePath}`);
-    fetch(`/get_image_info?path=${encodeURIComponent(imagePath)}`)
-        .then(response => {
-            if (!response.ok) {
-                throw new Error(`HTTP error! status: ${response.status}`);
-            }
-            return response.json();
-        })
-        .then(data => {
-            console.log('Image info received:', data);
-            const dataPanel = document.getElementById('dataPanel');
-            if (dataPanel) {
-                dataPanel.innerHTML = '';
-                
-                // Define the keys we want to display and their labels
-                const keysToDisplay = {
-                    'File Name': 'File Name',
-                    'File Path': 'File Path',
-                    'File Type': 'File Type',
-                    'File Size': 'File Size',
-                    'Dimensions': 'Dimensions'
-                };
+    
+    Promise.all([
+        fetch(`/get_image_info?path=${encodeURIComponent(imagePath)}`).then(response => response.json()),
+        fetch(`/get_tags?path=${encodeURIComponent(imagePath)}`).then(response => response.json())
+    ])
+    .then(([imageInfo, tags]) => {
+        console.log('Image info and tags received:', { imageInfo, tags });
+        const dataPanel = document.getElementById('dataPanel');
+        if (dataPanel) {
+            dataPanel.innerHTML = '';
+            
+            // Display image info
+            const keysToDisplay = {
+                'File Name': 'File Name',
+                'File Path': 'File Path',
+                'File Type': 'File Type',
+                'File Size': 'File Size',
+                'Dimensions': 'Dimensions'
+            };
 
-                // Create and append elements for each piece of information
-                for (const [key, label] of Object.entries(keysToDisplay)) {
-                    if (data[key]) {
-                        const p = document.createElement('p');
-                        p.textContent = `${label}: ${data[key]}`;
-                        dataPanel.appendChild(p);
-                    }
+            for (const [key, label] of Object.entries(keysToDisplay)) {
+                if (imageInfo[key]) {
+                    const p = document.createElement('p');
+                    p.textContent = `${label}: ${imageInfo[key]}`;
+                    dataPanel.appendChild(p);
                 }
-                
-                // Add tag functionality
-                const tagContainer = document.createElement('div');
-                tagContainer.id = 'tagContainer';
-                tagContainer.innerHTML = `
-                    <h3>Tags:</h3>
-                    <div id="existingTags"></div>
-                    <input type="text" id="newTag" placeholder="Add a new tag">
-                    <button id="addTagButton">Add Tag</button>
-                    <textarea id="bulkTagEdit" placeholder="Edit tags (comma-separated)"></textarea>
-                    <button id="applyTagsButton">Apply Changes</button>
-                    <button id="clearTagsButton">Clear All Tags</button>
-                `;
-                dataPanel.appendChild(tagContainer);
-
-                const bulkTagEdit = document.getElementById('bulkTagEdit');
-                const applyTagsButton = document.getElementById('applyTagsButton');
-                const addTagButton = document.getElementById('addTagButton');
-                const newTagInput = document.getElementById('newTag');
-                const clearTagsButton = document.getElementById('clearTagsButton');
-
-                if (bulkTagEdit && applyTagsButton && addTagButton && newTagInput && clearTagsButton) {
-                    bulkTagEdit.addEventListener('focus', () => setIsTyping(true));
-                    bulkTagEdit.addEventListener('blur', () => setIsTyping(false));
-                    newTagInput.addEventListener('focus', () => setIsTyping(true));
-                    newTagInput.addEventListener('blur', () => setIsTyping(false));
-
-                    applyTagsButton.addEventListener('click', () => {
-                        const tags = bulkTagEdit.value.split(',').map(tag => tag.trim()).filter(tag => tag);
-                        updateImageTags(imagePath, tags);
-                    });
-
-                    addTagButton.addEventListener('click', () => {
-                        const newTag = newTagInput.value.trim();
-                        if (newTag) {
-                            const currentTags = bulkTagEdit.value.split(',').map(tag => tag.trim()).filter(tag => tag);
-                            updateImageTags(imagePath, [...currentTags, newTag]);
-                            newTagInput.value = '';
-                        }
-                    });
-
-                    clearTagsButton.addEventListener('click', () => {
-                        clearTags(imagePath);
-                    });
-                }
-
-                // Fetch and display the latest tags
-                fetchAndUpdateTags(imagePath);
             }
-        })
-        .catch(error => {
-            console.error('Error updating data panel:', error);
-            const dataPanel = document.getElementById('dataPanel');
-            if (dataPanel) {
-                dataPanel.innerHTML = `<p>Error loading image information: ${error.message}</p>`;
+            
+            // Display tags
+            const tagContainer = document.createElement('div');
+            tagContainer.id = 'tagContainer';
+            tagContainer.innerHTML = `
+                <h3>Tags:</h3>
+                <div id="existingTags"></div>
+                <input type="text" id="newTag" placeholder="Add a new tag">
+                <button id="addTagButton">Add Tag</button>
+                <textarea id="bulkTagEdit" placeholder="Edit tags (comma-separated)"></textarea>
+                <button id="applyTagsButton">Apply Changes</button>
+                <button id="clearTagsButton">Clear All Tags</button>
+            `;
+            dataPanel.appendChild(tagContainer);
+
+            updateTagsDisplay(tags);
+
+            // Set up event listeners for tag operations
+            setupTagEventListeners(imagePath);
+        }
+    })
+    .catch(error => {
+        console.error('Error updating data panel:', error);
+        const dataPanel = document.getElementById('dataPanel');
+        if (dataPanel) {
+            dataPanel.innerHTML = `<p>Error loading image information: ${error.message}</p>`;
+        }
+    });
+}
+
+function setupTagEventListeners(imagePath) {
+    const bulkTagEdit = document.getElementById('bulkTagEdit');
+    const applyTagsButton = document.getElementById('applyTagsButton');
+    const addTagButton = document.getElementById('addTagButton');
+    const newTagInput = document.getElementById('newTag');
+    const clearTagsButton = document.getElementById('clearTagsButton');
+
+    if (bulkTagEdit && applyTagsButton && addTagButton && newTagInput && clearTagsButton) {
+        bulkTagEdit.addEventListener('focus', () => setIsTyping(true));
+        bulkTagEdit.addEventListener('blur', () => setIsTyping(false));
+        newTagInput.addEventListener('focus', () => setIsTyping(true));
+        newTagInput.addEventListener('blur', () => setIsTyping(false));
+
+        applyTagsButton.addEventListener('click', () => {
+            const tags = bulkTagEdit.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+            updateImageTags(imagePath, tags);
+        });
+
+        addTagButton.addEventListener('click', () => {
+            const newTag = newTagInput.value.trim();
+            if (newTag) {
+                const currentTags = bulkTagEdit.value.split(',').map(tag => tag.trim()).filter(tag => tag);
+                updateImageTags(imagePath, [...currentTags, newTag]);
+                newTagInput.value = '';
             }
         });
+
+        clearTagsButton.addEventListener('click', () => {
+            clearTags(imagePath);
+        });
+    }
 }
 
 // Update the existing updateTags function to use the new updateTagsDisplay function
@@ -350,12 +397,10 @@ function addTag(imagePath, newTag) {
             fetchAndUpdateTags(imagePath);
         } else {
             console.error('Failed to add tag:', data.message);
-            alert(`Failed to add tag: ${data.message}`);
         }
     })
     .catch(error => {
         console.error('Error adding tag:', error);
-        alert(`Error adding tag: ${error.message}`);
     });
 }
 
@@ -382,12 +427,10 @@ function updateImageTags(imagePath, tags) {
             fetchAndUpdateTags(imagePath);
         } else {
             console.error('Failed to update tags:', data.message);
-            alert(`Failed to update tags: ${data.message}`);
         }
     })
     .catch(error => {
         console.error('Error updating tags:', error);
-        alert(`Error updating tags: ${error.message}`);
     });
 }
 
@@ -455,3 +498,5 @@ document.addEventListener('DOMContentLoaded', () => {
         }
     }
 });
+
+let lastNavigationDirection = null;

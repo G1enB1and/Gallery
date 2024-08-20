@@ -1,13 +1,10 @@
 import { saveSessionState } from './utils_pinterest.js';
 import { loadPage } from './loader.js';
+import { setData } from './media.js';
 
 let data = [];
 let currentPage = parseInt(sessionStorage.getItem('currentPage')) || 1;
 const imagesPerPage = 60;
-
-function setData(images) {
-    data = images;
-}
 
 function getCurrentPage() {
     return currentPage;
