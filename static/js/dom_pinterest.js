@@ -226,6 +226,11 @@ async function initializeGallery(images, page) {
     }
 }
 
+// Function to check if the gallery has already been initialized
+function isGalleryInitialized() {
+    return document.querySelector('#gallery .gallery-item') !== null;
+}
+
 // Export all necessary functions
 export {
     setData,
